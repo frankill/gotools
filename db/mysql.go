@@ -8,6 +8,7 @@ import (
 
 	"github.com/frankill/gotools/array"
 	"github.com/frankill/gotools/query"
+	"github.com/frankill/gotools/record"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -454,128 +455,128 @@ func (m *MysqlDB) QueryVector(sql *query.SQLBuilder) func() ([][]string, error) 
 	}
 }
 
-// func (m *MysqlDB) QueryRecord(sql *query.SQLBuilder) func() (*record.Record, error) {
+func (m *MysqlDB) QueryRecord(sql *query.SQLBuilder) func() (*record.Record, error) {
 
-// 	query := sql.Build()
+	query := sql.Build()
 
-// 	num, err := m.QueryCount(sql)
+	num, err := m.QueryCount(sql)
 
-// 	if err != nil {
-// 		return func() (*record.Record, error) {
-// 			return &record.Record{}, err
-// 		}
-// 	}
-// 	return func() (*record.Record, error) {
+	if err != nil {
+		return func() (*record.Record, error) {
+			return &record.Record{}, err
+		}
+	}
+	return func() (*record.Record, error) {
 
-// 		rows, err := m.Con.Query(query)
-// 		if err != nil {
-// 			return &record.Record{}, err
-// 		}
-// 		defer rows.Close()
+		rows, err := m.Con.Query(query)
+		if err != nil {
+			return &record.Record{}, err
+		}
+		defer rows.Close()
 
-// 		columns, err := rows.Columns()
-// 		if err != nil {
-// 			return &record.Record{}, err
-// 		}
+		columns, err := rows.Columns()
+		if err != nil {
+			return &record.Record{}, err
+		}
 
-// 		lc := len(columns)
+		lc := len(columns)
 
-// 		rawResult := make([][]any, lc)
-// 		for i := range rawResult {
-// 			rawResult[i] = make([]any, num)
-// 		}
+		rawResult := make([][]any, lc)
+		for i := range rawResult {
+			rawResult[i] = make([]any, num)
+		}
 
-// 		field, _ := rows.ColumnTypes()
-// 		ftype := extrcaType(field)
-// 		row := makeRow(field)
+		field, _ := rows.ColumnTypes()
+		ftype := extrcaType(field)
+		row := makeRow(field)
 
-// 		rowIndex := 0
-// 		for rows.Next() {
-// 			err := rows.Scan(row...)
-// 			if err != nil {
-// 				log.Fatal(err)
-// 			}
+		rowIndex := 0
+		for rows.Next() {
+			err := rows.Scan(row...)
+			if err != nil {
+				log.Fatal(err)
+			}
 
-// 			for i := 0; i < lc; i++ {
-// 				switch ftype[i] {
-// 				case "int":
-// 					rawResult[i][rowIndex] = *row[i].(*int)
-// 				case "string":
-// 					rawResult[i][rowIndex] = *row[i].(*string)
-// 				case "float64":
-// 					rawResult[i][rowIndex] = *row[i].(*float64)
-// 				case "bool":
-// 					rawResult[i][rowIndex] = *row[i].(*bool)
-// 				default:
-// 					log.Fatal("Unknown database type: ", ftype[i])
-// 				}
+			for i := 0; i < lc; i++ {
+				switch ftype[i] {
+				case "int":
+					rawResult[i][rowIndex] = *row[i].(*int)
+				case "string":
+					rawResult[i][rowIndex] = *row[i].(*string)
+				case "float64":
+					rawResult[i][rowIndex] = *row[i].(*float64)
+				case "bool":
+					rawResult[i][rowIndex] = *row[i].(*bool)
+				default:
+					log.Fatal("Unknown database type: ", ftype[i])
+				}
 
-// 			}
-// 			rowIndex++
-// 		}
+			}
+			rowIndex++
+		}
 
-// 		res := record.NewRecord(sql.TableName(), lc)
+		res := record.NewRecord(sql.TableName(), lc)
 
-// 		for i := 0; i < lc; i++ {
-// 			res.AddField(columns[i], rawResult[i]...)
-// 		}
+		for i := 0; i < lc; i++ {
+			res.AddField(columns[i], rawResult[i]...)
+		}
 
-// 		return res, nil
-// 	}
-// }
+		return res, nil
+	}
+}
 
-// func extrcaType(columns []*sql.ColumnType) []string {
+func extrcaType(columns []*sql.ColumnType) []string {
 
-// 	res := make([]string, len(columns))
+	res := make([]string, len(columns))
 
-// 	for i := 0; i < len(columns); i++ {
+	for i := 0; i < len(columns); i++ {
 
-// 		databaseTypeName := strings.ToLower(columns[i].DatabaseTypeName())
+		databaseTypeName := strings.ToLower(columns[i].DatabaseTypeName())
 
-// 		switch databaseTypeName {
-// 		case "varchar", "text", "char", "enum", "set":
-// 			res[i] = "string"
-// 		case "integer", "int", "bigint", "smallint", "tinyint":
-// 			res[i] = "int"
-// 		case "float", "double", "decimal":
-// 			res[i] = "float64"
-// 		case "date", "time", "datetime", "timestamp":
-// 			res[i] = "string"
-// 		case "boolean", "bit":
-// 			res[i] = "bool"
-// 		default:
-// 			log.Printf("Unknown database type: %s", databaseTypeName)
+		switch databaseTypeName {
+		case "varchar", "text", "char", "enum", "set":
+			res[i] = "string"
+		case "integer", "int", "bigint", "smallint", "tinyint":
+			res[i] = "int"
+		case "float", "double", "decimal":
+			res[i] = "float64"
+		case "date", "time", "datetime", "timestamp":
+			res[i] = "string"
+		case "boolean", "bit":
+			res[i] = "bool"
+		default:
+			log.Printf("Unknown database type: %s", databaseTypeName)
 
-// 		}
-// 	}
+		}
+	}
 
-// 	return res
-// }
-// func makeRow(columns []*sql.ColumnType) []any {
+	return res
+}
+func makeRow(columns []*sql.ColumnType) []any {
 
-// 	res := make([]any, len(columns))
+	res := make([]any, len(columns))
 
-// 	for i := 0; i < len(columns); i++ {
+	for i := 0; i < len(columns); i++ {
 
-// 		databaseTypeName := strings.ToLower(columns[i].DatabaseTypeName())
+		databaseTypeName := strings.ToLower(columns[i].DatabaseTypeName())
 
-// 		switch databaseTypeName {
-// 		case "varchar", "text", "char", "enum", "set":
-// 			res[i] = new(string)
-// 		case "integer", "int", "bigint", "smallint", "tinyint":
-// 			res[i] = new(int)
-// 		case "float", "double", "decimal":
-// 			res[i] = new(float64)
-// 		case "date", "time", "datetime", "timestamp":
-// 			res[i] = new(string)
-// 		case "boolean", "bit":
-// 			res[i] = new(bool)
-// 		default:
-// 			log.Printf("Unknown database type: %s", databaseTypeName)
+		switch databaseTypeName {
+		case "varchar", "text", "char", "enum", "set":
+			res[i] = new(string)
+		case "integer", "int", "bigint", "smallint", "tinyint":
+			res[i] = new(int)
+		case "float", "double", "decimal":
+			res[i] = new(float64)
+		case "date", "time", "datetime", "timestamp":
+			res[i] = new(string)
+		case "boolean", "bit":
+			res[i] = new(bool)
+		default:
+			log.Printf("Unknown database type: %s", databaseTypeName)
 
-// 		}
-// 	}
+		}
+	}
 
-// 	return res
+	return res
 
-// }
+}
