@@ -158,8 +158,8 @@ func GroupGenerateFilter[B ~[]U, C ~[]S, U comparable, S any](by B, data C) func
 
 		numberids := ArrayCopy(numberid)
 
-		ArraySortByLQ(value, numberid)
-		ArraySortByLQ(valueby, numberids)
+		ArraySortByL(ASCInt, value, numberid)
+		ArraySortByL(ASCInt, valueby, numberids)
 
 		return valueby, value
 
@@ -376,7 +376,7 @@ func GroupByOrder[D ~[]U, B ~[]T, O ~[]S, T comparable, S cmp.Ordered, U any](by
 	res := make(map[T][]U, len(group))
 
 	for k, v := range group {
-		ArraySortByLQ(v.First, v.Second)
+		ArraySortByL(ASCGeneric, v.First, v.Second)
 		res[k] = v.First
 	}
 
@@ -395,7 +395,7 @@ func GroupByOrderDesc[D ~[]U, B ~[]T, O ~[]S, T comparable, S cmp.Ordered, U any
 	res := make(map[T][]U, len(group))
 
 	for k, v := range group {
-		ArraySortByLocal(func(x, y S) bool { return x > y }, v.First, v.Second)
+		ArraySortByL(DESCGeneric, v.First, v.Second)
 		res[k] = v.First
 	}
 

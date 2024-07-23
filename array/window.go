@@ -33,7 +33,7 @@ func RowNumber[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, order C) []int
 		numberid = append(numberid, ArraySeq(0, len(v), 1)...)
 	}
 
-	ArraySortByLQ(numberid, sortid)
+	ArraySortByL(ASCInt, numberid, sortid)
 
 	return numberid
 }
@@ -51,7 +51,7 @@ func RowNumberDesc[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, order C) [
 		numberid = append(numberid, ArraySeq(0, len(v), 1)...)
 	}
 
-	ArraySortByLQ(numberid, sortid)
+	ArraySortByL(ASCInt, numberid, sortid)
 
 	return numberid
 }
@@ -79,7 +79,7 @@ func MaxValue[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) []S {
 		numberid = append(numberid, v.Second...)
 	}
 
-	ArraySortByLQ(value, numberid)
+	ArraySortByL(ASCInt, value, numberid)
 
 	return value
 }
@@ -107,7 +107,7 @@ func MinValue[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) []S {
 		numberid = append(numberid, v.Second...)
 	}
 
-	ArraySortByLQ(value, numberid)
+	ArraySortByL(ASCInt, value, numberid)
 
 	return value
 }
@@ -135,7 +135,7 @@ func FirstValue[B ~[]U, C ~[]S, U comparable, S any](by B, data C) []S {
 		numberid = append(numberid, v.Second...)
 	}
 
-	ArraySortByLQ(value, numberid)
+	ArraySortByL(ASCInt, value, numberid)
 
 	return value
 }
@@ -160,7 +160,7 @@ func LastValue[B ~[]U, C ~[]S, U comparable, S any](by B, data C) []S {
 		numberid = append(numberid, v.Second...)
 	}
 
-	ArraySortByLQ(value, numberid)
+	ArraySortByL(ASCInt, value, numberid)
 
 	return value
 }

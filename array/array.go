@@ -8,6 +8,19 @@ import (
 	"time"
 )
 
+var (
+	ASCInt  = func(x, y int) bool { return x < y }
+	DESCInt = func(x, y int) bool { return x < y }
+)
+
+func ASCGeneric[T cmp.Ordered](x, y T) bool {
+	return x < y
+}
+
+func DESCGeneric[T cmp.Ordered](x, y T) bool {
+	return x > y
+}
+
 // ArrayFromAny函数接受任意类型的输入参数，并将它们转换为切片。
 //
 // 参数:
@@ -1220,11 +1233,11 @@ func ArrayEnumerateDense[S ~[]T, T comparable](arr S) []int {
 	return result
 }
 
-func ArraySortByQ[D ~[]U, S ~[]T, T any, U cmp.Ordered](arr S, order D) (S, D) {
+// func ArraySortByQ[D ~[]U, S ~[]T, T any, U cmp.Ordered](arr S, order D) (S, D) {
 
-	return ArraySortBy(func(x, y U) bool { return x < y }, arr, order)
+// 	return ArraySortBy(func(x, y U) bool { return x < y }, arr, order)
 
-}
+// }
 
 // ArraySortTwo 通过自定义比较函数和排序顺序对数组进行排序。
 // 参数 fun 是用于比较两个元素大小的函数，返回 true 表示第一个元素小于第二个元素。
@@ -1266,9 +1279,9 @@ func ArraySortBy[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D
 	return res, tmp
 }
 
-func ArraySortByLQ[D ~[]U, S ~[]T, T any, U cmp.Ordered](arr S, order D) {
-	ArraySortByLocal(func(current, before U) bool { return current < before }, arr, order)
-}
+// func ArraySortByLQ[D ~[]U, S ~[]T, T any, U cmp.Ordered](arr S, order D) {
+// 	ArraySortByL(func(current, before U) bool { return current < before }, arr, order)
+// }
 
 // ArraySortTwoLocal 是一个泛型排序函数，用于对两个关联数组进行排序。
 // 它接受一个比较函数、一个需要排序的数组和一个与之相关的数组，
@@ -1283,7 +1296,7 @@ func ArraySortByLQ[D ~[]U, S ~[]T, T any, U cmp.Ordered](arr S, order D) {
 //
 // 返回:
 //   - 无返回值，直接修改输入的 arr 和 order 数组。
-func ArraySortByLocal[D ~[]U, S ~[]T, T, U any](fun func(current, before U) bool, arr S, order D) {
+func ArraySortByL[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D) {
 	la := len(arr)
 	if la == 0 {
 		return
@@ -1358,11 +1371,11 @@ func ArraySort[S ~[]T, T any](fun func(x, y T) bool, arr S) S {
 //
 // 参数:
 // - arr: 要排序的切片 S，其中元素类型 T 必须是可比较的（实现 cmp.Ordered 接口）。
-func ArraySortQuick[S ~[]T, T cmp.Ordered](arr S) S {
+// func ArraySortQuick[S ~[]T, T cmp.Ordered](arr S) S {
 
-	return ArraySort(func(x, y T) bool { return x < y }, arr)
+// 	return ArraySort(func(x, y T) bool { return x < y }, arr)
 
-}
+// }
 
 // ArraySortLocal 对类型为 S（元素类型为 T）的切片进行原地排序，依据提供的比较函数 `fun`。
 //
@@ -1447,7 +1460,7 @@ func ArrayDistinct[S ~[]T, T cmp.Ordered](arr S) S {
 		return arr
 	}
 
-	res := ArraySortQuick(arr)
+	res := ArraySort(func(x, y T) bool { return x < y }, arr)
 
 	return ArrayCompact(res)
 }
