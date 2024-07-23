@@ -24,7 +24,7 @@ SequenceMatch(a, b, c)([]int{1, 2, 3})([]int{1, 2}) = map[1:true 2:false]
 */
 func SequenceMatch[B ~[]T, D ~[]U, O ~[]S, T comparable, U comparable, S cmp.Ordered](by B, data D, order O) func([]U) func([]int) map[T]bool {
 
-	group := GroupArrayByOrder(by, data, order)
+	group := GroupByOrder(by, data, order)
 
 	return func(eventID []U) func([]int) map[T]bool {
 
@@ -69,7 +69,7 @@ SequenceCount(a, b, c)([]string{"a"})([]int{1}) = map[1:2]
 */
 func SequenceCount[B ~[]T, D ~[]U, O ~[]S, T comparable, U comparable, S cmp.Ordered](by B, data D, order O) func([]U) func([]int) map[T]int {
 
-	group := GroupArrayByOrder(by, data, order)
+	group := GroupByOrder(by, data, order)
 
 	return func(eventID []U) func([]int) map[T]int {
 
@@ -113,7 +113,7 @@ func SequenceCount[B ~[]T, D ~[]U, O ~[]S, T comparable, U comparable, S cmp.Ord
 //	"strict_increase": 严格递增模式，计算事件序列在数据中按顺序出现的最大次数，重复，意外事件不会中断。
 func WindowFunnel[B ~[]T, D ~[]U, O ~[]S, T comparable, U comparable, S cmp.Ordered](by B, data D, order O) func([]U) func(mode string) map[T]int {
 
-	group := GroupArrayByOrder(by, data, order)
+	group := GroupByOrder(by, data, order)
 
 	return func(eventID []U) func(mode string) map[T]int {
 

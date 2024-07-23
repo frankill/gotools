@@ -23,7 +23,7 @@ func WindowFun[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, order C) func(
 func RowNumber[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, order C) []int {
 	id := ArraySeq(0, len(by), 1)
 
-	group := GroupArrayByOrder(by, id, order)
+	group := GroupByOrder(by, id, order)
 
 	sortid := make([]int, 0, len(by))
 	numberid := make([]int, 0, len(by))
@@ -41,7 +41,7 @@ func RowNumber[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, order C) []int
 func RowNumberDesc[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, order C) []int {
 	id := ArraySeq(0, len(by), 1)
 
-	group := GroupArrayByOrderDesc(by, id, order)
+	group := GroupByOrderDesc(by, id, order)
 
 	sortid := make([]int, 0, len(by))
 	numberid := make([]int, 0, len(by))
@@ -69,7 +69,7 @@ func RowNumberDesc[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, order C) [
 func MaxValue[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) []S {
 
 	id := ArraySeq(0, len(data), 1)
-	group := GroupArrayPair(by, data, id)
+	group := GroupPair(by, data, id)
 
 	value := make([]S, 0, len(data))
 	numberid := make([]int, 0, len(data))
@@ -97,7 +97,7 @@ func MaxValue[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) []S {
 func MinValue[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) []S {
 
 	id := ArraySeq(0, len(data), 1)
-	group := GroupArrayPair(by, data, id)
+	group := GroupPair(by, data, id)
 
 	value := make([]S, 0, len(data))
 	numberid := make([]int, 0, len(data))
@@ -125,7 +125,7 @@ func MinValue[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) []S {
 func FirstValue[B ~[]U, C ~[]S, U comparable, S any](by B, data C) []S {
 
 	id := ArraySeq(0, len(data), 1)
-	group := GroupArrayPair(by, data, id)
+	group := GroupPair(by, data, id)
 
 	value := make([]S, 0, len(data))
 	numberid := make([]int, 0, len(data))
@@ -150,7 +150,7 @@ func FirstValue[B ~[]U, C ~[]S, U comparable, S any](by B, data C) []S {
 func LastValue[B ~[]U, C ~[]S, U comparable, S any](by B, data C) []S {
 
 	id := ArraySeq(0, len(data), 1)
-	group := GroupArrayPair(by, data, id)
+	group := GroupPair(by, data, id)
 
 	value := make([]S, 0, len(data))
 	numberid := make([]int, 0, len(data))

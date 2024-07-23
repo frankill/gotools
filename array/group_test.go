@@ -304,7 +304,7 @@ func TestGroupArrayPair(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GroupArrayPair(tt.by, tt.first, tt.second); !reflect.DeepEqual(got, tt.want) {
+			if got := GroupPair(tt.by, tt.first, tt.second); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GroupArrayPair() = %v, want %v", got, tt.want)
 			}
 		})
@@ -315,7 +315,7 @@ func TestGroupArray(t *testing.T) {
 	data1 := []int{1, 2, 3}
 	by1 := []int{0, 0, 1}
 	expected1 := map[int][]int{0: {1, 2}, 1: {3}}
-	result1 := GroupArray(by1, data1)
+	result1 := GroupData(by1, data1)
 	if !reflect.DeepEqual(result1, expected1) {
 		t.Errorf("Test case 1 failed. Expected %v, got %v", expected1, result1)
 	}
@@ -324,7 +324,7 @@ func TestGroupArray(t *testing.T) {
 	data3 := [][]float64{}
 	by3 := []float64{}
 	expected3 := map[float64][][]float64{}
-	result3 := GroupArray(by3, data3)
+	result3 := GroupData(by3, data3)
 	if !reflect.DeepEqual(result3, expected3) {
 		t.Errorf("Test case 3 failed. Expected %v, got %v", expected3, result3)
 	}
@@ -333,7 +333,7 @@ func TestGroupArray(t *testing.T) {
 	data4 := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
 	by4 := []int{0, 0, 2}
 	expected4 := map[int][][]int{0: {{1, 2, 3}, {4, 5, 6}}, 2: {{7, 8, 9}}}
-	result4 := GroupArray(by4, data4)
+	result4 := GroupData(by4, data4)
 	if !reflect.DeepEqual(result4, expected4) {
 		t.Errorf("Test case 4 failed. Expected %v, got %v", expected4, result4)
 	}
@@ -361,7 +361,7 @@ func TestGroupArrayByOrder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// 调用待测试的函数
-			got := GroupArrayByOrder(tt.by, tt.data, tt.order)
+			got := GroupByOrder(tt.by, tt.data, tt.order)
 
 			// 比较结果
 			if !reflect.DeepEqual(got, tt.want) {

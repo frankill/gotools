@@ -20,7 +20,7 @@ type Retentionfun[T any] func(x []T) bool
 //   - 闭包函数返回一个映射，除第一个条件外，条件成对应用：如果第一个和第二个为真，则第二个结果为真，如果第一个和第三个为真，则第三个结果为真，等等
 func Retention[B ~[]U, C ~[]S, U comparable, S any](by B, data C) func(fun ...Retentionfun[S]) map[U][]bool {
 
-	group := GroupArray(by, data)
+	group := GroupData(by, data)
 
 	return func(fun ...Retentionfun[S]) map[U][]bool {
 
@@ -58,7 +58,7 @@ func Retention[B ~[]U, C ~[]S, U comparable, S any](by B, data C) func(fun ...Re
 // 函数返回一个 map[U]int，其中键 U 是分组的依据值，值 int 表示该组在 data 中出现的次数。
 func GroupCount[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) map[U]int {
 
-	group := GroupArray(by, data)
+	group := GroupData(by, data)
 
 	res := make(map[U]int, len(group))
 	for k, v := range group {
@@ -80,7 +80,7 @@ func GroupCount[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) map[U
 // map[U]int：一个映射，键为 by 中的分组依据值，值为对应组内唯一元素的数量。
 func GroupDistinct[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) map[U]int {
 
-	group := GroupArray(by, data)
+	group := GroupData(by, data)
 
 	res := make(map[U]int, len(group))
 
@@ -106,7 +106,7 @@ type GroupFilterfun[K comparable, T any] func(x K, y []T) []bool
 //	该映射的键类型为 U，值类型为 S。
 func GroupGenerate[B ~[]U, C ~[]S, U comparable, S any](by B, data C) func(fun Groupfun[S]) map[U]S {
 
-	group := GroupArray(by, data)
+	group := GroupData(by, data)
 
 	return func(fun Groupfun[S]) map[U]S {
 
@@ -133,7 +133,7 @@ func GroupGenerate[B ~[]U, C ~[]S, U comparable, S any](by B, data C) func(fun G
 func GroupGenerateFilter[B ~[]U, C ~[]S, U comparable, S any](by B, data C) func(fun GroupFilterfun[U, S]) ([]U, []S) {
 
 	id := ArraySeq(0, len(data), 1)
-	group := GroupArrayPair(by, data, id)
+	group := GroupPair(by, data, id)
 
 	return func(fun GroupFilterfun[U, S]) ([]U, []S) {
 
@@ -184,7 +184,7 @@ GroupMax 根据指定的分组键对数据进行分组处理，并计算每个�
 */
 func GroupMax[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) map[U]S {
 
-	group := GroupArray(by, data)
+	group := GroupData(by, data)
 
 	res := make(map[U]S, len(group))
 
@@ -216,7 +216,7 @@ GroupMin 根据提供的分组条件和数据集，对数据进行分组，并�
 */
 func GroupMin[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) map[U]S {
 
-	group := GroupArray(by, data)
+	group := GroupData(by, data)
 
 	res := make(map[U]S, len(group))
 
@@ -242,7 +242,7 @@ func GroupMin[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) map[U]S
 //   - map[U]S: 返回一个以 U 类型为键，S 类型为值的映射，表示每个分组的键与该组数据的总和。
 func GroupSum[B ~[]U, C ~[]S, U comparable, S Number](by B, data C) map[U]S {
 
-	group := GroupArray(by, data)
+	group := GroupData(by, data)
 
 	res := make(map[U]S, len(group))
 
@@ -262,7 +262,7 @@ GroupArrayPair 根据一个关键数组将两个数据数组分组。
 
 此函数利用泛型，可适用于不同类型的数组。如果输入的 frist、by 或 second 为空，将直接返回空映射。
 */
-func GroupArrayPair[D ~[]U, B ~[]T, O ~[]S, T comparable, S, U any](by B, frist D, second O) map[T]Pair[[]U, []S] {
+func GroupPair[D ~[]U, B ~[]T, O ~[]S, T comparable, S, U any](by B, frist D, second O) map[T]Pair[[]U, []S] {
 
 	res := map[T]Pair[[]U, []S]{}
 
@@ -303,7 +303,7 @@ func GroupArrayPair[D ~[]U, B ~[]T, O ~[]S, T comparable, S, U any](by B, frist 
 //
 // 返回值:
 // - map[T][]U: 一个映射，键为 T 类型的分组标识，值为对应分组内的 U 类型元素切片。
-func GroupArray[D ~[]U, B ~[]T, T comparable, U any](by B, data D) map[T][]U {
+func GroupData[D ~[]U, B ~[]T, T comparable, U any](by B, data D) map[T][]U {
 	res := map[T][]U{}
 
 	if len(data) == 0 {
@@ -321,7 +321,23 @@ func GroupArray[D ~[]U, B ~[]T, T comparable, U any](by B, data D) map[T][]U {
 	return res
 }
 
-func Group[B ~[]T, T comparable](by B) map[T][]int {
+// Group 函数根据输入的切片 by 对数据进行分组，返回一个映射，映射的键是 by 中的唯一元素，值是对应元素在原切片中的索引集合。
+//
+// by: 需要分组的切片
+//
+// 返回值:
+// - map[T][]int: 包含分组信息的映射
+//
+// 示例:
+//
+//	by := []int{1, 2, 2, 3, 3, 3, 4, 4, 4, 4}
+//	grouped := Group(by)
+//
+//	fmt.Println(grouped)
+//
+//	输出:
+//	map[1:[0] 2:[1 2] 3:[3 4 5] 4:[6 7 8 9]]
+func GroupLocation[B ~[]T, T comparable](by B) map[T][]int {
 	res := map[T][]int{}
 
 	if len(by) == 0 {
@@ -349,13 +365,13 @@ func Group[B ~[]T, T comparable](by B) map[T][]int {
 // 注意：
 // - 当 order 为空时，直接调用 GroupArray 进行分组。
 // - 若 order 提供了排序依据，函数首先依据 by 和 order 进行分组及排序，然后将排序后的数据作为结果值。
-func GroupArrayByOrder[D ~[]U, B ~[]T, O ~[]S, T comparable, S cmp.Ordered, U any](by B, data D, order O) map[T][]U {
+func GroupByOrder[D ~[]U, B ~[]T, O ~[]S, T comparable, S cmp.Ordered, U any](by B, data D, order O) map[T][]U {
 
 	if len(order) == 0 {
-		return GroupArray(by, data)
+		return GroupData(by, data)
 	}
 
-	group := GroupArrayPair(by, data, order)
+	group := GroupPair(by, data, order)
 
 	res := make(map[T][]U, len(group))
 
@@ -368,13 +384,13 @@ func GroupArrayByOrder[D ~[]U, B ~[]T, O ~[]S, T comparable, S cmp.Ordered, U an
 }
 
 // GroupArrayByOrderDesc GroupArrayByOrder倒序版
-func GroupArrayByOrderDesc[D ~[]U, B ~[]T, O ~[]S, T comparable, S cmp.Ordered, U any](by B, data D, order O) map[T][]U {
+func GroupByOrderDesc[D ~[]U, B ~[]T, O ~[]S, T comparable, S cmp.Ordered, U any](by B, data D, order O) map[T][]U {
 
 	if len(order) == 0 {
-		return GroupArray(by, data)
+		return GroupData(by, data)
 	}
 
-	group := GroupArrayPair(by, data, order)
+	group := GroupPair(by, data, order)
 
 	res := make(map[T][]U, len(group))
 
