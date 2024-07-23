@@ -11,67 +11,57 @@ import (
 	"github.com/frankill/gotools/array"
 )
 
-// type RecordAggType func(r *Record, rowIndex [][]int) (string, []any)
+type RecordAggType func(r *Record, rowIndex [][]int) (string, []any)
 
-// func recordAgg(fun func(slice ...[]int) int) func(filedName string) RecordAggType {
+func recordAgg(fun func(slice ...[]int) int) func(filedName string) RecordAggType {
 
-// 	return func(filedName string) RecordAggType {
-// 		return func(r *Record, rowIndex [][]int) (string, []any) {
+	return func(filedName string) RecordAggType {
+		return func(r *Record, rowIndex [][]int) (string, []any) {
 
-// 			data := r.SelectName(filedName).(Int)
-// 			res := make([]any, len(rowIndex))
+			data := r.SelectName(filedName).(Int)
+			res := make([]any, len(rowIndex))
 
-// 			for i := 0; i < len(rowIndex); i++ {
+			for i := 0; i < len(rowIndex); i++ {
 
-// 				res[i] = fun(array.ArrayChoose(rowIndex[i], data))
+				res[i] = fun(array.ArrayChoose(rowIndex[i], data))
 
-// 			}
-// 			return filedName + "_sum", res
-// 		}
-// 	}
-// }
+			}
+			return filedName + "_sum", res
+		}
+	}
+}
 
-// func RSum(filedName string) func(r *Record, rowIndex [][]int) (string, []any) {
+func RSum(filedName string) func(r *Record, rowIndex [][]int) (string, []any) {
 
-// 	return recordAgg(array.ASum[[]int, int])(filedName)
+	return recordAgg(array.ASum[[]int, int])(filedName)
 
-// }
+}
 
-// func RMean(filedName string) func(r *Record, rowIndex [][]int) (string, []any) {
+func RMean(filedName string) func(r *Record, rowIndex [][]int) (string, []any) {
 
-// 	return func(r *Record, rowIndex [][]int) (string, []any) {
+	return func(r *Record, rowIndex [][]int) (string, []any) {
 
-// 		data := r.SelectName(filedName).(Int)
-// 		res := make([]any, len(rowIndex))
+		data := r.SelectName(filedName).(Int)
+		res := make([]any, len(rowIndex))
 
-// 		for i := 0; i < len(rowIndex); i++ {
-// 			tmp := array.ArrayChoose(rowIndex[i], data)
-// 			res[i] = array.ASum(tmp) / (len(tmp))
+		for i := 0; i < len(rowIndex); i++ {
+			tmp := array.ArrayChoose(rowIndex[i], data)
+			res[i] = array.ASum(tmp) / (len(tmp))
 
-// 		}
-// 		return filedName + "_mean", res
-// 	}
-// }
+		}
+		return filedName + "_mean", res
+	}
+}
 
-// func RMax(filedName string) func(r *Record, rowIndex [][]int) (string, []any) {
+func RMax(filedName string) func(r *Record, rowIndex [][]int) (string, []any) {
 
-// 	return recordAgg(array.AMax[[]int, int])(filedName)
-// }
+	return recordAgg(array.AMax[[]int, int])(filedName)
+}
 
-// func RMin(filedName string) func(r *Record, rowIndex [][]int) (string, []any) {
+func RMin(filedName string) func(r *Record, rowIndex [][]int) (string, []any) {
 
-// 	return recordAgg(array.AMin[[]int, int])(filedName)
-// }
-
-// func RCount(filedName string) func(r *Record, rowIndex [][]int) (string, []any) {
-
-// 	return recordAgg(array.Acount[[]int, int])(filedName)
-// }
-
-// func RDistinct(filedName string) func(r *Record, rowIndex [][]int) (string, []any) {
-
-// 	return recordAgg(array.ADistinct[[]int, int])(filedName)
-// }
+	return recordAgg(array.AMin[[]int, int])(filedName)
+}
 
 type Record struct {
 	name      string
@@ -159,39 +149,39 @@ func (r *Record) WriteCsv(filename string) error {
 	return nil
 }
 
-// func (r *Record) Group(by []string, funs ...RecordAggType) *GroupRecord {
+func (r *Record) Group(by []string, funs ...RecordAggType) *GroupRecord {
 
-// 	if len(by) == 0 {
-// 		log.Println("字段名称数组不能为空")
-// 		return nil
-// 	}
+	if len(by) == 0 {
+		log.Println("字段名称数组不能为空")
+		return nil
+	}
 
-// 	if len(funs) == 0 {
-// 		log.Println("至少需要一个函数作为参数")
-// 		return nil
-// 	}
+	if len(funs) == 0 {
+		log.Println("至少需要一个函数作为参数")
+		return nil
+	}
 
-// 	indexs := MapIntersect(array.ArrayMap(func(x ...string) map[string][]int {
+	indexs := array.MapIntersect(array.ArrayMap(func(x ...string) map[string][]int {
 
-// 		return array.Group(r.SelectName(x[0]).ToString())
+		return array.GroupLocation(r.SelectName(x[0]).ToString())
 
-// 	}, by)...)
+	}, by)...)
 
-// 	cols := array.ArrayZip(indexs.First...)
+	cols := array.ArrayZip(indexs.First...)
 
-// 	res := NewGroupRecord(r.name, len(cols)+len(funs))
+	res := NewGroupRecord(r.name, len(cols)+len(funs))
 
-// 	for i := 0; i < len(cols); i++ {
-// 		res.AddStringField(by[i], cols[i]...)
-// 	}
+	for i := 0; i < len(cols); i++ {
+		res.AddStringField(by[i], cols[i]...)
+	}
 
-// 	for _, fun := range funs {
-// 		colname, data := fun(r, indexs.Second)
-// 		res.AddField(colname, data...)
-// 	}
+	for _, fun := range funs {
+		colname, data := fun(r, indexs.Second)
+		res.AddField(colname, data...)
+	}
 
-// 	return res
-// }
+	return res
+}
 
 func (r *Record) RowName() int {
 	return r.rowNum
