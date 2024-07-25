@@ -161,6 +161,32 @@ func LTE[T cmp.Ordered](arr ...T) bool {
 
 }
 
+// ArrayForEach 逐元素执行函数。
+// 参数:
+//
+//	fun: 用于逐元素执行的函数。
+//	arr: 变长参数列表，每个参数都是一个切片。
+//
+// 返回:
+//
+//	无返回值。
+func ForEach[S ~[]T, T any](fun func(x ...T), arr ...S) {
+	if len(arr) == 0 || len(arr[0]) == 0 {
+		return
+	}
+	l := len(arr[0])
+	f := len(arr)
+	param := make([]T, f)
+
+	for i := 0; i < l; i++ {
+		for j := 0; j < f; j++ {
+			param[j] = arr[j][i]
+		}
+		fun(param...)
+	}
+
+}
+
 // ArrayAnd 对两个布尔切片进行逐元素逻辑与操作。
 // 参数:
 //

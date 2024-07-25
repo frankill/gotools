@@ -104,7 +104,7 @@ type GroupFilterfun[K comparable, T any] func(x K, y []T) []bool
 //
 //	一个函数，该函数接受一个 Groupfun 类型的参数，并返回一个映射。
 //	该映射的键类型为 U，值类型为 S。
-func GroupGenerate[B ~[]U, C ~[]S, U comparable, S any](by B, data C) func(fun Groupfun[S]) map[U]S {
+func GroupApply[B ~[]U, C ~[]S, U comparable, S any](by B, data C) func(fun Groupfun[S]) map[U]S {
 
 	group := GroupData(by, data)
 

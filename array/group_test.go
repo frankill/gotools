@@ -86,7 +86,7 @@ func TestGroupGenerate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := GroupGenerate(tt.by, tt.data)(tt.fun)
+			got := GroupApply(tt.by, tt.data)(tt.fun)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GroupGenerate() = %v, want %v", got, tt.want)
 			}
