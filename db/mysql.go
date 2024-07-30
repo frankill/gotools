@@ -286,7 +286,7 @@ func (m *MysqlDB) QueryAny(sql *query.SQLBuilder) func() ([][]string, error) {
 		for rows.Next() {
 			err := rows.Scan(rowPointers...)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatalln(err)
 			}
 
 			tmpRow := make([]string, lc)
@@ -338,7 +338,7 @@ func (m *MysqlDB) QueryAnyIter(sql *query.SQLBuilder) func(ch chan []string) err
 
 			err := rows.Scan(rowPointers...)
 			if err != nil {
-				log.Println(err)
+				log.Fatalln(err)
 			}
 
 			ch <- row
