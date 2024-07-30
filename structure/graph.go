@@ -125,7 +125,8 @@ func (g *Graph[T, U]) Addedge(ds, de T) bool {
 
 func (g *Graph[T, U]) AddVer(v T) {
 
-	if _, ok := g.index[g.transform(v)]; ok {
+	if value, ok := g.index[g.transform(v)]; ok {
+		g.vertexs[value].data = v
 		return
 	}
 
