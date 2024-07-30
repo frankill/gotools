@@ -356,7 +356,7 @@ func MapPopulateSeries[K ~[]T, V ~[]S, T Number, S any](key K, value V, max int)
 //
 //	一个切片，包含所有指定键在map中的对应值。
 //	如果某个键不存在于map中，则对应位置的值为该类型的零值。
-func MapContains[M map[K]V, A []V, K comparable, V any](m M, key ...K) A {
+func MapContains[M map[K]V, A []V, K comparable, V any](m M, default_value V, key ...K) A {
 
 	lk := len(key)
 	res := make(A, 0, lk)
@@ -367,7 +367,12 @@ func MapContains[M map[K]V, A []V, K comparable, V any](m M, key ...K) A {
 
 	for i := range key {
 
-		res = append(res, m[key[i]])
+		if v, ok := m[key[i]]; !ok {
+			res = append(res, default_value)
+			continue
+		} else {
+			res = append(res, v)
+		}
 
 	}
 

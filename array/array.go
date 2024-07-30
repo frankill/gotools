@@ -34,9 +34,20 @@ func ArrayFromAny[T any](input ...T) []T {
 	return input
 }
 
+// ArrayRep 生成一个新的切片，该切片由输入切片 `x` 的元素重复 `n` 次组成。
+//
+// 参数:
+// - x: 类型为 `S` 的输入切片，包含类型为 `T` 的元素。
+// - n: 每个 `x` 中的元素应重复的次数。
+// - sort: 一个布尔标志，指示生成的切片是否应进行排序。
+//
+// 返回:
+// - 一个类型为 `[]T` 的新切片，包含重复的 `x` 元素。
 func ArrayRep[S ~[]T, T any](x S, n int, sort bool) []T {
+	// Create an empty slice with a capacity equal to `n` times the length of `x`.
 	result := make([]T, 0, n*len(x))
 
+	// If `sort` is set to `true`, repeat each element of `x` `n` times and append them to the result slice.
 	if sort {
 		for i := range x {
 			for j := 0; j < n; j++ {
@@ -46,6 +57,7 @@ func ArrayRep[S ~[]T, T any](x S, n int, sort bool) []T {
 		return result
 	}
 
+	// If `sort` is set to `false`, repeat the entire `x` slice `n` times and append it to the result slice.
 	for i := 0; i < n; i++ {
 		result = append(result, x...)
 	}

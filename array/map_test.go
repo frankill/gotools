@@ -387,7 +387,7 @@ func TestMapContains(t *testing.T) {
 			name:     "Empty map",
 			m:        map[string]int{},
 			key:      []string{"a", "b", "c"},
-			expected: []int{0, 0, 0},
+			expected: []int{-1, -1, -1},
 		},
 		{
 			name:     "Existing keys",
@@ -399,20 +399,20 @@ func TestMapContains(t *testing.T) {
 			name:     "Non-existing keys",
 			m:        map[string]int{"a": 1, "b": 2},
 			key:      []string{"c", "d"},
-			expected: []int{0, 0},
+			expected: []int{-1, -1},
 		},
 		{
 			name:     "Mixed keys",
 			m:        map[string]int{"a": 1, "b": 2, "c": 3},
 			key:      []string{"a", "d", "b", "e"},
-			expected: []int{1, 0, 2, 0},
+			expected: []int{1, -1, 2, -1},
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 调用被测试函数
-			result := MapContains(tc.m, tc.key...)
+			result := MapContains(tc.m, -1, tc.key...)
 
 			// 检查结果是否符合预期
 			if len(result) != len(tc.expected) {

@@ -1,6 +1,7 @@
 package array
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
 	"testing"
@@ -172,4 +173,9 @@ func TestCartesian(t *testing.T) {
 			t.Errorf("Expected %v, but got %v", tc.output, result)
 		}
 	}
+
+	ForEach(func(x ...int) {
+		fmt.Println(x)
+	}, ArraySeq(1, 3, 1), ArraySeq(2, 10, 1))
+
 }

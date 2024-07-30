@@ -161,7 +161,7 @@ func LTE[T cmp.Ordered](arr ...T) bool {
 
 }
 
-// ArrayForEach 逐元素执行函数。
+// ForEach 逐元素执行函数。
 // 参数:
 //
 //	fun: 用于逐元素执行的函数。
@@ -171,18 +171,20 @@ func LTE[T cmp.Ordered](arr ...T) bool {
 //
 //	无返回值。
 func ForEach[S ~[]T, T any](fun func(x ...T), arr ...S) {
-	if len(arr) == 0 || len(arr[0]) == 0 {
+
+	if len(arr) == 0 {
 		return
 	}
-	l := len(arr[0])
-	f := len(arr)
-	param := make([]T, f)
 
-	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
+	la := ArrayMap(func(x ...S) int { return len(x[0]) }, arr)
+	lm := ArrayMax(la)
+
+	for i := 0; i < lm; i++ {
+		parm := make([]T, len(arr))
+		for j := 0; j < len(arr); j++ {
+			parm[j] = arr[j][i%la[j]]
 		}
-		fun(param...)
+		fun(parm...)
 	}
 
 }
