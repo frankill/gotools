@@ -22,11 +22,11 @@ import (
 //	转换后的计数查询语句。
 func CountQuery(baseQuery string) string {
 
-	sql := strings.ToUpper(baseQuery)
+	query := strings.ToUpper(baseQuery)
 
 	re := regexp.MustCompile("SELECT.*FROM")
 
-	resultQuery := re.ReplaceAllString(sql, "SELECT COUNT(1) c FROM")
+	resultQuery := re.ReplaceAllString(query, "SELECT COUNT(1) c FROM")
 
 	return strings.ToLower(resultQuery)
 }
@@ -75,9 +75,9 @@ func (m *MysqlDB) Close() {
 // 返回:
 //
 //	一个函数，接受一个 SqlInsert 类型的参数，执行数据库插入操作。
-func (m *MysqlDB) Insert(ch chan []string, stop chan struct{}) func(sql query.SqlInsert) error {
+func (m *MysqlDB) Insert(ch chan []string, stop chan struct{}) func(query query.SqlInsert) error {
 
-	return func(sql query.SqlInsert) error {
+	return func(query query.SqlInsert) error {
 
 		defer close(stop)
 
@@ -85,7 +85,7 @@ func (m *MysqlDB) Insert(ch chan []string, stop chan struct{}) func(sql query.Sq
 		res := make([][]any, 0, num)
 
 		commit := func() error {
-			if err := m.do(res, sql); err != nil {
+			if err := m.do(res, query); err != nil {
 				return err
 			}
 			res = res[:0]
@@ -119,12 +119,12 @@ func (m *MysqlDB) Insert(ch chan []string, stop chan struct{}) func(sql query.Sq
 
 }
 
-func (m *MysqlDB) do(data [][]any, sql query.SqlInsert) error {
+func (m *MysqlDB) do(data [][]any, query query.SqlInsert) error {
 
-	sql.AddValues(data...)
-	stmt, args := sql.Build()
+	query.AddValues(data...)
+	stmt, args := query.Build()
 
-	defer sql.Clear()
+	defer query.Clear()
 
 	tj, err := m.Con.Begin()
 
@@ -160,11 +160,11 @@ func (m *MysqlDB) do(data [][]any, sql query.SqlInsert) error {
 // 返回:
 //
 //	一个函数，无参数，返回查询结果的第一列数据和可能的错误。
-func (m *MysqlDB) QueryOne(sql *query.SQLBuilder) func() ([]string, error) {
+func (m *MysqlDB) QueryOne(query *query.SQLBuilder) func() ([]string, error) {
 
-	query := sql.Build()
+	query_ := query.Build()
 
-	num, err := m.QueryCount(sql)
+	num, err := m.QueryCount(query)
 
 	if err != nil {
 		return func() ([]string, error) {
@@ -174,16 +174,16 @@ func (m *MysqlDB) QueryOne(sql *query.SQLBuilder) func() ([]string, error) {
 
 	return func() ([]string, error) {
 
-		rows, err := m.Con.Query(query)
+		rows, err := m.Con.Query(query_)
 
 		if err != nil {
 			return nil, err
 		}
 
-		dict := make(map[string]struct{}, num)
+		dict := make(map[sql.NullString]struct{}, num)
 
 		for rows.Next() {
-			tmp := ""
+			var tmp sql.NullString
 			err := rows.Scan(&tmp)
 			if err != nil {
 				panic(err)
@@ -191,7 +191,7 @@ func (m *MysqlDB) QueryOne(sql *query.SQLBuilder) func() ([]string, error) {
 			dict[tmp] = struct{}{}
 		}
 
-		return array.MapKeys(dict), nil
+		return array.MapApply(func(k sql.NullString, v struct{}) string { return k.String }, dict), nil
 
 	}
 
@@ -205,11 +205,11 @@ func (m *MysqlDB) QueryOne(sql *query.SQLBuilder) func() ([]string, error) {
 // 返回:
 //
 //	一个函数，无参数，返回查询结果的两列数据作为键值对的映射和可能的错误。
-func (m *MysqlDB) QueryTwo(sql *query.SQLBuilder) func() (map[string]string, error) {
+func (m *MysqlDB) QueryTwo(query *query.SQLBuilder) func() (map[string]string, error) {
 
-	query := sql.Build()
+	query_ := query.Build()
 
-	num, err := m.QueryCount(sql)
+	num, err := m.QueryCount(query)
 
 	if err != nil {
 		return func() (map[string]string, error) {
@@ -218,16 +218,16 @@ func (m *MysqlDB) QueryTwo(sql *query.SQLBuilder) func() (map[string]string, err
 	}
 	return func() (map[string]string, error) {
 
-		rows, err := m.Con.Query(query)
+		rows, err := m.Con.Query(query_)
 
 		if err != nil {
 			return nil, err
 		}
 
-		data := make(map[string]string, num)
+		data := make(map[sql.NullString]sql.NullString, num)
 
 		for rows.Next() {
-			one, two := "", ""
+			var one, two sql.NullString
 			err := rows.Scan(&one, &two)
 			if err != nil {
 				return nil, err
@@ -235,7 +235,7 @@ func (m *MysqlDB) QueryTwo(sql *query.SQLBuilder) func() (map[string]string, err
 			data[one] = two
 		}
 
-		return data, nil
+		return array.MapApplyBoth(func(k sql.NullString, v sql.NullString) (string, string) { return k.String, v.String }, data), nil
 
 	}
 
@@ -249,11 +249,11 @@ func (m *MysqlDB) QueryTwo(sql *query.SQLBuilder) func() (map[string]string, err
 // 返回:
 //
 //	一个函数，无参数，返回查询结果的所有列数据和可能的错误。
-func (m *MysqlDB) QueryAny(sql *query.SQLBuilder) func() ([][]string, error) {
+func (m *MysqlDB) QueryAny(query *query.SQLBuilder) func() ([][]string, error) {
 
-	query := sql.Build()
+	query_ := query.Build()
 
-	num, err := m.QueryCount(sql)
+	num, err := m.QueryCount(query)
 
 	if err != nil {
 		return func() ([][]string, error) {
@@ -263,7 +263,7 @@ func (m *MysqlDB) QueryAny(sql *query.SQLBuilder) func() ([][]string, error) {
 
 	return func() ([][]string, error) {
 
-		rows, err := m.Con.Query(query)
+		rows, err := m.Con.Query(query_)
 		if err != nil {
 			return nil, err
 		}
@@ -277,7 +277,7 @@ func (m *MysqlDB) QueryAny(sql *query.SQLBuilder) func() ([][]string, error) {
 
 		rawResult := make([][]string, 0, num)
 
-		row := make([]string, lc)
+		row := make([]sql.NullString, lc)
 		rowPointers := make([]any, lc)
 		for i := range row {
 			rowPointers[i] = &row[i]
@@ -289,9 +289,9 @@ func (m *MysqlDB) QueryAny(sql *query.SQLBuilder) func() ([][]string, error) {
 				log.Fatalln(err)
 			}
 
-			tmpRow := make([]string, lc)
-			copy(tmpRow, row)
+			tmpRow := array.ArrayMap(func(x ...sql.NullString) string { return x[0].String }, row)
 			rawResult = append(rawResult, tmpRow)
+
 		}
 
 		return rawResult, nil
@@ -308,14 +308,14 @@ func (m *MysqlDB) QueryAny(sql *query.SQLBuilder) func() ([][]string, error) {
 // 返回:
 //
 //	一个函数，接收一个通道，用于发送查询结果的每一行数据，以及可能的错误。
-func (m *MysqlDB) QueryAnyIter(sql *query.SQLBuilder) func(ch chan []string) error {
+func (m *MysqlDB) QueryAnyIter(query *query.SQLBuilder) func(ch chan []string) error {
 
-	query := sql.Build()
+	query_ := query.Build()
 	return func(ch chan []string) error {
 
 		defer close(ch)
 
-		rows, err := m.Con.Query(query)
+		rows, err := m.Con.Query(query_)
 
 		if err != nil {
 			return err
@@ -330,7 +330,7 @@ func (m *MysqlDB) QueryAnyIter(sql *query.SQLBuilder) func(ch chan []string) err
 		lc := len(columns)
 
 		for rows.Next() {
-			row := make([]string, lc)
+			row := make([]sql.NullString, lc)
 			rowPointers := make([]any, lc)
 			for i := range row {
 				rowPointers[i] = &row[i]
@@ -341,7 +341,9 @@ func (m *MysqlDB) QueryAnyIter(sql *query.SQLBuilder) func(ch chan []string) err
 				log.Fatalln(err)
 			}
 
-			ch <- row
+			ch <- array.ArrayMap(func(i ...sql.NullString) string {
+				return i[0].String
+			}, row)
 		}
 		return nil
 
@@ -357,10 +359,10 @@ func (m *MysqlDB) QueryAnyIter(sql *query.SQLBuilder) func(ch chan []string) err
 // 返回:
 //
 //	查询结果的行数和可能的错误。
-func (m *MysqlDB) QueryCount(sql *query.SQLBuilder) (int, error) {
+func (m *MysqlDB) QueryCount(query *query.SQLBuilder) (int, error) {
 
-	query := sql.Build()
-	rows, err := m.Con.Query(CountQuery(query))
+	query_ := query.Build()
+	rows, err := m.Con.Query(CountQuery(query_))
 	if err != nil {
 		return 0, err
 	}
@@ -378,9 +380,9 @@ func (m *MysqlDB) QueryCount(sql *query.SQLBuilder) (int, error) {
 
 }
 
-func (m *MysqlDB) QueryField(sql *query.SQLBuilder) ([]string, error) {
+func (m *MysqlDB) QueryField(query *query.SQLBuilder) ([]string, error) {
 
-	q := sql.Copy()
+	q := query.Copy()
 
 	rows, err := m.Con.Query(q.Eq("1", 2).Build())
 	if err != nil {
@@ -401,11 +403,11 @@ func (m *MysqlDB) QueryField(sql *query.SQLBuilder) ([]string, error) {
 //
 //	一个函数，无参数，返回查询结果的每一列数据和可能的错误。
 //	查询结果的每一列数据是一个二维切片，其中每一行是一个一维切片，代表查询结果的一列数据。
-func (m *MysqlDB) QueryVector(sql *query.SQLBuilder) func() ([][]string, error) {
+func (m *MysqlDB) QueryVector(query *query.SQLBuilder) func() ([][]string, error) {
 
-	query := sql.Build()
+	query_ := query.Build()
 
-	num, err := m.QueryCount(sql)
+	num, err := m.QueryCount(query)
 
 	if err != nil {
 		return func() ([][]string, error) {
@@ -414,7 +416,7 @@ func (m *MysqlDB) QueryVector(sql *query.SQLBuilder) func() ([][]string, error) 
 	}
 	return func() ([][]string, error) {
 
-		rows, err := m.Con.Query(query)
+		rows, err := m.Con.Query(query_)
 		if err != nil {
 			return nil, err
 		}
@@ -432,7 +434,7 @@ func (m *MysqlDB) QueryVector(sql *query.SQLBuilder) func() ([][]string, error) 
 			rawResult[i] = make([]string, num)
 		}
 
-		row := make([]string, lc)
+		row := make([]sql.NullString, lc)
 		rowPointers := make([]any, lc)
 		for i := range row {
 			rowPointers[i] = &row[i]
@@ -446,7 +448,7 @@ func (m *MysqlDB) QueryVector(sql *query.SQLBuilder) func() ([][]string, error) 
 			}
 
 			for i := 0; i < lc; i++ {
-				rawResult[i][rowIndex] = row[i]
+				rawResult[i][rowIndex] = row[i].String
 			}
 			rowIndex++
 		}
@@ -455,11 +457,11 @@ func (m *MysqlDB) QueryVector(sql *query.SQLBuilder) func() ([][]string, error) 
 	}
 }
 
-func (m *MysqlDB) QueryRecord(sql *query.SQLBuilder) func() (*record.Record, error) {
+func (m *MysqlDB) QueryRecord(query *query.SQLBuilder) func() (*record.Record, error) {
 
-	query := sql.Build()
+	query_ := query.Build()
 
-	num, err := m.QueryCount(sql)
+	num, err := m.QueryCount(query)
 
 	if err != nil {
 		return func() (*record.Record, error) {
@@ -468,7 +470,7 @@ func (m *MysqlDB) QueryRecord(sql *query.SQLBuilder) func() (*record.Record, err
 	}
 	return func() (*record.Record, error) {
 
-		rows, err := m.Con.Query(query)
+		rows, err := m.Con.Query(query_)
 		if err != nil {
 			return &record.Record{}, err
 		}
@@ -500,13 +502,13 @@ func (m *MysqlDB) QueryRecord(sql *query.SQLBuilder) func() (*record.Record, err
 			for i := 0; i < lc; i++ {
 				switch ftype[i] {
 				case "int":
-					rawResult[i][rowIndex] = *row[i].(*int)
+					rawResult[i][rowIndex] = int((*row[i].(*sql.NullInt64)).Int64)
 				case "string":
-					rawResult[i][rowIndex] = *row[i].(*string)
+					rawResult[i][rowIndex] = (*row[i].(*sql.NullString)).String
 				case "float64":
-					rawResult[i][rowIndex] = *row[i].(*float64)
+					rawResult[i][rowIndex] = (*row[i].(*sql.NullFloat64)).Float64
 				case "bool":
-					rawResult[i][rowIndex] = *row[i].(*bool)
+					rawResult[i][rowIndex] = (*row[i].(*sql.NullBool)).Bool
 				default:
 					log.Fatal("Unknown database type: ", ftype[i])
 				}
@@ -515,7 +517,7 @@ func (m *MysqlDB) QueryRecord(sql *query.SQLBuilder) func() (*record.Record, err
 			rowIndex++
 		}
 
-		res := record.NewRecord(sql.TableName(), lc)
+		res := record.NewRecord(query.TableName(), lc)
 
 		for i := 0; i < lc; i++ {
 			res.AddField(columns[i], rawResult[i]...)
@@ -562,15 +564,15 @@ func makeRow(columns []*sql.ColumnType) []any {
 
 		switch databaseTypeName {
 		case "varchar", "text", "char", "enum", "set":
-			res[i] = new(string)
+			res[i] = new(sql.NullString)
 		case "integer", "int", "bigint", "smallint", "tinyint":
-			res[i] = new(int)
+			res[i] = new(sql.NullInt32)
 		case "float", "double", "decimal":
-			res[i] = new(float64)
+			res[i] = new(sql.NullFloat64)
 		case "date", "time", "datetime", "timestamp":
-			res[i] = new(string)
+			res[i] = new(sql.NullString)
 		case "boolean", "bit":
-			res[i] = new(bool)
+			res[i] = new(sql.NullString)
 		default:
 			log.Printf("Unknown database type: %s", databaseTypeName)
 
