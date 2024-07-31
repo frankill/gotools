@@ -3,8 +3,13 @@ package iter
 import (
 	"cmp"
 	"log"
+	"sync"
 
 	"github.com/frankill/gotools/array"
+)
+
+var (
+	BufferSize = 10
 )
 
 type Pipeline[T any] struct {
@@ -36,7 +41,7 @@ func (p *Pipeline[T]) Compute(input chan T) chan T {
 //   - 一个 `U` 类型的通道，通道中的值是对切片 `a` 中的每个元素应用函数 `f` 的结果。
 func FromArray[T any, U any](f func(x T) U, a []T) chan U {
 
-	ch := make(chan U, 3)
+	ch := make(chan U, BufferSize)
 
 	go func() {
 		defer close(ch)
@@ -62,7 +67,7 @@ func FromArray[T any, U any](f func(x T) U, a []T) chan U {
 //   - 当所有键值对都被发送到通道后，关闭通道。
 func FromMap[K comparable, V any](m map[K]V) chan []array.Pair[K, V] {
 
-	ch := make(chan []array.Pair[K, V], 3)
+	ch := make(chan []array.Pair[K, V], BufferSize)
 
 	go func() {
 		defer close(ch)
@@ -86,12 +91,12 @@ func FromMap[K comparable, V any](m map[K]V) chan []array.Pair[K, V] {
 //   - 一个通道，通道中的值是读取的 CSV 文件中的每一行数据，每一行数据是一个字符串切片（[]string）。
 func FromCsv(path string) chan []string {
 
-	ch := make(chan []string, 3)
+	ch := make(chan []string, BufferSize)
 
 	go func() {
 		err := array.ReadFromCsvSliceChannel(path, ch)
 		if err != nil {
-			log.Panicln(err)
+			log.Println(err)
 		}
 	}()
 	return ch
@@ -99,12 +104,12 @@ func FromCsv(path string) chan []string {
 
 func FromExcel(path string, sheet string) chan []string {
 
-	ch := make(chan []string, 3)
+	ch := make(chan []string, BufferSize)
 
 	go func() {
 		err := array.ReadFromExcelSliceChannel(path, sheet, ch)
 		if err != nil {
-			log.Panicln(err)
+			log.Println(err)
 		}
 	}()
 	return ch
@@ -125,7 +130,7 @@ func ToCsv(path string, ch chan []string) {
 	go func() {
 		err := array.WriteToCSVStringSliceChannel(ch, stop, path)
 		if err != nil {
-			log.Panicln(err)
+			log.Println(err)
 		}
 	}()
 
@@ -140,7 +145,7 @@ func ToExcel(path string, sheet string, ch chan []string) {
 	go func() {
 		err := array.WriteToExcelStringSliceChannel(ch, stop, path, sheet)
 		if err != nil {
-			log.Panicln(err)
+			log.Println(err)
 		}
 	}()
 
@@ -161,7 +166,7 @@ func ToExcel(path string, sheet string, ch chan []string) {
 //   - 使用一个 goroutine 执行这些操作，并在完成后关闭通道 ch_。
 func Map[T any, U any](f func(x T) U, ch chan T) chan U {
 
-	ch_ := make(chan U, 3)
+	ch_ := make(chan U, BufferSize)
 
 	go func() {
 		defer close(ch_)
@@ -201,7 +206,7 @@ func Walk[T any, U any](f func(x T) U, ch chan T) {
 //   - 使用一个 goroutine 执行这些操作，并在完成后关闭通道 ch_。
 func Filter[T any](f func(x T) bool, ch chan T) chan T {
 
-	ch_ := make(chan T, 3)
+	ch_ := make(chan T, BufferSize)
 
 	go func() {
 		defer close(ch_)
@@ -229,7 +234,7 @@ func Filter[T any](f func(x T) bool, ch chan T) chan T {
 //   - 使用一个 goroutine 执行这些操作，并在完成后关闭通道 ch。
 func Sequence(start, end, step int) chan int {
 
-	ch := make(chan int, 3)
+	ch := make(chan int, BufferSize)
 
 	go func() {
 		defer close(ch)
@@ -277,7 +282,7 @@ func Reduce[T, U any](f func(x U, y T) U, init U, ch chan T) U {
 //   - 使用一个 goroutine 执行这些操作，并在完成后关闭通道 ch_。
 func Scanl[T, U any](f func(x U, y T) U, init U, ch chan T) chan U {
 
-	ch_ := make(chan U, 3)
+	ch_ := make(chan U, BufferSize)
 
 	go func() {
 		defer close(ch_)
@@ -306,7 +311,7 @@ func Scanl[T, U any](f func(x U, y T) U, init U, ch chan T) chan U {
 //   - 将生成的新值发送到新的通道 ch 中。
 //   - 当两个通道都关闭时，停止处理并关闭通道 ch。
 func Zip[T any, U any, V any](f func(x T, y U) V, ch1 chan T, ch2 chan U) chan V {
-	ch := make(chan V, 3)
+	ch := make(chan V, BufferSize)
 
 	go func() {
 		defer close(ch)
@@ -338,8 +343,8 @@ func Zip[T any, U any, V any](f func(x T, y U) V, ch1 chan T, ch2 chan U) chan V
 //   - 从输入通道 ch 中读取数据，根据函数 f 的结果将每个值分配到两个新的通道 ch1 和 ch2。
 //   - 当输入通道 ch 关闭时，关闭新的通道 ch1 和 ch2。
 func Partition[T any](f func(x T) bool, ch chan T) (chan T, chan T) {
-	ch1 := make(chan T, 3)
-	ch2 := make(chan T, 3)
+	ch1 := make(chan T, BufferSize)
+	ch2 := make(chan T, BufferSize)
 
 	go func() {
 
@@ -412,7 +417,7 @@ func Collect[T any](ch chan T) []T {
 //   - 当遇到第一个不满足条件的值时，停止读取并关闭新通道 ch_。
 //   - 新通道 ch_ 只包含在遇到第一个不满足条件的值之前的所有值
 func TakeWhile[T any](f func(x T) bool, ch chan T) chan T {
-	ch_ := make(chan T, 3)
+	ch_ := make(chan T, BufferSize)
 
 	go func() {
 		defer close(ch_)
@@ -441,7 +446,7 @@ func TakeWhile[T any](f func(x T) bool, ch chan T) chan T {
 //   - 从第一个不满足条件的值开始，将所有后续值写入新通道 ch_。
 //   - 新通道 ch_ 包含从第一个不满足条件的值之后的所有值。
 func DropWhile[T any](f func(x T) bool, ch chan T) chan T {
-	ch_ := make(chan T, 3)
+	ch_ := make(chan T, BufferSize)
 
 	num := 0
 	go func() {
@@ -476,22 +481,32 @@ func DropWhile[T any](f func(x T) bool, ch chan T) chan T {
 //   - 遍历每个输入通道，直到它们都关闭。
 //   - 当所有输入通道都关闭时，关闭新通道 ch_。
 //   - 新通道 ch_ 包含从所有输入通道中读取的所有值，按照输入通道的顺序。
-func Merge[T any](ch ...chan T) chan T {
+func Merge[T any](chs ...chan T) chan T {
 
-	ch_ := make(chan T, 3)
-	go func() {
-		defer close(ch_)
-		for _, v := range ch {
-			for v := range v {
-				ch_ <- v
+	out := make(chan T, BufferSize)
+
+	var wg sync.WaitGroup
+
+	for _, ch := range chs {
+		wg.Add(1)
+		go func(c chan T) {
+			defer wg.Done()
+			for v := range c {
+				out <- v
 			}
-		}
+		}(ch)
+	}
+
+	go func() {
+		defer close(out)
+		wg.Wait()
 	}()
-	return ch_
+
+	return out
 }
 
 func GroupBy[U cmp.Ordered, T any, K comparable](by chan K, data chan T, order chan U) chan array.Pair[K, []T] {
-	ch := make(chan array.Pair[K, []T], 3)
+	ch := make(chan array.Pair[K, []T], BufferSize)
 
 	go func() {
 		defer close(ch)
@@ -514,4 +529,35 @@ func GroupBy[U cmp.Ordered, T any, K comparable](by chan K, data chan T, order c
 	}()
 
 	return ch
+}
+
+// Window 滚动窗口函数
+// 参数:
+//   - windowSize: 窗口的大小。
+//   - ch: 输入通道，包含要处理的数据。
+//
+// 返回:
+//   - 输出通道，其中包含滚动窗口的数据切片。
+func Window[T any](windowSize int, ch chan T) chan []T {
+	window := make([]T, 0, windowSize)
+	out := make(chan []T, 3)
+
+	go func() {
+		defer close(out)
+		for v := range ch {
+			window = append(window, v)
+			if len(window) == windowSize {
+				// 发送当前窗口的副本到通道
+				out <- window
+				// 重新创建窗口切片
+				window = make([]T, 0, windowSize)
+			}
+		}
+		// 处理剩余的窗口数据
+		if len(window) > 0 {
+			out <- window
+		}
+	}()
+
+	return out
 }
