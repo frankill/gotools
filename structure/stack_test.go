@@ -1,13 +1,15 @@
-package structure
+package structure_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/frankill/gotools/structure"
 )
 
 func TestStackOperations(t *testing.T) {
 	// Create a new stack with some initial data
-	stack := NewStack(1, 2, 3)
+	stack := structure.NewStack(1, 2, 3)
 
 	// Test push method
 	stack.Push(4)

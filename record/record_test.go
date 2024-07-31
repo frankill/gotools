@@ -1,4 +1,4 @@
-package record
+package record_test
 
 import (
 	"fmt"
@@ -24,6 +24,6 @@ func TestMapIntersect(t *testing.T) {
 	df := [][]byte{[]byte("abc"), []byte("test"), []byte("中心")}
 
 	a := array.ArrayConcat(df...)
-	fmt.Println(string(a[0:3]), a,df)
+	fmt.Println(string(a[0:3]), a, df)
 
 }

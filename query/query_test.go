@@ -1,17 +1,21 @@
-package query
+package query_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/frankill/gotools/query"
+)
 
 // 示例测试函数 TestSQLBuilder_Build 测试 SQLBuilder 的功能
 func TestSQLBuilder_Build(t *testing.T) {
 	tests := []struct {
 		name     string
-		builder  *SQLBuilder
+		builder  *query.SQLBuilder
 		expected string
 	}{
 		{
 			name: "Basic SELECT query",
-			builder: NewSQLBuilder().
+			builder: query.NewSQLBuilder().
 				Select("id", "name", "age").
 				From("users").
 				Where("age > 18", "name != 'Admin'").
@@ -20,10 +24,10 @@ func TestSQLBuilder_Build(t *testing.T) {
 		},
 		{
 			name: "SELECT query with IN subquery",
-			builder: NewSQLBuilder().
+			builder: query.NewSQLBuilder().
 				Select("id", "name", "age").
 				From("users").
-				In("id", NewSQLBuilder().
+				In("id", query.NewSQLBuilder().
 					Select("user_id").
 					From("permissions").
 					Where("role = 'admin'")).
@@ -32,7 +36,7 @@ func TestSQLBuilder_Build(t *testing.T) {
 		},
 		{
 			name: "SELECT query with BETWEEN clause",
-			builder: NewSQLBuilder().
+			builder: query.NewSQLBuilder().
 				Select("id", "name", "age").
 				From("users").
 				Between("age", 18, 30).
@@ -41,7 +45,7 @@ func TestSQLBuilder_Build(t *testing.T) {
 		},
 		{
 			name: "SELECT query with AND and OR conditions",
-			builder: NewSQLBuilder().
+			builder: query.NewSQLBuilder().
 				Select("id", "name", "age").
 				From("users").
 				Where("test is not null").
@@ -52,7 +56,7 @@ func TestSQLBuilder_Build(t *testing.T) {
 		},
 		{
 			name: "SELECT query with multiple GROUP BY fields",
-			builder: NewSQLBuilder().
+			builder: query.NewSQLBuilder().
 				Select("category", "COUNT(*) as count").
 				From("products").
 				GroupBy("category", "sub_category"),
@@ -60,7 +64,7 @@ func TestSQLBuilder_Build(t *testing.T) {
 		},
 		{
 			name: "SELECT query with multiple ORDER BY fields",
-			builder: NewSQLBuilder().
+			builder: query.NewSQLBuilder().
 				Select("id", "name").
 				From("users").
 				OrderBy("name ASC", "id DESC"),

@@ -1,9 +1,11 @@
-package array
+package array_test
 
 import (
 	"fmt"
 	"reflect"
 	"testing"
+
+	"github.com/frankill/gotools/array"
 )
 
 func TestSequenceMatch(t *testing.T) {
@@ -40,7 +42,7 @@ func TestSequenceMatch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// 调用待测试的函数
-			got := SequenceMatch(tt.by, tt.data, tt.order)(tt.input)(tt.id)
+			got := array.SequenceMatch(tt.by, tt.data, tt.order)(tt.input)(tt.id)
 
 			// 比较结果
 			if !reflect.DeepEqual(got, tt.want) {
@@ -84,7 +86,7 @@ func TestSequenceCount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// 调用待测试的函数
-			got := SequenceCount(tt.by, tt.data, tt.order)(tt.input)(tt.id)
+			got := array.SequenceCount(tt.by, tt.data, tt.order)(tt.input)(tt.id)
 
 			// 比较结果
 			if !reflect.DeepEqual(got, tt.want) {
@@ -132,7 +134,7 @@ func TestWindowFunnel(t *testing.T) {
 	funnelSteps := []string{"view_product", "add_to_cart", "purchase"}
 
 	// 创建漏斗分析函数
-	funnel := WindowFunnel(userIDs, eventTypes, timestamps)
+	funnel := array.WindowFunnel(userIDs, eventTypes, timestamps)
 
 	// 预期结果
 	expectedStrictOrder := map[string]int{"user1": 1, "user2": 2, "user3": 3}

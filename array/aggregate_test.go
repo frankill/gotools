@@ -1,8 +1,10 @@
-package array
+package array_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/frankill/gotools/array"
 )
 
 func TestASum(t *testing.T) {
@@ -32,7 +34,7 @@ func TestASum(t *testing.T) {
 	// Run tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := ASum(tt.slice...)
+			result := array.ASum(tt.slice...)
 			if result != tt.expected {
 				t.Errorf("Expected %d, but got %d", tt.expected, result)
 			}
@@ -67,7 +69,7 @@ func TestAMin(t *testing.T) {
 	// Run tests
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			result := AMin(test.slice...)
+			result := array.AMin(test.slice...)
 			if result != test.expected {
 				t.Errorf("Expected %d, but got %d", test.expected, result)
 			}
@@ -103,7 +105,7 @@ func TestAMax(t *testing.T) {
 	// Run test cases
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := AMax(tt.slice...)
+			result := array.AMax(tt.slice...)
 			if result != tt.expected {
 				t.Errorf("AMax(%v) = %v, expected %v", tt.slice, result, tt.expected)
 			}
@@ -114,7 +116,7 @@ func TestAConcat(t *testing.T) {
 	// Test case 1
 	input1 := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
 	expected1 := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
-	result1 := AConcat(input1...)
+	result1 := array.AConcat(input1...)
 	if len(result1) != len(expected1) || !reflect.DeepEqual(result1, expected1) {
 		t.Errorf("Test case 1 failed. Expected %v, got %v", expected1, result1)
 	}
@@ -122,7 +124,7 @@ func TestAConcat(t *testing.T) {
 	// Test case 2
 	input2 := [][]string{{"hello", "world"}, {"foo", "bar"}}
 	expected2 := []string{"hello", "world", "foo", "bar"}
-	result2 := AConcat(input2...)
+	result2 := array.AConcat(input2...)
 	if len(result2) != len(expected2) || !reflect.DeepEqual(result2, expected2) {
 		t.Errorf("Test case 2 failed. Expected %v, got %v", expected2, result2)
 	}
@@ -130,7 +132,7 @@ func TestAConcat(t *testing.T) {
 	// Test case 3
 	input3 := [][]float64{}
 	expected3 := []float64{}
-	result3 := AConcat(input3...)
+	result3 := array.AConcat(input3...)
 	if len(result3) != len(expected3) || !reflect.DeepEqual(result3, expected3) {
 		t.Errorf("Test case 3 failed. Expected %v, got %v", expected3, result3)
 	}
@@ -138,7 +140,7 @@ func TestAConcat(t *testing.T) {
 	// Test case 4
 	input4 := [][]bool{{true, false}, {true, true}}
 	expected4 := []bool{true, false, true, true}
-	result4 := AConcat(input4...)
+	result4 := array.AConcat(input4...)
 	if len(result4) != len(expected4) || !reflect.DeepEqual(result4, expected4) {
 		t.Errorf("Test case 4 failed. Expected %v, got %v", expected4, result4)
 	}
@@ -183,7 +185,7 @@ func TestAMaxif(t *testing.T) {
 	// Run test cases
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := AMaxif(tt.fun, tt.slice)
+			result := array.AMaxif(tt.fun, tt.slice)
 			if result != tt.expected {
 				t.Errorf("Expected %d, but got %d", tt.expected, result)
 			}
@@ -228,7 +230,7 @@ func TestAMinif(t *testing.T) {
 	// Run test cases
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := AMinif(tt.fun, tt.slice...)
+			result := array.AMinif(tt.fun, tt.slice...)
 			if result != tt.expected {
 				t.Errorf("AMinif() = %v, expected %v", result, tt.expected)
 			}
@@ -250,7 +252,7 @@ func TestAargMax(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		result := AargMax(tt.arg, tt.val)
+		result := array.AargMax(tt.arg, tt.val)
 		if result != tt.expect {
 			t.Errorf("AargMax(%v, %v) = %v, expect %v", tt.arg, tt.val, result, tt.expect)
 		}
@@ -271,7 +273,7 @@ func TestAargMin(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := AargMin(test.arg, test.val)
+		result := array.AargMin(test.arg, test.val)
 		if !reflect.DeepEqual(result, test.expect) {
 			t.Errorf("AargMin(%v, %v) = %v, expect %v", test.arg, test.val, result, test.expect)
 		}
@@ -306,7 +308,7 @@ func TestAccumulateFun(t *testing.T) {
 	// 运行测试用例
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := Asccumulate(tt.fun, tt.init, tt.arr...)
+			result := array.Asccumulate(tt.fun, tt.init, tt.arr...)
 			if result != tt.expected {
 				t.Errorf("AccumulateFun() = %v, want %v", result, tt.expected)
 			}

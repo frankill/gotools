@@ -1,10 +1,12 @@
-package array
+package array_test
 
 import (
 	"fmt"
 	"reflect"
 	"strconv"
 	"testing"
+
+	"github.com/frankill/gotools/array"
 )
 
 // TestAnd 测试 And 函数
@@ -25,7 +27,7 @@ func TestAnd(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := And(tt.arr...)
+			result := array.And(tt.arr...)
 			if result != tt.expected {
 				t.Errorf("And() = %v, want %v", result, tt.expected)
 			}
@@ -36,7 +38,7 @@ func TestAnd(t *testing.T) {
 func TestOr(t *testing.T) {
 	// Test case with no arguments
 	t.Run("no arguments", func(t *testing.T) {
-		result := Or()
+		result := array.Or()
 		if result != false {
 			t.Errorf("Or() with no arguments should return false, got %v", result)
 		}
@@ -44,7 +46,7 @@ func TestOr(t *testing.T) {
 
 	// Test case with all false arguments
 	t.Run("all false arguments", func(t *testing.T) {
-		result := Or(false, false, false)
+		result := array.Or(false, false, false)
 		if result != false {
 			t.Errorf("Or() with all false arguments should return false, got %v", result)
 		}
@@ -52,7 +54,7 @@ func TestOr(t *testing.T) {
 
 	// Test case with at least one true argument
 	t.Run("at least one true argument", func(t *testing.T) {
-		result := Or(false, true, false)
+		result := array.Or(false, true, false)
 		if result != true {
 			t.Errorf("Or() with at least one true argument should return true, got %v", result)
 		}
@@ -71,7 +73,7 @@ func TestNot(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Not(tt.v); got != tt.want {
+			if got := array.Not(tt.v); got != tt.want {
 				t.Errorf("Not() = %v, want %v", got, tt.want)
 			}
 		})
@@ -144,7 +146,7 @@ func TestOperatorMap(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 调用待测试函数
-			result := Operator(tc.fun, tc.arr...)
+			result := array.Operator(tc.fun, tc.arr...)
 
 			// 检查结果是否与预期相同
 			if !reflect.DeepEqual(result, tc.expected) {
@@ -168,14 +170,14 @@ func TestCartesian(t *testing.T) {
 
 	// 遍历测试用例
 	for _, tc := range testCases {
-		result := Cartesian(tc.input...)
+		result := array.Cartesian(tc.input...)
 		if !reflect.DeepEqual(result, tc.output) {
 			t.Errorf("Expected %v, but got %v", tc.output, result)
 		}
 	}
 
-	ForEach(func(x ...int) {
+	array.ForEach(func(x ...int) {
 		fmt.Println(x)
-	}, ArraySeq(1, 3, 1), ArraySeq(2, 10, 1))
+	}, array.ArraySeq(1, 3, 1), array.ArraySeq(2, 10, 1))
 
 }

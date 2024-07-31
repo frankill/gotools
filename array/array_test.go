@@ -1,9 +1,11 @@
-package array
+package array_test
 
 import (
 	"reflect"
 	"strconv"
 	"testing"
+
+	"github.com/frankill/gotools/array"
 )
 
 func TestArrayFromAny(t *testing.T) {
@@ -22,7 +24,7 @@ func TestArrayFromAny(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ArrayFromAny(tt.input...)
+			got := array.ArrayFromAny(tt.input...)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ArrayFromAny() = %v, want %v", got, tt.want)
 			}
@@ -33,7 +35,7 @@ func TestArrayRandomSample(t *testing.T) {
 	// Test case 3: Test with an empty input array
 	input3 := []float64{}
 	expected3 := []float64{}
-	result3 := ArrayRandomSample(input3, 1, false)
+	result3 := array.ArrayRandomSample(input3, 1, false)
 	if !reflect.DeepEqual(result3, expected3) {
 		t.Errorf("ArrayRandomSample(%v, 1) = %v, want %v", input3, result3, expected3)
 	}
@@ -41,7 +43,7 @@ func TestArrayRandomSample(t *testing.T) {
 	// Test case 4: Test with a sample size greater than or equal to the input array size
 	input4 := []int{6, 7, 8, 9, 10}
 	expected4 := []int{6, 7, 8, 9, 10}
-	result4 := ArrayRandomSample(input4, 5, false)
+	result4 := array.ArrayRandomSample(input4, 5, false)
 	if !reflect.DeepEqual(result4, expected4) {
 		t.Errorf("ArrayRandomSample(%v, 5) = %v, want %v", input4, result4, expected4)
 	}
@@ -50,14 +52,14 @@ func TestArrayRandomSample(t *testing.T) {
 // Test case for the ArrayShif function
 func TestArrayShif(t *testing.T) {
 	input1 := []int{1, 2, 3, 4, 5, 6}
-	output1 := ArrayShif(input1, 2)
+	output1 := array.ArrayShif(input1, 2)
 	expected1 := []int{0, 0, 1, 2, 3, 4}
 	if !reflect.DeepEqual(output1, expected1) {
 		t.Errorf("Expected %v but got %v", expected1, output1)
 	}
 
 	input2 := []int{1, 2, 3, 4, 5, 6}
-	output2 := ArrayShif(input2, -2)
+	output2 := array.ArrayShif(input2, -2)
 	expected2 := []int{3, 4, 5, 6, 0, 0}
 	if !reflect.DeepEqual(output2, expected2) {
 		t.Errorf("Expected %v but got %v", expected2, output2)
@@ -69,14 +71,14 @@ func TestArrayShif(t *testing.T) {
 // Test case for the ArrayRotate function
 func TestArrayRotate(t *testing.T) {
 	input1 := []int{1, 2, 3, 4, 5, 6}
-	output1 := ArrayRotate(input1, 2)
+	output1 := array.ArrayRotate(input1, 2)
 	expected1 := []int{3, 4, 5, 6, 1, 2}
 	if !reflect.DeepEqual(output1, expected1) {
 		t.Errorf("Expected %v but got %v", expected1, output1)
 	}
 
 	input2 := []int{1, 2, 3, 4, 5, 6}
-	output2 := ArrayRotate(input2, -2)
+	output2 := array.ArrayRotate(input2, -2)
 	expected2 := []int{5, 6, 1, 2, 3, 4}
 	if !reflect.DeepEqual(output2, expected2) {
 		t.Errorf("Expected %v but got %v", expected2, output2)
@@ -88,21 +90,21 @@ func TestArrayRotate(t *testing.T) {
 // Test case for the ArrayProduct function
 func TestArrayProduct(t *testing.T) {
 	input1 := []int{1, 2, 3, 4, 5, 6}
-	output1 := ArrayProduct(input1)
+	output1 := array.ArrayProduct(input1)
 	expected1 := float64(720)
 	if output1 != expected1 {
 		t.Errorf("Expected %v but got %v", expected1, output1)
 	}
 
 	input2 := []float32{2.5, 3.5, 1.5}
-	output2 := ArrayProduct(input2)
+	output2 := array.ArrayProduct(input2)
 	expected2 := float64(13.125)
 	if output2 != expected2 {
 		t.Errorf("Expected %v but got %v", expected2, output2)
 	}
 
 	input3 := []int{}
-	output3 := ArrayProduct(input3)
+	output3 := array.ArrayProduct(input3)
 	expected3 := float64(1.0)
 	if output3 != expected3 {
 		t.Errorf("Expected %v but got %v", expected3, output3)
@@ -114,7 +116,7 @@ func TestArrayProduct(t *testing.T) {
 // Test case for the ArrayCumSum function
 func TestArrayCumFun(t *testing.T) {
 	input1 := []int{1, 2, 3, 4, 5, 6}
-	output1 := ArrayCumFun(func(a, b int) int {
+	output1 := array.ArrayCumFun(func(a, b int) int {
 		return a + b
 	}, input1)
 	expected1 := []int{1, 3, 6, 10, 15, 21}
@@ -123,7 +125,7 @@ func TestArrayCumFun(t *testing.T) {
 	}
 
 	input2 := []float32{1.5, 2.5, 3.5, 4.5, 5.5, 6.5}
-	output2 := ArrayCumFun(func(a, b float32) float32 {
+	output2 := array.ArrayCumFun(func(a, b float32) float32 {
 		return a + b
 	}, input2)
 	expected2 := []float32{1.5, 4, 7.5, 12, 17.5, 24}
@@ -137,14 +139,14 @@ func TestArrayCumFun(t *testing.T) {
 // Test case for the ArrayCumSum function
 func TestArrayCumSum(t *testing.T) {
 	input1 := []int{1, 2, 3, 4, 5, 6}
-	output1 := ArrayCumSum(input1)
+	output1 := array.ArrayCumSum(input1)
 	expected1 := []int{1, 3, 6, 10, 15, 21}
 	if !reflect.DeepEqual(output1, expected1) {
 		t.Errorf("Expected %v but got %v", expected1, output1)
 	}
 
 	input2 := []float32{1.5, 2.5, 3.5, 4.5, 5.5, 6.5}
-	output2 := ArrayCumSum(input2)
+	output2 := array.ArrayCumSum(input2)
 	expected2 := []float32{1.5, 4, 7.5, 12, 17.5, 24}
 	if !reflect.DeepEqual(output2, expected2) {
 		t.Errorf("Expected %v but got %v", expected2, output2)
@@ -156,7 +158,7 @@ func TestArrayCumSum(t *testing.T) {
 // Test case for the ArrayCumProd function
 func TestArrayCumProd(t *testing.T) {
 	input1 := []int{1, 2, 3, 4, 5, 6}
-	output1 := ArrayCumProd(input1)
+	output1 := array.ArrayCumProd(input1)
 	expected1 := []int{1, 2, 6, 24, 120, 720}
 	if !reflect.DeepEqual(output1, expected1) {
 		t.Errorf("Expected %v but got %v", expected1, output1)
@@ -168,7 +170,7 @@ func TestArrayCumProd(t *testing.T) {
 // Test case for the ArrayCumMax function
 func TestArrayCumMax(t *testing.T) {
 	input1 := []int{1, 5, 3, 7, 2, 6}
-	output1 := ArrayCumMax(input1)
+	output1 := array.ArrayCumMax(input1)
 	expected1 := []int{1, 5, 5, 7, 7, 7}
 	if !reflect.DeepEqual(output1, expected1) {
 		t.Errorf("Expected %v but got %v", expected1, output1)
@@ -180,7 +182,7 @@ func TestArrayCumMax(t *testing.T) {
 // Test case for the ArrayCumMin function
 func TestArrayCumMin(t *testing.T) {
 	input1 := []int{1, 5, 3, 7, 2, 6}
-	output1 := ArrayCumMin(input1)
+	output1 := array.ArrayCumMin(input1)
 	expected1 := []int{1, 1, 1, 1, 1, 1}
 	if !reflect.DeepEqual(output1, expected1) {
 		t.Errorf("Expected %v but got %v", expected1, output1)
@@ -192,14 +194,14 @@ func TestArrayCumMin(t *testing.T) {
 // Test case for the ArrayAvg function
 func TestArrayAvg(t *testing.T) {
 	input1 := []int{1, 2, 3, 4, 5}
-	output1 := ArrayAvg(input1)
+	output1 := array.ArrayAvg(input1)
 	expected1 := int(3)
 	if output1 != expected1 {
 		t.Errorf("Expected %v but got %v", expected1, output1)
 	}
 
 	input2 := []float32{1.5, 2.5, 3.5, 4.5, 5.5}
-	output2 := ArrayAvg(input2)
+	output2 := array.ArrayAvg(input2)
 	expected2 := float32(3.5)
 	if output2 != expected2 {
 		t.Errorf("Expected %v but got %v", expected2, output2)
@@ -211,14 +213,14 @@ func TestArrayAvg(t *testing.T) {
 // Test case for the ArraySum function
 func TestArraySum(t *testing.T) {
 	input1 := []int{1, 2, 3, 4, 5}
-	output1 := ArraySum(input1)
+	output1 := array.ArraySum(input1)
 	expected1 := int(15)
 	if output1 != expected1 {
 		t.Errorf("Expected %v but got %v", expected1, output1)
 	}
 
 	input2 := []float32{1.5, 2.5, 3.5, 4.5, 5.5}
-	output2 := ArraySum(input2)
+	output2 := array.ArraySum(input2)
 	expected2 := float32(17.5)
 	if output2 != expected2 {
 		t.Errorf("Expected %v but got %v", expected2, output2)
@@ -230,14 +232,14 @@ func TestArraySum(t *testing.T) {
 // Test case for the ArrayMax function
 func TestArrayMax(t *testing.T) {
 	input1 := []int{1, 5, 3, 7, 2, 6}
-	output1 := ArrayMax(input1)
+	output1 := array.ArrayMax(input1)
 	expected1 := int(7)
 	if output1 != expected1 {
 		t.Errorf("Expected %v but got %v", expected1, output1)
 	}
 
 	input2 := []float32{1.5, 2.5, 3.5, 4.5, 5.5}
-	output2 := ArrayMax(input2)
+	output2 := array.ArrayMax(input2)
 	expected2 := float32(5.5)
 	if output2 != expected2 {
 		t.Errorf("Expected %v but got %v", expected2, output2)
@@ -249,14 +251,14 @@ func TestArrayMax(t *testing.T) {
 // Test case for the ArrayMin function
 func TestArrayMin(t *testing.T) {
 	input1 := []int{1, 5, 3, 7, 2, 6}
-	output1 := ArrayMin(input1)
+	output1 := array.ArrayMin(input1)
 	expected1 := int(1)
 	if output1 != expected1 {
 		t.Errorf("Expected %v but got %v", expected1, output1)
 	}
 
 	input2 := []float32{1.5, 2.5, 3.5, 4.5, 5.5}
-	output2 := ArrayMin(input2)
+	output2 := array.ArrayMin(input2)
 	expected2 := float32(1.5)
 	if output2 != expected2 {
 		t.Errorf("Expected %v but got %v", expected2, output2)
@@ -268,7 +270,7 @@ func TestArrayMin(t *testing.T) {
 func TestArrayFindLast(t *testing.T) {
 	// Test case 1: Empty array
 	arr1 := [][]int{}
-	result1 := ArrayFindLast(func(x ...int) bool { return false }, arr1...)
+	result1 := array.ArrayFindLast(func(x ...int) bool { return false }, arr1...)
 	expected1 := -1
 	if result1 != expected1 {
 		t.Errorf("Test case 1 failed. Expected %d, got %d", expected1, result1)
@@ -278,7 +280,7 @@ func TestArrayFindLast(t *testing.T) {
 	f := func(x ...int) bool {
 		return x[0]%2 == 0
 	}
-	result2 := ArrayFindLast(f, []int{1, 2, 3, 4, 5})
+	result2 := array.ArrayFindLast(f, []int{1, 2, 3, 4, 5})
 	expected2 := 3
 	if result2 != expected2 {
 		t.Errorf("Test case 2 failed. Expected %d, got %d", expected2, result2)
@@ -289,7 +291,7 @@ func TestArrayFindLast(t *testing.T) {
 	f = func(x ...int) bool {
 		return x[0]+x[1]+x[2] > 15
 	}
-	result3 := ArrayFindLast(f, arr3...)
+	result3 := array.ArrayFindLast(f, arr3...)
 	expected3 := 2
 	if result3 != expected3 {
 		t.Errorf("Test case 3 failed. Expected %d, got %d", expected3, result3)
@@ -299,7 +301,7 @@ func TestArrayFindLast(t *testing.T) {
 func TestArrayFindFirst(t *testing.T) {
 	// Test case 1: Empty array
 	arr1 := [][]int{}
-	result1 := ArrayFindFirst(func(x ...int) bool { return false }, arr1...)
+	result1 := array.ArrayFindFirst(func(x ...int) bool { return false }, arr1...)
 	expected1 := -1
 	if result1 != expected1 {
 		t.Errorf("Test case 1 failed. Expected %d, got %d", expected1, result1)
@@ -311,7 +313,7 @@ func TestArrayFindFirst(t *testing.T) {
 	f := func(x ...int) bool {
 		return x[0]%2 == 0
 	}
-	result2 := ArrayFindFirst(f, arr2...)
+	result2 := array.ArrayFindFirst(f, arr2...)
 	expected2 := 1
 	if result2 != expected2 {
 		t.Errorf("Test case 2 failed. Expected %d, got %d", expected2, result2)
@@ -322,7 +324,7 @@ func TestArrayFindFirst(t *testing.T) {
 	f = func(x ...int) bool {
 		return x[0]+x[1]+x[2] > 12
 	}
-	result3 := ArrayFindFirst(f, arr3...)
+	result3 := array.ArrayFindFirst(f, arr3...)
 	expected3 := 1
 	if result3 != expected3 {
 		t.Errorf("Test case 3 failed. Expected %d, got %d", expected3, result3)
@@ -332,7 +334,7 @@ func TestArrayFindFirst(t *testing.T) {
 func TestArrayLast(t *testing.T) {
 	// Test case 1: Empty array
 	arr1 := [][]int{}
-	result1 := ArrayLast(func(x ...int) bool { return false }, arr1...)
+	result1 := array.ArrayLast(func(x ...int) bool { return false }, arr1...)
 	expected1 := 0
 	if !reflect.DeepEqual(result1, expected1) {
 		t.Errorf("Test case 1 failed. Expected %v, got %v", expected1, result1)
@@ -343,7 +345,7 @@ func TestArrayLast(t *testing.T) {
 	f := func(x ...int) bool {
 		return x[0]%2 == 0
 	}
-	result2 := ArrayLast(f, arr2...)
+	result2 := array.ArrayLast(f, arr2...)
 	expected2 := 4
 	if !reflect.DeepEqual(result2, expected2) {
 		t.Errorf("Test case 2 failed. Expected %v, got %v", expected2, result2)
@@ -354,7 +356,7 @@ func TestArrayLast(t *testing.T) {
 	f = func(x ...int) bool {
 		return x[0]+x[1]+x[2] > 12
 	}
-	result3 := ArrayLast(f, arr3...)
+	result3 := array.ArrayLast(f, arr3...)
 	expected3 := 3
 	if !reflect.DeepEqual(result3, expected3) {
 		t.Errorf("Test case 3 failed. Expected %v, got %v", expected3, result3)
@@ -364,7 +366,7 @@ func TestArrayLast(t *testing.T) {
 func TestArrayFirst(t *testing.T) {
 	// Test case 1: Empty array
 	arr1 := [][]int{}
-	result1 := ArrayFirst(func(x ...int) bool { return false }, arr1...)
+	result1 := array.ArrayFirst(func(x ...int) bool { return false }, arr1...)
 	expected1 := 0
 	if !reflect.DeepEqual(result1, expected1) {
 		t.Errorf("Test case 1 failed. Expected %v, got %v", expected1, result1)
@@ -375,7 +377,7 @@ func TestArrayFirst(t *testing.T) {
 	f := func(x ...int) bool {
 		return x[0]%2 == 0
 	}
-	result2 := ArrayFirst(f, arr2...)
+	result2 := array.ArrayFirst(f, arr2...)
 	expected2 := 2
 	if !reflect.DeepEqual(result2, expected2) {
 		t.Errorf("Test case 2 failed. Expected %v, got %v", expected2, result2)
@@ -386,7 +388,7 @@ func TestArrayFirst(t *testing.T) {
 	f = func(x ...int) bool {
 		return x[0]+x[1]+x[2] > 12
 	}
-	result3 := ArrayFirst(f, arr3...)
+	result3 := array.ArrayFirst(f, arr3...)
 	expected3 := 2
 	if !reflect.DeepEqual(result3, expected3) {
 		t.Errorf("Test case 3 failed. Expected %v, got %v", expected3, result3)
@@ -395,7 +397,7 @@ func TestArrayFirst(t *testing.T) {
 func TestArrayAll(t *testing.T) {
 	// Test case 1: Empty array
 	arr1 := [][]int{}
-	result1 := ArrayAll(func(x ...int) bool { return false }, arr1...)
+	result1 := array.ArrayAll(func(x ...int) bool { return false }, arr1...)
 	expected1 := false
 	if result1 != expected1 {
 		t.Errorf("Test case 1 failed. Expected %v, got %v", strconv.FormatBool(expected1), strconv.FormatBool(result1))
@@ -403,7 +405,7 @@ func TestArrayAll(t *testing.T) {
 
 	// Test case 2: Single array with all elements greater than 0
 	arr2 := [][]int{{1, 2, 3, 4, 5}}
-	result2 := ArrayAll(func(x ...int) bool {
+	result2 := array.ArrayAll(func(x ...int) bool {
 		return x[0]%2 == 0
 	}, arr2...)
 	expected2 := false
@@ -413,7 +415,7 @@ func TestArrayAll(t *testing.T) {
 
 	// Test case 3: Multiple arrays with all elements greater than 0
 	arr3 := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
-	result3 := ArrayAll(func(x ...int) bool {
+	result3 := array.ArrayAll(func(x ...int) bool {
 		return x[0]+x[1]+x[2] > 11
 	}, arr3...)
 	expected3 := true
@@ -427,7 +429,7 @@ func TestArrayAny(t *testing.T) {
 
 	// Test case 2: Single array with all elements greater than 0
 	arr2 := [][]int{{1, 2, 3, 4, 5}}
-	result2 := ArrayAny(func(x ...int) bool {
+	result2 := array.ArrayAny(func(x ...int) bool {
 		return x[0]%2 == 0
 	}, arr2...)
 	expected2 := true
@@ -437,7 +439,7 @@ func TestArrayAny(t *testing.T) {
 
 	// Test case 3: Multiple arrays with all elements greater than 0
 	arr3 := [][]int{{1, 2, 3}, {4, 5, 6}, {4, 8, 9}}
-	result3 := ArrayAll(func(x ...int) bool {
+	result3 := array.ArrayAll(func(x ...int) bool {
 		return x[0]+x[1]+x[2] > 11
 	}, arr3...)
 	expected3 := false
@@ -450,7 +452,7 @@ func TestArrayAny(t *testing.T) {
 func TestArrayReverseSplit(t *testing.T) {
 	// Test case 1: Empty array
 	arr1 := [][]int{{1}}
-	result1 := ArrayReverseSplit(func(x ...int) bool { return true }, arr1...)
+	result1 := array.ArrayReverseSplit(func(x ...int) bool { return true }, arr1...)
 	expected1 := [][]int{{1}}
 	if !reflect.DeepEqual(result1, expected1) {
 		t.Errorf("Test case 1 failed. Expected %v, got %v", expected1, result1)
@@ -461,7 +463,7 @@ func TestArrayReverseSplit(t *testing.T) {
 	f := func(x ...int) bool {
 		return x[0] > 2
 	}
-	result2 := ArrayReverseSplit(f, arr2...)
+	result2 := array.ArrayReverseSplit(f, arr2...)
 	expected2 := [][]int{}
 	if !reflect.DeepEqual(result2, expected2) {
 		t.Errorf("Test case 2 failed. Expected %v, got %v", expected2, result2)
@@ -474,7 +476,7 @@ func TestArrayReverseSplit(t *testing.T) {
 		return x[0] > 1
 	}
 
-	result4 := ArrayReverseSplit(f, arr4...)
+	result4 := array.ArrayReverseSplit(f, arr4...)
 	expected4 := [][]int{{1, 2}, {3}}
 	if !reflect.DeepEqual(result4, expected4) {
 		t.Errorf("Test case 4 failed. Expected %v, got %v", expected4, result4)
@@ -486,7 +488,7 @@ func TestArraySplit(t *testing.T) {
 	// Test case 1: Empty input
 	arr := [][]int{}
 	expected := [][]int{}
-	result := ArraySplit(func(x ...int) bool { return true }, arr...)
+	result := array.ArraySplit(func(x ...int) bool { return true }, arr...)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Test case 1 failed. Expected: %v, Got: %v", expected, result)
 	}
@@ -494,21 +496,21 @@ func TestArraySplit(t *testing.T) {
 	// Test case 2: Single-element input
 	arr = [][]int{{1}}
 	expected = [][]int{{1}}
-	result = ArraySplit(func(x ...int) bool { return true }, arr...)
+	result = array.ArraySplit(func(x ...int) bool { return true }, arr...)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Test case 2 failed. Expected: %v, Got: %v", expected, result)
 	}
 
 	arr = [][]int{{1, 2}}
 	expected = [][]int{{1}, {2}}
-	result = ArraySplit(func(x ...int) bool { return true }, arr...)
+	result = array.ArraySplit(func(x ...int) bool { return true }, arr...)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Test case 2 failed. Expected: %v, Got: %v", expected, result)
 	}
 	// Test case 3: Multiple elements, no split
 	arr = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
 	expected = [][]int{{1}, {2, 3}}
-	result = ArraySplit(func(x ...int) bool { return x[0]%2 == 0 }, arr...)
+	result = array.ArraySplit(func(x ...int) bool { return x[0]%2 == 0 }, arr...)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Test case 3 failed. Expected: %v, Got: %v", expected, result)
 	}
@@ -516,7 +518,7 @@ func TestArraySplit(t *testing.T) {
 	// Test case 4: Multiple elements, with split
 	arr = [][]int{{1, 2, 3}, {4, 2, 6}, {7, 8, 9}}
 	expected = [][]int{{1}, {2, 3}}
-	result = ArraySplit(func(x ...int) bool { return x[0] == x[1] }, arr...)
+	result = array.ArraySplit(func(x ...int) bool { return x[0] == x[1] }, arr...)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Test case 4 failed. Expected: %v, Got: %v", expected, result)
 	}
@@ -526,7 +528,7 @@ func TestArrayReverseFill(t *testing.T) {
 	// Test case 1: Empty input
 	arr := [][]int{}
 	expected := []int{}
-	result := ArrayReverseFill(func(x ...int) bool { return false }, arr...)
+	result := array.ArrayReverseFill(func(x ...int) bool { return false }, arr...)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Test case 1 failed. Expected: %v, Got: %v", expected, result)
 	}
@@ -534,7 +536,7 @@ func TestArrayReverseFill(t *testing.T) {
 	// Test case 2: Single-element input
 	arr = [][]int{{1}}
 	expected = []int{1}
-	result = ArrayReverseFill(func(x ...int) bool { return false }, arr...)
+	result = array.ArrayReverseFill(func(x ...int) bool { return false }, arr...)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Test case 2 failed. Expected: %v, Got: %v", expected, result)
 	}
@@ -542,7 +544,7 @@ func TestArrayReverseFill(t *testing.T) {
 	// Test case 3: Multiple elements, no reverse fill
 	arr = [][]int{{1, 2, 3}, {4, 2, 6}, {7, 8, 9}}
 	expected = []int{1, 3, 3}
-	result = ArrayReverseFill(func(x ...int) bool { return x[0] != x[1] }, arr...)
+	result = array.ArrayReverseFill(func(x ...int) bool { return x[0] != x[1] }, arr...)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Test case 3 failed. Expected: %v, Got: %v", expected, result)
 	}
@@ -550,7 +552,7 @@ func TestArrayReverseFill(t *testing.T) {
 	// Test case 4: Multiple elements, with reverse fill
 	arr = [][]int{{1, 2, 3}, {4, 5, 3}, {7, 8, 9}}
 	expected = []int{3, 3, 3}
-	result = ArrayReverseFill(func(x ...int) bool { return x[0] == x[1] }, arr...)
+	result = array.ArrayReverseFill(func(x ...int) bool { return x[0] == x[1] }, arr...)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Test case 4 failed. Expected: %v, Got: %v", expected, result)
 	}
@@ -579,13 +581,13 @@ func equalSlices[T comparable](a, b []T) bool {
 
 func TestArrayFill(t *testing.T) {
 	// 边界条件：空切片
-	emptyResult := ArrayFill(alwaysTrue, []int{})
+	emptyResult := array.ArrayFill(alwaysTrue, []int{})
 	if len(emptyResult) != 0 {
 		t.Errorf("Expected empty slice for empty input, got %v", emptyResult)
 	}
 
 	// 单元素切片
-	singleElementResult := ArrayFill(alwaysTrue, []int{1})
+	singleElementResult := array.ArrayFill(alwaysTrue, []int{1})
 	expectedSingle := []int{1}
 	if !equalSlices(singleElementResult, expectedSingle) {
 		t.Errorf("Expected %v for single element input, got %v", expectedSingle, singleElementResult)
@@ -593,14 +595,14 @@ func TestArrayFill(t *testing.T) {
 
 	// 多维切片一般情况
 	multiDimensionalInput := [][]int{{1, 2, 3}, {4, 5, 6}}
-	multiDimensionalResult := ArrayFill(alwaysTrue, multiDimensionalInput...)
+	multiDimensionalResult := array.ArrayFill(alwaysTrue, multiDimensionalInput...)
 	expectedMulti := []int{1, 2, 3}
 	if !equalSlices(multiDimensionalResult, expectedMulti) {
 		t.Errorf("Expected %v for multi-dimensional input with alwaysTrue, got %v", expectedMulti, multiDimensionalResult)
 	}
 
 	multiDimensionalInput = [][]int{{1, 2, 3}, {4, 5, 6}}
-	multiDimensionalResult = ArrayFill(func(x ...int) bool { return x[0] == 3 }, multiDimensionalInput...)
+	multiDimensionalResult = array.ArrayFill(func(x ...int) bool { return x[0] == 3 }, multiDimensionalInput...)
 	expectedMulti = []int{1, 1, 3}
 	if !equalSlices(multiDimensionalResult, expectedMulti) {
 		t.Errorf("Expected %v for multi-dimensional input with alwaysTrue, got %v", expectedMulti, multiDimensionalResult)
@@ -608,7 +610,7 @@ func TestArrayFill(t *testing.T) {
 
 	// 测试函数逻辑应用
 	logicTestInput := [][]int{{1, 2, 3}, {4, 5, 6}} // 假设falseVal类型为int，但值表示逻辑上的"假"
-	logicTestResult := ArrayFill(alwaysFalse, logicTestInput...)
+	logicTestResult := array.ArrayFill(alwaysFalse, logicTestInput...)
 	expectedLogic := []int{1, 1, 1} // 根据alwaysFalse逻辑，第二个元素应被替换为前一个元素的值
 	if !equalSlices(logicTestResult, expectedLogic) {
 		t.Errorf("Expected %v for applying custom logic, got %v", expectedLogic, logicTestResult)
@@ -622,7 +624,7 @@ func TestArrayFilterBoundary(t *testing.T) {
 	}
 	emptyInput := [][]int{}
 	expectedEmptyResult := []int{}
-	if result := ArrayFilter(emptyArrayFilter, emptyInput...); !reflect.DeepEqual(result, expectedEmptyResult) {
+	if result := array.ArrayFilter(emptyArrayFilter, emptyInput...); !reflect.DeepEqual(result, expectedEmptyResult) {
 		t.Errorf("ArrayFilter did not handle empty input correctly, expected %v, got %v", expectedEmptyResult, result)
 	}
 
@@ -632,7 +634,7 @@ func TestArrayFilterBoundary(t *testing.T) {
 	}
 	singleElementInput := [][]int{{42}}
 	expectedSingleElementResult := []int{42}
-	if result := ArrayFilter(singleElementFilter, singleElementInput...); !reflect.DeepEqual(result, expectedSingleElementResult) {
+	if result := array.ArrayFilter(singleElementFilter, singleElementInput...); !reflect.DeepEqual(result, expectedSingleElementResult) {
 		t.Errorf("ArrayFilter did not handle single element input correctly, expected %v, got %v", expectedSingleElementResult, result)
 	}
 
@@ -642,7 +644,7 @@ func TestArrayFilterBoundary(t *testing.T) {
 	}
 	allFalseInput := [][]int{{1, 2, 3}, {4, 5, 6}}
 	expectedAllFalseResult := []int{2}
-	if result := ArrayFilter(allFalseFilter, allFalseInput...); !reflect.DeepEqual(result, expectedAllFalseResult) {
+	if result := array.ArrayFilter(allFalseFilter, allFalseInput...); !reflect.DeepEqual(result, expectedAllFalseResult) {
 		t.Errorf("ArrayFilter did not handle all false condition correctly, expected %v, got %v", expectedAllFalseResult, result)
 	}
 }
@@ -654,7 +656,7 @@ func TestArrayMap(t *testing.T) {
 	}
 	regularInput := [][]int{{1, 2}, {3, 4}}
 	expectedRegularResult := []int{1, 4}
-	if result := ArrayMap(regularMap, regularInput...); !reflect.DeepEqual(result, expectedRegularResult) {
+	if result := array.ArrayMap(regularMap, regularInput...); !reflect.DeepEqual(result, expectedRegularResult) {
 		t.Errorf("ArrayMap failed for regular input: expected %v, got %v", expectedRegularResult, result)
 	}
 
@@ -664,7 +666,7 @@ func TestArrayMap(t *testing.T) {
 	}
 	emptyInput := [][]int{}
 	expectedEmptyResult := []int{}
-	if result := ArrayMap(emptyArrayMap, emptyInput...); !reflect.DeepEqual(result, expectedEmptyResult) {
+	if result := array.ArrayMap(emptyArrayMap, emptyInput...); !reflect.DeepEqual(result, expectedEmptyResult) {
 		t.Errorf("ArrayMap did not handle empty input correctly, expected %v, got %v", expectedEmptyResult, result)
 	}
 
@@ -674,7 +676,7 @@ func TestArrayMap(t *testing.T) {
 	}
 	singleElementInput := [][]int{{42}}
 	expectedSingleElementResult := []int{42}
-	if result := ArrayMap(singleElementMap, singleElementInput...); !reflect.DeepEqual(result, expectedSingleElementResult) {
+	if result := array.ArrayMap(singleElementMap, singleElementInput...); !reflect.DeepEqual(result, expectedSingleElementResult) {
 		t.Errorf("ArrayMap did not handle single element input correctly, expected %v, got %v", expectedSingleElementResult, result)
 	}
 
@@ -684,7 +686,7 @@ func TestArrayMap(t *testing.T) {
 	}
 	unevenLengthsInput := [][]int{{1, 2}, {3, 4}}
 	expectedUnevenLengthsResult := []int{1, 2} // 只映射第一个元素
-	if result := ArrayMap(unevenLengthsMap, unevenLengthsInput...); !reflect.DeepEqual(result, expectedUnevenLengthsResult) {
+	if result := array.ArrayMap(unevenLengthsMap, unevenLengthsInput...); !reflect.DeepEqual(result, expectedUnevenLengthsResult) {
 		t.Errorf("ArrayMap did not handle uneven lengths correctly, expected %v, got %v", expectedUnevenLengthsResult, result)
 	}
 }
@@ -693,27 +695,27 @@ func TestArrayZip(t *testing.T) {
 	// 测试用例：常规zip操作
 	regularInput := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
 	expectedRegularResult := [][]int{{1, 4, 7}, {2, 5, 8}, {3, 6, 9}}
-	if result := ArrayZip(regularInput...); !reflect.DeepEqual(result, expectedRegularResult) {
+	if result := array.ArrayZip(regularInput...); !reflect.DeepEqual(result, expectedRegularResult) {
 		t.Errorf("ArrayZip failed for regular input: expected %v, got %v", expectedRegularResult, result)
 	}
 
 	// 边界条件测试用例：空数组
 	emptyInput := [][]int{}
 	expectedEmptyResult := [][]int{}
-	if result := ArrayZip(emptyInput...); !reflect.DeepEqual(result, expectedEmptyResult) {
+	if result := array.ArrayZip(emptyInput...); !reflect.DeepEqual(result, expectedEmptyResult) {
 		t.Errorf("ArrayZip did not handle empty input correctly, expected %v, got %v", expectedEmptyResult, result)
 	}
 
 	// 边界条件测试用例：数组中只有一个元素
 	singleElementInput := [][]int{{42}}
 	expectedSingleElementResult := [][]int{{42}}
-	if result := ArrayZip(singleElementInput...); !reflect.DeepEqual(result, expectedSingleElementResult) {
+	if result := array.ArrayZip(singleElementInput...); !reflect.DeepEqual(result, expectedSingleElementResult) {
 		t.Errorf("ArrayZip did not handle single element input correctly, expected %v, got %v", expectedSingleElementResult, result)
 	}
 
 	// 边界条件测试用例：数组中元素数量不一致
 	unevenLengthsInput := [][]int{{1, 2}, {3, 4}, {5, 6}}
-	if result := ArrayZip(ArrayZip(unevenLengthsInput...)...); !reflect.DeepEqual(result, unevenLengthsInput) {
+	if result := array.ArrayZip(array.ArrayZip(unevenLengthsInput...)...); !reflect.DeepEqual(result, unevenLengthsInput) {
 		t.Errorf("ArrayZip did not handle uneven lengths correctly, expected %v, got %v", unevenLengthsInput, result)
 	}
 }
@@ -722,28 +724,28 @@ func TestArrayCompact(t *testing.T) {
 	// 测试用例：常规去重
 	regularInput := []int{1, 2, 2, 3, 3, 3, 4}
 	expectedRegularResult := []int{1, 2, 3, 4}
-	if result := ArrayCompact(regularInput); !reflect.DeepEqual(result, expectedRegularResult) {
+	if result := array.ArrayCompact(regularInput); !reflect.DeepEqual(result, expectedRegularResult) {
 		t.Errorf("ArrayCompact failed for regular input: expected %v, got %v", expectedRegularResult, result)
 	}
 
 	// 边界条件测试用例：空数组
 	emptyInput := []int{}
 	expectedEmptyResult := []int{}
-	if result := ArrayCompact(emptyInput); !reflect.DeepEqual(result, expectedEmptyResult) {
+	if result := array.ArrayCompact(emptyInput); !reflect.DeepEqual(result, expectedEmptyResult) {
 		t.Errorf("ArrayCompact did not handle empty input correctly, expected %v, got %v", expectedEmptyResult, result)
 	}
 
 	// 边界条件测试用例：所有元素相同
 	identicalElementsInput := []int{1, 1, 1, 1}
 	expectedIdenticalElementsResult := []int{1}
-	if result := ArrayCompact(identicalElementsInput); !reflect.DeepEqual(result, expectedIdenticalElementsResult) {
+	if result := array.ArrayCompact(identicalElementsInput); !reflect.DeepEqual(result, expectedIdenticalElementsResult) {
 		t.Errorf("ArrayCompact did not handle identical elements correctly, expected %v, got %v", expectedIdenticalElementsResult, result)
 	}
 
 	// 边界条件测试用例：数组中只有一个元素
 	singleElementInput := []int{42}
 	expectedSingleElementResult := []int{42}
-	if result := ArrayCompact(singleElementInput); !reflect.DeepEqual(result, expectedSingleElementResult) {
+	if result := array.ArrayCompact(singleElementInput); !reflect.DeepEqual(result, expectedSingleElementResult) {
 		t.Errorf("ArrayCompact did not handle single element input correctly, expected %v, got %v", expectedSingleElementResult, result)
 	}
 }
@@ -751,28 +753,28 @@ func TestArrayReverse(t *testing.T) {
 	// 测试用例：常规反转
 	regularInput := []int{1, 2, 3, 4, 5}
 	expectedRegularResult := []int{5, 4, 3, 2, 1}
-	if result := ArrayReverse(regularInput); !reflect.DeepEqual(result, expectedRegularResult) {
+	if result := array.ArrayReverse(regularInput); !reflect.DeepEqual(result, expectedRegularResult) {
 		t.Errorf("ArrayReverse failed for regular input: expected %v, got %v", expectedRegularResult, result)
 	}
 
 	// 边界条件测试用例：空数组
 	emptyInput := []int{}
 	expectedEmptyResult := []int{}
-	if result := ArrayReverse(emptyInput); !reflect.DeepEqual(result, expectedEmptyResult) {
+	if result := array.ArrayReverse(emptyInput); !reflect.DeepEqual(result, expectedEmptyResult) {
 		t.Errorf("ArrayReverse did not handle empty input correctly, expected %v, got %v", expectedEmptyResult, result)
 	}
 
 	// 边界条件测试用例：只有一个元素的数组
 	singleElementInput := []int{42}
 	expectedSingleElementResult := []int{42}
-	if result := ArrayReverse(singleElementInput); !reflect.DeepEqual(result, expectedSingleElementResult) {
+	if result := array.ArrayReverse(singleElementInput); !reflect.DeepEqual(result, expectedSingleElementResult) {
 		t.Errorf("ArrayReverse did not handle single element input correctly, expected %v, got %v", expectedSingleElementResult, result)
 	}
 
 	// 边界条件测试用例：两个元素的数组
 	twoElementsInput := []int{1, 2, 3, 4}
 	expectedTwoElementsResult := []int{4, 3, 2, 1}
-	if result := ArrayReverse(twoElementsInput); !reflect.DeepEqual(result, expectedTwoElementsResult) {
+	if result := array.ArrayReverse(twoElementsInput); !reflect.DeepEqual(result, expectedTwoElementsResult) {
 		t.Errorf("ArrayReverse failed for two elements input: expected %v, got %v", expectedTwoElementsResult, result)
 	}
 }
@@ -791,21 +793,21 @@ func TestArrayFold(t *testing.T) {
 	}
 	regularInput := [][]int{{1, 2}, {3, 4}}
 	expectedRegularResult := []int{4, 10}
-	if result := ArrayFold(sumFun, accFun, regularInput...); !reflect.DeepEqual(result, expectedRegularResult) {
+	if result := array.ArrayFold(sumFun, accFun, regularInput...); !reflect.DeepEqual(result, expectedRegularResult) {
 		t.Errorf("ArrayFold failed for regular input: expected %v, got %v", expectedRegularResult, result)
 	}
 
 	// 边界条件测试用例：空数组
 	emptyInput := [][]int{}
 	expectedEmptyResult := []int{}
-	if result := ArrayFold(sumFun, accFun, emptyInput...); !reflect.DeepEqual(result, expectedEmptyResult) {
+	if result := array.ArrayFold(sumFun, accFun, emptyInput...); !reflect.DeepEqual(result, expectedEmptyResult) {
 		t.Errorf("ArrayFold did not handle empty input correctly, expected %v, got %v", expectedEmptyResult, result)
 	}
 
 	// 边界条件测试用例：数组中只有一个元素
 	singleElementInput := [][]int{{42}}
 	expectedSingleElementResult := []int{42}
-	if result := ArrayFold(sumFun, accFun, singleElementInput...); !reflect.DeepEqual(result, expectedSingleElementResult) {
+	if result := array.ArrayFold(sumFun, accFun, singleElementInput...); !reflect.DeepEqual(result, expectedSingleElementResult) {
 		t.Errorf("ArrayFold did not handle single element input correctly, expected %v, got %v", expectedSingleElementResult, result)
 	}
 
@@ -818,7 +820,7 @@ func TestArrayReduce(t *testing.T) {
 	}
 	regularInput := []int{1, 2, 3, 4}
 	expectedRegularResult := 10 // 1 + 2 + 3 + 4
-	if result := ArrayReduce(addFun, 0, regularInput); result != expectedRegularResult {
+	if result := array.ArrayReduce(addFun, 0, regularInput); result != expectedRegularResult {
 		t.Errorf("ArrayReduce failed for regular input: expected %v, got %v", expectedRegularResult, result)
 	}
 
@@ -826,14 +828,14 @@ func TestArrayReduce(t *testing.T) {
 	emptyInput := []int{}
 	// 预期结果是result的类型零值，这里假设U和T都是int，所以零值是0
 	var expectedEmptyResult int = 0
-	if result := ArrayReduce(addFun, 0, emptyInput); result != expectedEmptyResult {
+	if result := array.ArrayReduce(addFun, 0, emptyInput); result != expectedEmptyResult {
 		t.Errorf("ArrayReduce did not handle empty input correctly, expected %v, got %v", expectedEmptyResult, result)
 	}
 
 	// 边界条件测试用例：数组中只有一个元素
 	singleElementInput := []int{42}
 	expectedSingleElementResult := 42
-	if result := ArrayReduce(addFun, 0, singleElementInput); result != expectedSingleElementResult {
+	if result := array.ArrayReduce(addFun, 0, singleElementInput); result != expectedSingleElementResult {
 		t.Errorf("ArrayReduce did not handle single element input correctly, expected %v, got %v", expectedSingleElementResult, result)
 	}
 
@@ -844,7 +846,7 @@ func TestArrayReduce(t *testing.T) {
 	}
 	stringInput := []string{"Hello", " ", "World"}
 	expectedStringResult := "Hello World" // 连接字符串，忽略空格
-	if result := ArrayReduce(concatenateFun, "", stringInput); result != expectedStringResult {
+	if result := array.ArrayReduce(concatenateFun, "", stringInput); result != expectedStringResult {
 		t.Errorf("ArrayReduce failed for string input: expected %v, got %v", expectedStringResult, result)
 	}
 
@@ -852,7 +854,7 @@ func TestArrayReduce(t *testing.T) {
 		return append(x, y)
 	}
 	a := []int{1, 2, 3, 4}
-	if r := ArrayReduce(fun, []int{}, a); !equalSlices(r, a) {
+	if r := array.ArrayReduce(fun, []int{}, a); !equalSlices(r, a) {
 		t.Errorf("ArrayReduce failed for regular input: expected %v, got %v", a, r)
 	}
 }
@@ -863,35 +865,35 @@ func TestArrayIntersect(t *testing.T) {
 	slice2 := []int{3, 4, 5, 6}
 	slice3 := []int{4, 5, 6, 7}
 	expectedRegularResult := []int{4} // 1, 2, 3, 4 和 3, 4, 5, 6 和 4, 5, 6, 7 的交集是 4
-	if result := ArrayIntersect(slice1, slice2, slice3); !reflect.DeepEqual(result, expectedRegularResult) {
+	if result := array.ArrayIntersect(slice1, slice2, slice3); !reflect.DeepEqual(result, expectedRegularResult) {
 		t.Errorf("ArrayIntersect failed for regular input: expected %v, got %v", expectedRegularResult, result)
 	}
 
 	// 边界条件测试用例：空切片
 	emptySlices := [][]int{}
 	expectedEmptyResult := []int(nil)
-	if result := ArrayIntersect(emptySlices...); !reflect.DeepEqual(result, expectedEmptyResult) {
+	if result := array.ArrayIntersect(emptySlices...); !reflect.DeepEqual(result, expectedEmptyResult) {
 		t.Errorf("ArrayIntersect did not handle empty slices correctly, expected %v, got %v", expectedEmptyResult, result)
 	}
 
 	// 边界条件测试用例：单个切片
 	singleSlice := []int{1, 2, 3, 4}
 	expectedSingleSliceResult := []int{1, 2, 3, 4}
-	if result := ArrayIntersect(singleSlice); !reflect.DeepEqual(result, expectedSingleSliceResult) {
+	if result := array.ArrayIntersect(singleSlice); !reflect.DeepEqual(result, expectedSingleSliceResult) {
 		t.Errorf("ArrayIntersect did not handle single slice correctly, expected %v, got %v", expectedSingleSliceResult, result)
 	}
 
 	// 边界条件测试用例：所有切片元素都不相同
 	differentSlices := [][]int{{1, 2}, {3, 4}, {5, 6}}
 	expectedDifferentSlicesResult := []int{} // 没有交集
-	if result := ArrayIntersect(differentSlices...); !reflect.DeepEqual(result, expectedDifferentSlicesResult) {
+	if result := array.ArrayIntersect(differentSlices...); !reflect.DeepEqual(result, expectedDifferentSlicesResult) {
 		t.Errorf("ArrayIntersect failed for slices with no intersection: expected %v, got %v", expectedDifferentSlicesResult, result)
 	}
 
 	// 边界条件测试用例：包含重复元素的切片
 	duplicateSlices := [][]int{{1, 2, 2}, {2, 3, 4, 2}}
 	expectedDuplicateSlicesResult := []int{2} // 2 是重复的，但交集中只应该出现一次
-	if result := ArrayIntersect(duplicateSlices...); !reflect.DeepEqual(result, expectedDuplicateSlicesResult) {
+	if result := array.ArrayIntersect(duplicateSlices...); !reflect.DeepEqual(result, expectedDuplicateSlicesResult) {
 		t.Errorf("ArrayIntersect failed for slices with duplicates: expected %v, got %v", expectedDuplicateSlicesResult, result)
 	}
 }
@@ -931,7 +933,7 @@ func TestArrayEnumerateDense(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ArrayEnumerateDense(tt.arr); !reflect.DeepEqual(got, tt.expected) {
+			if got := array.ArrayEnumerateDense(tt.arr); !reflect.DeepEqual(got, tt.expected) {
 				t.Errorf("ArrayEnumerateDense() = %v, want %v", got, tt.expected)
 			}
 		})
@@ -956,7 +958,7 @@ func TestArraySort(t *testing.T) {
 			sortFunc := func(x, y int) bool {
 				return x < y
 			}
-			if result := ArraySort(sortFunc, tt.arr); !reflect.DeepEqual(result, tt.expected) {
+			if result := array.ArraySort(sortFunc, tt.arr); !reflect.DeepEqual(result, tt.expected) {
 				t.Errorf("ArraySort() = %v, want %v", result, tt.expected)
 			}
 		})
@@ -980,7 +982,7 @@ func TestArrayDistinct(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := ArrayDistinct(tt.arr)
+			result := array.ArrayDistinct(tt.arr)
 			if !reflect.DeepEqual(result, tt.expected) {
 				t.Errorf("ArrayDistinct() = %v, want %v", result, tt.expected)
 			}
@@ -1004,7 +1006,7 @@ func TestArrayDifference(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := ArrayDifference(tt.arr)
+			result := array.ArrayDifference(tt.arr)
 			if !reflect.DeepEqual(result, tt.expected) {
 				t.Errorf("ArrayDifference() = %v, want %v", result, tt.expected)
 			}
@@ -1025,7 +1027,7 @@ func TestArrayCount(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := ArrayCount(tt.fun, tt.arrs...)
+			result := array.ArrayCount(tt.fun, tt.arrs...)
 			if result != tt.expected {
 				t.Errorf("ArrayCount() = %v, want %v", result, tt.expected)
 			}
@@ -1054,7 +1056,7 @@ func TestArrayHasAll(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := ArrayHasAll(tt.arr, tt.elems...)
+			result := array.ArrayHasAll(tt.arr, tt.elems...)
 			if result != tt.expected {
 				t.Errorf("%s, ArrayHasAll() = %v, want %v", tt.name, result, tt.expected)
 			}
@@ -1083,7 +1085,7 @@ func TestArrayHasAny(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := ArrayHasAny(tt.arr, tt.elems...)
+			result := array.ArrayHasAny(tt.arr, tt.elems...)
 			if result != tt.expected {
 				t.Errorf("ArrayHasAny() = %v, want %v", result, tt.expected)
 			}
@@ -1093,14 +1095,14 @@ func TestArrayHasAny(t *testing.T) {
 
 func TestArrayConcat(t *testing.T) {
 	// 测试空切片输入
-	emptyResult := ArrayConcat[[]int, int]()
+	emptyResult := array.ArrayConcat[[]int, int]()
 	if len(emptyResult) != 0 {
 		t.Errorf("Expected empty slice for empty input, got %v", emptyResult)
 	}
 
 	// 测试单个切片
 	singleSlice := []int{1, 2, 3}
-	singleResult := ArrayConcat(singleSlice)
+	singleResult := array.ArrayConcat(singleSlice)
 	expectedSingle := []int{1, 2, 3}
 	if !equalSlices(singleResult, expectedSingle) {
 		t.Errorf("Expected %v for single slice input, got %v", expectedSingle, singleResult)
@@ -1108,7 +1110,7 @@ func TestArrayConcat(t *testing.T) {
 
 	// 测试多个切片
 	multipleSlices := [][]int{{1, 2}, {3, 4}, {5}}
-	multipleResult := ArrayConcat(multipleSlices...)
+	multipleResult := array.ArrayConcat(multipleSlices...)
 	expectedMultiple := []int{1, 2, 3, 4, 5}
 	if !equalSlices(multipleResult, expectedMultiple) {
 		t.Errorf("Expected %v for multiple slices input, got %v", expectedMultiple, multipleResult)
@@ -1117,7 +1119,7 @@ func TestArrayConcat(t *testing.T) {
 	// 测试不同类型元素的切片（这里仅演示概念，Go泛型要求所有元素类型一致）
 	// 请注意，在实际应用中，T 的类型在调用时就必须确定，因此以下代码仅作为示意
 	stringSlices := [][]string{{"a", "b"}, {"c"}}
-	stringResult := ArrayConcat(stringSlices...)
+	stringResult := array.ArrayConcat(stringSlices...)
 	expectedStrings := []string{"a", "b", "c"}
 	if !equalSlices(stringResult, expectedStrings) {
 		t.Errorf("Expected %v for string slices input, got %v", expectedStrings, stringResult)
@@ -1130,7 +1132,7 @@ func TestArrayHasSequence(t *testing.T) {
 	arr2 := []int{3, 4, 5}
 	expected := true
 	expectedIndex := 4
-	result, index := ArrayHasSequence(arr1, arr2)
+	result, index := array.ArrayHasSequence(arr1, arr2)
 	if result != expected || index != expectedIndex {
 		t.Errorf("Test case 1 failed. Expected (%v, %v), got (%v, %v)", expected, expectedIndex, result, index)
 	}
@@ -1140,7 +1142,7 @@ func TestArrayHasSequence(t *testing.T) {
 	arr2 = []int{7, 8, 9}
 	expected = false
 	expectedIndex = 0
-	result, index = ArrayHasSequence(arr1, arr2)
+	result, index = array.ArrayHasSequence(arr1, arr2)
 	if result != expected || index != expectedIndex {
 		t.Errorf("Test case 2 failed. Expected (%v, %v), got (%v, %v)", expected, expectedIndex, result, index)
 	}
@@ -1150,7 +1152,7 @@ func TestArrayHasSequence(t *testing.T) {
 	arr2 = []int{}
 	expected = true
 	expectedIndex = 0
-	result, index = ArrayHasSequence(arr1, arr2)
+	result, index = array.ArrayHasSequence(arr1, arr2)
 	if result != expected || index != expectedIndex {
 		t.Errorf("Test case 3 failed. Expected (%v, %v), got (%v, %v)", expected, expectedIndex, result, index)
 	}
@@ -1191,7 +1193,7 @@ func TestArraySequenceCount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// 调用待测试的函数
-			count := ArraySequenceCount(tt.arr1, tt.arr2)
+			count := array.ArraySequenceCount(tt.arr1, tt.arr2)
 
 			// 验证结果是否符合预期
 			if count != tt.expected {
@@ -1230,7 +1232,7 @@ func TestArrayExtractByIndex(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			actual := ArrayChoose(test.index, test.arr)
+			actual := array.ArrayChoose(test.index, test.arr)
 			if !reflect.DeepEqual(actual, test.expected) {
 				t.Errorf("Test %s failed. Expected %v, got %v", test.name, test.expected, actual)
 			}

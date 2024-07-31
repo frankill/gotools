@@ -1,13 +1,15 @@
-package structure
+package structure_test
 
 import (
 	"fmt"
 	"testing"
+
+	"github.com/frankill/gotools/structure"
 )
 
 func TestSetOperations(t *testing.T) {
 	// 创建一个新的集合
-	set := NewSet(1, 2, 3)
+	set := structure.NewSet(1, 2, 3)
 
 	// 测试 Has 方法
 	if !set.Has(2) {

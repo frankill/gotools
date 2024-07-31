@@ -26,6 +26,24 @@ func PairOf[T, U any](first T, second U) Pair[T, U] {
 	}
 }
 
+// PairFromMap 将一个映射转换为一个包含键值对的切片。
+// 参数:
+//   - data: 一个映射，键类型为 K，值类型为 V。
+//
+// 返回:
+//   - 一个切片，其中包含所有映射中的键值对，每个键值对表示为 Pair[K, V]。
+//
+// 函数功能:
+//   - 遍历映射 data，将每个键值对转换为 Pair[K, V] 类型，并将其添加到切片 pairs 中。
+//   - 返回包含所有键值对的切片 pairs。
+func PairFromMap[K comparable, V any](data map[K]V) []Pair[K, V] {
+	pairs := make([]Pair[K, V], 0, len(data))
+	for k, v := range data {
+		pairs = append(pairs, Pair[K, V]{First: k, Second: v})
+	}
+	return pairs
+}
+
 // PairFromArray 根据两个数组创建一个包含对应元素对的数组。
 // 参数 first 和 second 分别代表两个源数组。
 // 返回值是一个 Pair[T, V] 类型的数组，其中每个 Pair 包含来自 first 和 second 的对应元素。

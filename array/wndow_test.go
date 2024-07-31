@@ -1,8 +1,10 @@
-package array
+package array_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/frankill/gotools/array"
 )
 
 func TestRowNumber(t *testing.T) {
@@ -37,7 +39,7 @@ func TestRowNumber(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call the function under test
-			result := RowNumber(tt.by, tt.order)
+			result := array.RowNumber(tt.by, tt.order)
 
 			// Check if the result matches the expected value
 			if !reflect.DeepEqual(result, tt.expected) {
@@ -73,7 +75,7 @@ func TestMaxValue(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call the function
-			result := MaxValue(tt.by, tt.data)
+			result := array.MaxValue(tt.by, tt.data)
 
 			// Check if the result is correct
 			if !reflect.DeepEqual(result, tt.expected) {
@@ -108,7 +110,7 @@ func TestMinValue(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// 调用函数得到结果
-			got := MinValue(tt.by, tt.data)
+			got := array.MinValue(tt.by, tt.data)
 
 			// 检查结果是否正确
 			if !reflect.DeepEqual(got, tt.want) {
@@ -137,7 +139,7 @@ func TestLastValue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := LastValue(tt.by, tt.data); !reflect.DeepEqual(got, tt.want) {
+			if got := array.LastValue(tt.by, tt.data); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("LastValue() = %v, want %v", got, tt.want)
 			}
 		})
@@ -165,7 +167,7 @@ func TestFirstValue(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call the function under test
-			result := FirstValue(tt.by, tt.data)
+			result := array.FirstValue(tt.by, tt.data)
 
 			// Check if the result matches the expected value
 			if !reflect.DeepEqual(result, tt.expected) {

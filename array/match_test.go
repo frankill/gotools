@@ -1,8 +1,10 @@
-package array
+package array_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/frankill/gotools/array"
 )
 
 func TestMatchOne(t *testing.T) {
@@ -29,7 +31,7 @@ func TestMatchOne(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := MatchOne(test.lookup_value, test.lookup_array)
+		result := array.MatchOne(test.lookup_value, test.lookup_array)
 		if !reflect.DeepEqual(result, test.expected) {
 			t.Errorf("MatchOne(%v, %v) = %v, expected %v", test.lookup_value, test.lookup_array, result, test.expected)
 		}
@@ -46,7 +48,7 @@ func TestXlookup(t *testing.T) {
 	lookup_result := []int{1, 2, 3}
 
 	expected := []int{1}
-	result := Xlookup(lookup_value, lookup_array, lookup_result)
+	result := array.Xlookup(lookup_value, lookup_array, lookup_result)
 
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Expected %v, but got %v", expected, result)

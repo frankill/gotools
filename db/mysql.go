@@ -308,44 +308,46 @@ func (m *MysqlDB) QueryAny(query *query.SQLBuilder) func() ([][]string, error) {
 // 返回:
 //
 //	一个函数，接收一个通道，用于发送查询结果的每一行数据，以及可能的错误。
-func (m *MysqlDB) QueryAnyIter(query *query.SQLBuilder) func(ch chan []string) error {
+func (m *MysqlDB) QueryAnyIter(query *query.SQLBuilder) func() (chan []string, error) {
 
 	query_ := query.Build()
-	return func(ch chan []string) error {
-
+	return func() (chan []string, error) {
+		ch := make(chan []string, 3)
 		defer close(ch)
 
 		rows, err := m.Con.Query(query_)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		columns, err := rows.Columns()
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 
-		lc := len(columns)
+		go func() {
+			lc := len(columns)
+			for rows.Next() {
+				row := make([]sql.NullString, lc)
+				rowPointers := make([]any, lc)
+				for i := range row {
+					rowPointers[i] = &row[i]
+				}
 
-		for rows.Next() {
-			row := make([]sql.NullString, lc)
-			rowPointers := make([]any, lc)
-			for i := range row {
-				rowPointers[i] = &row[i]
+				err := rows.Scan(rowPointers...)
+				if err != nil {
+					log.Fatalln(err)
+				}
+
+				ch <- array.ArrayMap(func(i ...sql.NullString) string {
+					return i[0].String
+				}, row)
 			}
+		}()
 
-			err := rows.Scan(rowPointers...)
-			if err != nil {
-				log.Fatalln(err)
-			}
-
-			ch <- array.ArrayMap(func(i ...sql.NullString) string {
-				return i[0].String
-			}, row)
-		}
-		return nil
+		return ch, nil
 
 	}
 

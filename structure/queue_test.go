@@ -1,12 +1,14 @@
-package structure
+package structure_test
 
 import (
 	"testing"
+
+	"github.com/frankill/gotools/structure"
 )
 
 func TestQueueOperations(t *testing.T) {
 	// 创建一个新的队列，并进行操作测试
-	queue := NewQueue(1)
+	queue := structure.NewQueue(1)
 
 	// 测试 Push 操作
 	queue.Push(2)

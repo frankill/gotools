@@ -1,9 +1,11 @@
-package array
+package array_test
 
 import (
 	"reflect"
 	"strconv"
 	"testing"
+
+	"github.com/frankill/gotools/array"
 )
 
 func TestMapKeys(t *testing.T) {
@@ -32,7 +34,7 @@ func TestMapKeys(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 调用函数
-			gotKeys := MapKeys(tc.inputMap)
+			gotKeys := array.MapKeys(tc.inputMap)
 
 			// 检查结果是否正确
 			if len(gotKeys) != len(tc.wantKeys) {
@@ -56,7 +58,7 @@ func TestMpaValues(t *testing.T) {
 		"c": 3,
 	}
 	expected1 := []int{1, 2, 3}
-	result1 := MapValues(m1)
+	result1 := array.MapValues(m1)
 	if len(result1) != len(expected1) {
 		t.Errorf("Expected %v, got %v", expected1, result1)
 	}
@@ -68,7 +70,7 @@ func TestMpaValues(t *testing.T) {
 		3.5: true,
 	}
 	expected2 := []bool{true, false, true}
-	result2 := MapValues(m2)
+	result2 := array.MapValues(m2)
 	if len(result2) != len(expected2) {
 		t.Errorf("Expected %v, got %v", expected2, result2)
 	}
@@ -76,7 +78,7 @@ func TestMpaValues(t *testing.T) {
 	// Test case 3
 	m3 := map[complex128]string{}
 	expected3 := []string{}
-	result3 := MapValues(m3)
+	result3 := array.MapValues(m3)
 	if len(result3) != len(expected3) {
 		t.Errorf("Expected %v, got %v", expected3, result3)
 	}
@@ -111,7 +113,7 @@ func TestMapFilter(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call the function under test
-			gotMap := MapFilter(tt.filter, tt.inputMap)
+			gotMap := array.MapFilter(tt.filter, tt.inputMap)
 
 			// Check if the result is as expected
 			if len(gotMap) != len(tt.wantMap) {
@@ -186,7 +188,7 @@ func TestMapApplyValue(t *testing.T) {
 	// Run the tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			actual := MapApplyValue(tt.f, tt.m)
+			actual := array.MapApplyValue(tt.f, tt.m)
 			if len(actual) != len(tt.expected) {
 				t.Errorf("Expected length %d, but got %d", len(tt.expected), len(actual))
 			}
@@ -243,7 +245,7 @@ func TestMapApplyKey(t *testing.T) {
 	// Run the tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			actual := MapApplyKey(tt.f, tt.m)
+			actual := array.MapApplyKey(tt.f, tt.m)
 			if !mapsEqual(actual, tt.expected) {
 				t.Errorf("Expected %v, but got %v", tt.expected, actual)
 			}
@@ -289,7 +291,7 @@ func TestMapApplyBoth(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := MapApplyBoth(tt.f, tt.m); !reflect.DeepEqual(got, tt.want) {
+			if got := array.MapApplyBoth(tt.f, tt.m); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("MapApplyBoth() = %v, want %v", got, tt.want)
 			}
 		})
@@ -327,7 +329,7 @@ func TestMapFromArrayWithFun(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 调用被测试函数
-			result := MapFromArrayWithFun(tc.fun, tc.key, tc.value)
+			result := array.MapFromArrayWithFun(tc.fun, tc.key, tc.value)
 
 			// 检查结果是否符合预期
 			if len(result) != len(tc.expected) {
@@ -368,7 +370,7 @@ func TestMapPopulateSeries(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := MapPopulateSeries(tt.key, tt.value, tt.max)
+			result := array.MapPopulateSeries(tt.key, tt.value, tt.max)
 			if !reflect.DeepEqual(result, tt.expect) {
 				t.Errorf("Test %s failed. Expected %v, got %v", tt.name, tt.expect, result)
 			}
@@ -412,7 +414,7 @@ func TestMapContains(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 调用被测试函数
-			result := MapContains(tc.m, -1, tc.key...)
+			result := array.MapContains(tc.m, -1, tc.key...)
 
 			// 检查结果是否符合预期
 			if len(result) != len(tc.expected) {
@@ -430,7 +432,7 @@ func TestMapConcat(t *testing.T) {
 	// Test case 1: Test with empty maps
 	m1 := []map[int]string{}
 	expected := map[int]string{}
-	result := MapConcat(m1...)
+	result := array.MapConcat(m1...)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("TestMapConcat failed. Expected %v, got %v", expected, result)
 	}
@@ -438,7 +440,7 @@ func TestMapConcat(t *testing.T) {
 	// Test case 2: Test with single map
 	m2 := []map[int]string{{1: "a", 2: "b"}}
 	expected = map[int]string{1: "a", 2: "b"}
-	result = MapConcat(m2...)
+	result = array.MapConcat(m2...)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("TestMapConcat failed. Expected %v, got %v", expected, result)
 	}
@@ -446,7 +448,7 @@ func TestMapConcat(t *testing.T) {
 	// Test case 3: Test with multiple maps
 	m3 := []map[int]string{{1: "a"}, {2: "b"}, {1: "c"}}
 	expected = map[int]string{1: "c", 2: "b"}
-	result = MapConcat(m3...)
+	result = array.MapConcat(m3...)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("TestMapConcat failed. Expected %v, got %v", expected, result)
 	}
@@ -487,7 +489,7 @@ func TestMapExists(t *testing.T) {
 	// Run test cases
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := MapExists(tt.f, tt.m)
+			result := array.MapExists(tt.f, tt.m)
 			if result != tt.expected {
 				t.Errorf("MapExists() = %v, expected %v", result, tt.expected)
 			}
@@ -533,7 +535,7 @@ func TestMapAll(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call the function under test
-			result := MapAll(tt.f, tt.m)
+			result := array.MapAll(tt.f, tt.m)
 
 			// Check if the result matches the expected value
 			if result != tt.expected {
@@ -548,12 +550,12 @@ func TestMapToPairsArray2(t *testing.T) {
 		"two":   {3, 4},
 		"three": {5},
 	}
-	expectedPairs := Pair[[]string, []int]{
+	expectedPairs := array.Pair[[]string, []int]{
 		First:  []string{"one", "one", "two", "two", "three"},
 		Second: []int{1, 2, 3, 4, 5},
 	}
 
-	result := MapToPairsArray2(testData)
+	result := array.MapToPairsArray2(testData)
 	if !reflect.DeepEqual(result, expectedPairs) {
 		t.Errorf("MapToPairsArray2(%v) = %v; want %v", testData, result, expectedPairs)
 	}
@@ -564,12 +566,12 @@ func TestMapToPairsArray(t *testing.T) {
 		"two":   2,
 		"three": 3,
 	}
-	expectedPairs := Pair[[]string, []int]{
+	expectedPairs := array.Pair[[]string, []int]{
 		First:  []string{"one", "two", "three"},
 		Second: []int{1, 2, 3},
 	}
 
-	result := MapToPairsArray(testData)
+	result := array.MapToPairsArray(testData)
 	if !reflect.DeepEqual(result, expectedPairs) {
 		t.Errorf("MapToPairsArray(%v) = %v; want %v", testData, result, expectedPairs)
 	}
@@ -580,7 +582,7 @@ func TestMapMerge(t *testing.T) {
 	m3 := map[string]int{"d": 5}
 	expectedMerged := map[string]int{"a": 1, "b": 2, "c": 4, "d": 5}
 
-	result := MapMerge(m1, m2, m3)
+	result := array.MapMerge(m1, m2, m3)
 	if !reflect.DeepEqual(result, expectedMerged) {
 		t.Errorf("MapMerge(%v, %v) = %v; want %v", m1, m2, result, expectedMerged)
 	}
@@ -589,7 +591,7 @@ func TestMapIntersect(t *testing.T) {
 	data1 := map[string][]int{"a": {1, 2, 3}, "b": {5, 6, 7, 8, 9}, "c": {4}}
 	data2 := map[string][]int{"a": {3, 4, 5}, "b": {7}, "c": {8, 9, 10}}
 
-	result := MapIntersect(data1, data2)
+	result := array.MapIntersect(data1, data2)
 
 	expectedFirst := [][]string{{"a", "a"}, {"b", "a"}, {"c", "a"}, {"b", "b"}, {"b", "c"}}
 	expectedSecond := [][]int{{3}, {5}, {4}, {7}, {8, 9}}

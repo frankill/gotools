@@ -1,14 +1,15 @@
-package structure
+package structure_test
 
 import (
 	"testing"
 
 	"github.com/frankill/gotools/array"
+	"github.com/frankill/gotools/structure"
 )
 
 func TestListOperations(t *testing.T) {
 	// 创建一个新的跳表
-	list := NewList(0.5, Compare[int])
+	list := structure.NewList(0.5, structure.Compare[int])
 
 	// 测试 Push 方法
 

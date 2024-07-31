@@ -1,13 +1,15 @@
-package structure
+package structure_test
 
 import (
 	"fmt"
 	"testing"
+
+	"github.com/frankill/gotools/structure"
 )
 
 func TestGraphOperations(t *testing.T) {
 	// 创建一个新的图，比较函数用于判断两个数据是否相等
-	graph := NewGraph[int](func(v, d int) bool {
+	graph := structure.NewGraph[int](func(v, d int) bool {
 		return v == d
 	}, 100, func(v int) int { return v })
 
