@@ -7,6 +7,26 @@ import (
 	"github.com/frankill/gotools/array"
 )
 
+type Pipeline[T any] struct {
+	steps []func(chan T) chan T
+}
+
+func NewPipeline[T any]() *Pipeline[T] {
+	return &Pipeline[T]{}
+}
+
+func (p *Pipeline[T]) AddStep(f func(chan T) chan T) {
+	p.steps = append(p.steps, f)
+}
+
+func (p *Pipeline[T]) Compute(input chan T) chan T {
+	ch := input
+	for _, step := range p.steps {
+		ch = step(ch)
+	}
+	return ch
+}
+
 // FromArray 将输入切片 `a` 中的每个元素应用函数 `f`，并返回一个包含结果的通道。
 // 参数:
 //   - f: 一个函数，接受切片中的元素 `T` 类型，并返回 `U` 类型的结果。
