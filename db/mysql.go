@@ -313,7 +313,6 @@ func (m *MysqlDB) QueryAnyIter(query *query.SQLBuilder) func() (chan []string, e
 	query_ := query.Build()
 	return func() (chan []string, error) {
 		ch := make(chan []string, 3)
-		defer close(ch)
 
 		rows, err := m.Con.Query(query_)
 
@@ -328,6 +327,8 @@ func (m *MysqlDB) QueryAnyIter(query *query.SQLBuilder) func() (chan []string, e
 		}
 
 		go func() {
+			defer close(ch)
+
 			lc := len(columns)
 			for rows.Next() {
 				row := make([]sql.NullString, lc)
