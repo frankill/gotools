@@ -307,7 +307,7 @@ func (m *MysqlDB) QueryAny(query *query.SQLBuilder) func() ([][]string, error) {
 //
 // 返回:
 //
-//	一个函数，接收一个通道，用于发送查询结果的每一行数据，以及可能的错误。
+//	一个函数，返回一个通道，用于发送查询结果的每一行数据，以及可能的错误。
 func (m *MysqlDB) QueryAnyIter(query *query.SQLBuilder) func() (chan []string, error) {
 
 	query_ := query.Build()
