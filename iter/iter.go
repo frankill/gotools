@@ -12,24 +12,64 @@ var (
 	BufferSize = 10
 )
 
-type Pipeline[T any] struct {
-	steps []func(chan T) chan T
+// Parallel 允许并行运行多个函数，并控制同时运行的最大协程数
+type Parallel struct {
+	arr []func()       // 存储要执行的函数的切片
+	wg  sync.WaitGroup // 用于同步 goroutine 的 WaitGroup
+	num int            // 同时运行的最大协程数
+	sem chan struct{}  // 信号量，用于限制同时运行的协程数量
 }
 
+// NewParallel 创建一个新的 Parallel 实例，指定最大并发数
+func NewParallel(maxConcurrency int) *Parallel {
+	return &Parallel{
+		num: maxConcurrency,
+		sem: make(chan struct{}, maxConcurrency),
+	}
+}
+
+// Add 添加一个新的函数到并行执行列表
+func (p *Parallel) Add(f func()) {
+	p.arr = append(p.arr, f)
+}
+
+// Compute 并行执行所有添加的函数，并等待它们完成
+func (p *Parallel) Compute() {
+	for _, f := range p.arr {
+		p.sem <- struct{}{}
+		p.wg.Add(1)
+		go func(f func()) {
+			defer p.wg.Done()
+			defer func() { <-p.sem }()
+			f()
+		}(f)
+	}
+
+	p.wg.Wait()
+}
+
+// Pipeline 表示一系列处理步骤，可以对数据进行处理
+type Pipeline[T any] struct {
+	steps []func(chan T) chan T // 表示处理步骤的函数切片
+}
+
+// NewPipeline 创建一个新的 Pipeline 实例，支持任意数据类型
 func NewPipeline[T any]() *Pipeline[T] {
 	return &Pipeline[T]{}
 }
 
+// AddStep 添加一个新的处理步骤到管道中
 func (p *Pipeline[T]) AddStep(f func(chan T) chan T) {
 	p.steps = append(p.steps, f)
 }
 
+// Compute 对输入通道应用管道中的所有处理步骤，并返回输出通道
 func (p *Pipeline[T]) Compute(input chan T) chan T {
 	ch := input
 	for _, step := range p.steps {
-		ch = step(ch)
+		ch = step(ch) // 对通道应用每一个步骤
 	}
-	return ch
+	return ch // 返回最终的输出通道
 }
 
 // FromArray 将输入切片 `a` 中的每个元素应用函数 `f`，并返回一个包含结果的通道。

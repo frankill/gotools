@@ -75,11 +75,9 @@ func (m *MysqlDB) Close() {
 // 返回:
 //
 //	一个函数，接受一个 SqlInsert 类型的参数，执行数据库插入操作。
-func (m *MysqlDB) Insert(ch chan []string, stop chan struct{}) func(query query.SqlInsert) error {
+func (m *MysqlDB) Insert(ch chan []string) func(query query.SqlInsert) error {
 
 	return func(query query.SqlInsert) error {
-
-		defer close(stop)
 
 		num := 1000
 		res := make([][]any, 0, num)
