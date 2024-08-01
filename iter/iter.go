@@ -65,21 +65,20 @@ func FromArray[T any, U any](f func(x T) U, a []T) chan U {
 //   - 遍历映射 m，将每个键值对包装在一个切片中，然后将这些切片逐个发送到通道 ch 中。
 //   - 每个通道中的元素都是一个包含单个键值对的切片。
 //   - 当所有键值对都被发送到通道后，关闭通道。
-func FromMap[K comparable, V any](m map[K]V) chan []array.Pair[K, V] {
+func FromMap[K comparable, V any](m map[K]V) chan array.Pair[K, V] {
 
-	ch := make(chan []array.Pair[K, V], BufferSize)
+	ch := make(chan array.Pair[K, V], BufferSize)
 
 	go func() {
 		defer close(ch)
 		for k, v := range m {
-			ch <- []array.Pair[K, V]{
-				{
-					First:  k,
-					Second: v,
-				},
+			ch <- array.Pair[K, V]{
+				First:  k,
+				Second: v,
 			}
 		}
 	}()
+
 	return ch
 }
 
