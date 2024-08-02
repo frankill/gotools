@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/frankill/gotools/array"
 	"github.com/frankill/gotools/iter"
 )
 
@@ -21,7 +22,7 @@ func TestFormArray(t *testing.T) {
 	}
 
 	// 使用 FormArray 函数
-	resultCh := iter.FromArray(toString, input)
+	resultCh := iter.FromArray(toString, input)()
 
 	// 收集结果
 	result := iter.Collect(resultCh)
@@ -52,7 +53,7 @@ func TestFromCsv(t *testing.T) {
 	}
 
 	// 使用 FromCsv 函数读取文件
-	resultCh := iter.FromCsv("test.csv")
+	resultCh := iter.FromCsv("test.csv")()
 
 	// 期望的结果
 	expected := [][]string{
@@ -98,7 +99,7 @@ func TestToCsv(t *testing.T) {
 	close(dataCh) // 关闭通道，表示数据写入完毕
 
 	// 使用 ToCsv 函数写入文件
-	iter.ToCsv(filePath, dataCh)
+	iter.ToCsv(filePath)(dataCh)
 
 	// 读取文件内容并验证
 	file, err := os.ReadFile(filePath)
@@ -130,7 +131,7 @@ func TestMap(t *testing.T) {
 	close(inputCh) // 关闭通道，表示数据写入完毕
 
 	// 使用 Map 函数
-	resultCh := iter.Map(toString, inputCh)
+	resultCh := iter.Map(toString)(inputCh)
 
 	// 收集结果
 	result := iter.Collect(resultCh)
@@ -158,7 +159,7 @@ func TestFilter(t *testing.T) {
 	close(inputCh) // 关闭通道，表示数据写入完毕
 
 	// 使用 Filter 函数
-	resultCh := iter.Filter(isEven, inputCh)
+	resultCh := iter.Filter(isEven)(inputCh)
 
 	// 收集结果
 	result := iter.Collect(resultCh)
@@ -244,7 +245,7 @@ func TestReduce(t *testing.T) {
 			close(inputCh) // 关闭通道，表示数据写入完毕
 
 			// 使用 Reduce 函数
-			result := iter.Reduce(tt.f, tt.init, inputCh)
+			result := iter.Reduce(tt.f, tt.init)(inputCh)
 
 			// 比较结果和期望结果
 			if result != tt.expected {
@@ -302,7 +303,7 @@ func TestScanl(t *testing.T) {
 			close(inputCh) // 关闭通道，表示数据写入完毕
 
 			// 使用 Scanl 函数
-			resultCh := iter.Scanl(tt.f, tt.init, inputCh)
+			resultCh := iter.Scanl(tt.f, tt.init)(inputCh)
 
 			// 收集结果
 			result := iter.Collect(resultCh)
@@ -349,7 +350,7 @@ func TestZip(t *testing.T) {
 			close(ch2)
 
 			// 使用 Zip 函数
-			resultCh := iter.Zip(tt.f, ch1, ch2)
+			resultCh := iter.Zip(tt.f)(ch1, ch2)
 
 			// 收集结果
 			result := iter.Collect(resultCh)
@@ -411,7 +412,7 @@ func TestPartition(t *testing.T) {
 			close(inputCh) // 关闭通道，表示数据写入完毕
 
 			// 使用 Partition 函数
-			ch1, ch2 := iter.Partition(tt.f, inputCh)
+			ch1, ch2 := iter.Partition(tt.f)(inputCh)
 
 			result1 := iter.Collect(ch1)
 			result2 := iter.Collect(ch2)
@@ -470,7 +471,7 @@ func TestFind(t *testing.T) {
 			close(inputCh) // 关闭通道，表示数据写入完毕
 
 			// 使用 Find 函数
-			result := iter.Find(tt.f, inputCh)
+			result := iter.Find(tt.f)(inputCh)
 
 			// 比较结果和期望结果
 			if result != tt.expected {
@@ -568,7 +569,7 @@ func TestTakeWhile(t *testing.T) {
 			close(inputCh) // 关闭通道，表示数据写入完毕
 
 			// 使用 TakeWhile 函数
-			resultCh := iter.TakeWhile(tt.f, inputCh)
+			resultCh := iter.TakeWhile(tt.f)(inputCh)
 			result := iter.Collect(resultCh) // 收集结果
 
 			// 比较结果和期望结果
@@ -628,7 +629,7 @@ func TestDropWhile(t *testing.T) {
 			close(inputCh) // 关闭通道，表示数据写入完毕
 
 			// 使用 DropWhile 函数
-			resultCh := iter.DropWhile(tt.f, inputCh)
+			resultCh := iter.DropWhile(tt.f)(inputCh)
 			result := iter.Collect(resultCh) // 收集结果
 
 			// 比较结果和期望结果
@@ -787,4 +788,21 @@ func TestGroupBy(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPipe(t *testing.T) {
+
+	input := iter.FromArray(func(x int) []string { return []string{fmt.Sprintf("%d", x)} }, array.ArraySeq(1, 100, 1))
+
+	pipe := iter.NewPipeline[[]string]()
+
+	pipe.SetStart(input)
+
+	pipe.SetEnd(iter.ToCsv("pipe.csv"))
+
+	pipe.AddStep(iter.Map(func(x []string) []string { return append(x, "test") }))
+
+	pipe.AddStep(iter.Filter(func(x []string) bool { return len(x) == 2 }))
+
+	pipe.Compute()
 }
