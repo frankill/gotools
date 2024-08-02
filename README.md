@@ -25,10 +25,10 @@ import (
 	"fmt"
 
 	"github.com/frankill/gotools/array"
-	"github.com/frankill/gotools/iter"
 )
 
 func main() {
+	
 	data := map[string]int{"a": 1, "b": 2, "c": 3}
 	doubled := array.MapApply(func(k string, v int) int { return v * 2 }, data)
 	fmt.Println(doubled) // 输出: [2, 4, 6]
@@ -38,12 +38,31 @@ func main() {
 	combined := array.ArrayMap(func(x ...any) string {
 		return fmt.Sprintf("%d-%s", x[0].(int), x[1].(string))
 	}, arr1, arr2)
+	
 	fmt.Println(combined) // 输出: ["1-a", "2-b", "3-c"]
 
 	arr3 := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	index := array.MatchZero([]int{4, 2, 6}, arr3)
 
 	fmt.Println(index)
+ 
+
+}
+
+
+```
+
+```go
+
+package main
+
+import (
+	 
+	"github.com/frankill/gotools/iter"
+)
+
+func main() {
+ 
 
 	input := iter.FromArray(func(x int) []string { return []string{fmt.Sprintf("%d", x)} }, array.ArraySeq(1, 100, 1))
 
