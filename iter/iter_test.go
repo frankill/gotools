@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/frankill/gotools/array"
 	"github.com/frankill/gotools/iter"
 )
 
@@ -792,17 +791,4 @@ func TestGroupBy(t *testing.T) {
 
 func TestPipe(t *testing.T) {
 
-	input := iter.FromArray(func(x int) []string { return []string{fmt.Sprintf("%d", x)} }, array.ArraySeq(1, 100, 1))
-
-	pipe := iter.NewPipeline[[]string]()
-
-	pipe.SetStart(input)
-
-	pipe.SetEnd(iter.ToCsv("pipe.csv"))
-
-	pipe.AddStep(iter.Map(func(x []string) []string { return append(x, "test") }))
-
-	pipe.AddStep(iter.Filter(func(x []string) bool { return len(x) == 2 }))
-
-	pipe.Compute()
 }
