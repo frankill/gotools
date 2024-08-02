@@ -135,8 +135,17 @@ func (p *Pipeline[T]) SetEnd(f func(chan T)) {
 	p.end = f
 }
 
-// Compute 对输入通道应用管道中的所有处理步骤，并返回输出通道
-func (p *Pipeline[T]) Compute() {
+// Compute 仅仅使用管道中的处理步骤，不包含起点和终点，直接对输入通道应用
+func (p *Pipeline[T]) Compute(input chan T) chan T {
+	ch := input
+	for _, step := range p.steps {
+		ch = step(ch) // 对通道应用每一个步骤
+	}
+	return ch // 返回最终的输出通道
+}
+
+// Run 对输入通道应用管道中的所有处理步骤 ，包含起点和终点，没有返回
+func (p *Pipeline[T]) Run() {
 	if p.start == nil || p.end == nil {
 		panic("Pipeline is missing start or end function")
 	}
@@ -356,7 +365,7 @@ func Distinct[T comparable](ch chan T) chan T {
 //
 // 函数功能:
 //   - 从输入通道 ch 中读取数据，对每个数据应用函数 f。
-func Walk[T any, U any](f func(x T) U) func(ch chan T) {
+func Walk[T any](f func(x T)) func(ch chan T) {
 
 	return func(ch chan T) {
 

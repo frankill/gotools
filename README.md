@@ -63,7 +63,6 @@ import (
 
 func main() {
  
-
 	input := iter.FromArray(func(x int) []string { return []string{fmt.Sprintf("%d", x)} }, array.ArraySeq(1, 100, 1))
 
 	pipe := iter.NewPipeline[[]string]()
@@ -79,7 +78,9 @@ func main() {
 		return tmp%2 == 0
 	}))
 
-	pipe.Compute()
+	pipe.Run()
+
+	iter.Walk(func(x []string) { fmt.Println(x) })(pipe.Compute(input()))
 
 }
 
