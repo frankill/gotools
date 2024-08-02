@@ -701,7 +701,7 @@ func TestMerge(t *testing.T) {
 			}
 
 			// 使用 Merge 函数
-			resultCh := iter.Merge(channels...)
+			resultCh := iter.Union(channels...)
 			result := iter.Collect(resultCh) // 收集结果
 
 			// 比较结果和期望结果

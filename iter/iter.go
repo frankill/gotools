@@ -311,6 +311,44 @@ func Map[T any, U any](f func(x T) U) func(ch chan T) chan U {
 	}
 }
 
+// FlatMap 返回一个处理步骤函数，该函数接受一个输入通道（chan T），
+// 对通道中的每个元素应用函数 f，并将结果展平到一个新的输出通道（chan U）中。
+// 函数 f 接受类型 T 的元素并返回类型 U 的切片。函数返回的处理步骤函数创建一个新的通道
+// 用于发送展平后的结果。返回的输出通道在处理完成后会被关闭。
+func FlatMap[T any, U any](f func(x T) []U) func(ch chan T) chan U {
+	return func(ch chan T) chan U {
+		ch_ := make(chan U, BufferSize)
+		go func() {
+			defer close(ch_)
+			for v := range ch {
+				for _, value := range f(v) {
+					ch_ <- value
+				}
+			}
+		}()
+		return ch_
+	}
+}
+
+// Distinct 返回一个处理步骤函数，该函数接受一个输入通道（chan T），
+// 从中移除重复的元素，并将唯一的元素发送到一个新的输出通道（chan T）中。
+// 函数内部使用一个映射（map）来跟踪已经见过的元素，以确保每个元素只出现一次。
+// 返回的输出通道在处理完成后会被关闭。
+func Distinct[T comparable](ch chan T) chan T {
+	ch_ := make(chan T, BufferSize)
+	set := make(map[T]struct{})
+	go func() {
+		defer close(ch_)
+		for v := range ch {
+			if _, ok := set[v]; !ok {
+				set[v] = struct{}{}
+				ch_ <- v
+			}
+		}
+	}()
+	return ch_
+}
+
 // Walk 对通道中的数据进行遍历操作。
 // 参数:
 //   - f: 一个函数，接受类型为 T 的输入。
@@ -642,7 +680,7 @@ func DropWhile[T any](f func(x T) bool) func(ch chan T) chan T {
 //	Merge 函数会启动多个 goroutine，每个 goroutine 从一个输入通道中读取数据
 //	并将数据写入到返回的通道中。所有输入通道的数据都将被合并到这个返回的通道中。
 //	当所有输入通道的数据都被读取完毕后，返回的通道将会被关闭。
-func Merge[T any](chs ...chan T) chan T {
+func Union[T any](chs ...chan T) chan T {
 
 	out := make(chan T, BufferSize)
 
