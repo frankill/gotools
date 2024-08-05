@@ -1,10 +1,11 @@
-package array
+package file
 
 import (
 	"encoding/csv"
 	"fmt"
 	"os"
 
+	"github.com/frankill/gotools/array"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -35,7 +36,7 @@ func WriteToExcelStringSliceChannel(ch chan []string, stop chan struct{}, filena
 	num := 1
 
 	for strSlice := range ch {
-		stream.SetRow(fmt.Sprintf("A%d", num), ArrayToAny(strSlice))
+		stream.SetRow(fmt.Sprintf("A%d", num), array.ArrayToAny(strSlice))
 		num++
 	}
 
@@ -71,7 +72,7 @@ func WriteToExcel(data [][]string, filename string, sheet string) error {
 	num := 1
 
 	for _, row := range data {
-		stream.SetRow(fmt.Sprintf("A%d", num), ArrayToAny(row))
+		stream.SetRow(fmt.Sprintf("A%d", num), array.ArrayToAny(row))
 		num++
 	}
 

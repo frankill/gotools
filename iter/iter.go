@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/frankill/gotools/array"
+	"github.com/frankill/gotools/file"
 )
 
 var (
@@ -226,7 +227,7 @@ func FromCsv(path string) func() chan []string {
 		ch := make(chan []string, BufferSize)
 
 		go func() {
-			err := array.ReadFromCsvSliceChannel(path, ch)
+			err := file.ReadFromCsvSliceChannel(path, ch)
 			if err != nil {
 				log.Println(err)
 			}
@@ -241,7 +242,7 @@ func FromExcel(path string, sheet string) func() chan []string {
 		ch := make(chan []string, BufferSize)
 
 		go func() {
-			err := array.ReadFromExcelSliceChannel(path, sheet, ch)
+			err := file.ReadFromExcelSliceChannel(path, sheet, ch)
 			if err != nil {
 				log.Println(err)
 			}
@@ -264,7 +265,7 @@ func ToCsv(path string) func(ch chan []string) {
 		stop := make(chan struct{})
 
 		go func() {
-			err := array.WriteToCSVStringSliceChannel(ch, stop, path)
+			err := file.WriteToCSVStringSliceChannel(ch, stop, path)
 			if err != nil {
 				log.Println(err)
 			}
@@ -281,7 +282,7 @@ func ToExcel(path string, sheet string) func(ch chan []string) {
 		stop := make(chan struct{})
 
 		go func() {
-			err := array.WriteToExcelStringSliceChannel(ch, stop, path, sheet)
+			err := file.WriteToExcelStringSliceChannel(ch, stop, path, sheet)
 			if err != nil {
 				log.Println(err)
 			}
