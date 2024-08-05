@@ -9,7 +9,7 @@ import (
 )
 
 // 按行拆分文件
-func SplitFileByLines(inputFile string, linesPerFile int, deleteSource bool) error {
+func SplitFileByLines(inputFile string, linesPerFile int, addHeader, deleteSource bool) error {
 	fileInfo, err := os.Stat(inputFile)
 	if err != nil {
 		return fmt.Errorf("file %s does not exist", inputFile)
@@ -30,6 +30,11 @@ func SplitFileByLines(inputFile string, linesPerFile int, deleteSource bool) err
 	defer file.Close()
 
 	reader := bufio.NewReader(file)
+	header, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+
 	baseName := strings.TrimSuffix(inputFile, filepath.Ext(inputFile))
 	ext := filepath.Ext(inputFile)
 	chunkIndex := 1
@@ -43,6 +48,13 @@ func SplitFileByLines(inputFile string, linesPerFile int, deleteSource bool) err
 
 	writer := bufio.NewWriter(chunkFile)
 	defer writer.Flush()
+
+	if addHeader {
+		_, err = writer.WriteString(header)
+		if err != nil {
+			return err
+		}
+	}
 
 	lineCount := 0
 
@@ -74,6 +86,12 @@ func SplitFileByLines(inputFile string, linesPerFile int, deleteSource bool) err
 			defer chunkFile.Close()
 
 			writer = bufio.NewWriter(chunkFile)
+			if addHeader {
+				_, err = writer.WriteString(header)
+				if err != nil {
+					return err
+				}
+			}
 			lineCount = 0
 		}
 	}
@@ -94,7 +112,7 @@ func SplitFileByLines(inputFile string, linesPerFile int, deleteSource bool) err
 }
 
 // 按文件大小拆分文件
-func SplitFileBySize(inputFile string, chunkSizeMB int, deleteSource bool) error {
+func SplitFileBySize(inputFile string, chunkSizeMB int, addHeader, deleteSource bool) error {
 	fileInfo, err := os.Stat(inputFile)
 	if err != nil {
 		return fmt.Errorf("file %s does not exist", inputFile)
@@ -122,6 +140,11 @@ func SplitFileBySize(inputFile string, chunkSizeMB int, deleteSource bool) error
 	defer file.Close()
 
 	reader := bufio.NewReader(file)
+	header, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+
 	baseName := strings.TrimSuffix(inputFile, filepath.Ext(inputFile))
 	ext := filepath.Ext(inputFile)
 	chunkIndex := 1
@@ -135,6 +158,13 @@ func SplitFileBySize(inputFile string, chunkSizeMB int, deleteSource bool) error
 
 	writer := bufio.NewWriter(chunkFile)
 	defer writer.Flush()
+
+	if addHeader {
+		_, err = writer.WriteString(header)
+		if err != nil {
+			return err
+		}
+	}
 
 	var currentSize int64
 
@@ -161,6 +191,12 @@ func SplitFileBySize(inputFile string, chunkSizeMB int, deleteSource bool) error
 			defer chunkFile.Close()
 
 			writer = bufio.NewWriter(chunkFile)
+			if addHeader {
+				_, err = writer.WriteString(header)
+				if err != nil {
+					return err
+				}
+			}
 			currentSize = 0
 		}
 
