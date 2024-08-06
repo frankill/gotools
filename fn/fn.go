@@ -8,11 +8,11 @@ type Fn[F Fun[U, T], U, T any] struct {
 }
 
 func New[F Fun[U, T], U, T any](f F) *Fn[F, U, T] {
-	return &Fn[F, U, T]{fun: f}
+	return &Fn[F, U, T]{fun: f, param: make([]U, 0)}
 }
 
 func (f *Fn[F, U, T]) Partial(x ...U) *Fn[F, U, T] {
-	f.param = x
+	f.param = append(f.param, x...)
 	return f
 }
 
