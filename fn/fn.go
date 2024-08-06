@@ -1,21 +1,51 @@
 package fn
 
-type Fun[U, T any] func(x ...U) T
+import (
+	"reflect"
 
-type Fn[F Fun[U, T], U, T any] struct {
-	param []U
-	fun   F
+	"github.com/frankill/gotools/array"
+)
+
+// FuncType 是一个空接口，接受任意函数签名。
+type FuncType any
+
+// FuncWrapper 包装一个函数，并允许进行部分应用和调用。
+type FuncWrapper struct {
+	fun    FuncType
+	params []reflect.Value
 }
 
-func New[F Fun[U, T], U, T any](f F) *Fn[F, U, T] {
-	return &Fn[F, U, T]{fun: f, param: make([]U, 0)}
+// NewFuncWrapper 创建一个新的 FuncWrapper 实例，初始化时只设置函数，参数为空。
+func NewFuncWrapper(f FuncType) *FuncWrapper {
+	return &FuncWrapper{fun: f, params: make([]reflect.Value, 0)}
 }
 
-func (f *Fn[F, U, T]) Partial(x ...U) *Fn[F, U, T] {
-	f.param = append(f.param, x...)
-	return f
+// Partial 添加新的参数到现有参数列表，返回一个指向当前 FuncWrapper 实例的指针。
+func (fw *FuncWrapper) Partial(args ...any) *FuncWrapper {
+	for _, arg := range args {
+		fw.params = append(fw.params, reflect.ValueOf(arg))
+	}
+	return fw
 }
 
-func (f *Fn[F, U, T]) Call(x ...U) T {
-	return f.fun(append(f.param, x...)...)
+// Call 调用函数，将所有已部分应用的参数与新传入的参数一起传递给函数，返回函数的结果。
+func (fw *FuncWrapper) Call(args ...any) any {
+	// 创建参数列表
+	callArgs := append(fw.params, array.ArrayMap(func(x ...any) reflect.Value {
+		return reflect.ValueOf(x[0])
+	}, args)...)
+	// 获取函数的 reflect.Value
+	funcValue := reflect.ValueOf(fw.fun)
+
+	// 调用函数
+	result := funcValue.Call(callArgs)
+	// 返回第一个结果（如果函数有返回值）
+	if len(result) > 0 {
+		return result[0].Interface()
+	}
+	return nil
+}
+
+func (fw *FuncWrapper) Clone() *FuncWrapper {
+	return &FuncWrapper{fun: fw.fun, params: fw.params}
 }
