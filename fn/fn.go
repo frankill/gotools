@@ -1,6 +1,7 @@
 package fn
 
 import (
+	"log"
 	"reflect"
 
 	"github.com/frankill/gotools/array"
@@ -8,6 +9,24 @@ import (
 
 // FuncType 是一个空接口，接受任意函数签名。
 type FuncType any
+
+// 检查一个接口值是否是函数类型
+func isFunction(fn interface{}) bool {
+	t := reflect.TypeOf(fn)
+	return t.Kind() == reflect.Func
+}
+func getFunctionParamCount(fn interface{}) (int, bool) {
+	// 获取函数的 reflect.Type
+	funcType := reflect.TypeOf(fn)
+
+	// 检查类型是否为函数
+	if funcType.Kind() != reflect.Func {
+		return 0, false
+	}
+
+	// 返回函数参数的数量
+	return funcType.NumIn(), true
+}
 
 // FuncWrapper 包装一个函数，并允许进行部分应用和调用。
 type FuncWrapper struct {
@@ -17,6 +36,9 @@ type FuncWrapper struct {
 
 // NewFuncWrapper 创建一个新的 FuncWrapper 实例，初始化时只设置函数，参数为空。
 func NewFuncWrapper(f FuncType) *FuncWrapper {
+	if !isFunction(f) {
+		log.Fatalln("Invalid function type.")
+	}
 	return &FuncWrapper{fun: f, params: make([]reflect.Value, 0)}
 }
 
@@ -34,6 +56,14 @@ func (fw *FuncWrapper) Call(args ...any) any {
 	callArgs := append(fw.params, array.ArrayMap(func(x ...any) reflect.Value {
 		return reflect.ValueOf(x[0])
 	}, args)...)
+
+	num, ok := getFunctionParamCount(fw.fun)
+	if !ok {
+		return nil
+	}
+	if num != len(callArgs) {
+		return nil
+	}
 	// 获取函数的 reflect.Value
 	funcValue := reflect.ValueOf(fw.fun)
 
