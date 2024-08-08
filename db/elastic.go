@@ -14,19 +14,17 @@ import (
 
 // 定义一个类型，添加 Index 和 ReturnFields 字段
 type ElasticSearchClient[T any] struct {
-	Client       *elastic.Client
-	Index        string
-	Query        elastic.Query
-	ReturnFields []string // 添加 ReturnFields 字段
+	Client *elastic.Client
+	Index  string
+	Query  elastic.Query
 }
 
 // 创建 ElasticSearchClient 实例的工厂函数
-func NewElasticSearchClient[T any](client *elastic.Client, index string, query elastic.Query, returnFields []string) *ElasticSearchClient[T] {
+func NewElasticSearchClient[T any](client *elastic.Client, index string, query elastic.Query) *ElasticSearchClient[T] {
 	return &ElasticSearchClient[T]{
-		Client:       client,
-		Index:        index,
-		Query:        query,
-		ReturnFields: returnFields,
+		Client: client,
+		Index:  index,
+		Query:  query,
 	}
 }
 
@@ -59,9 +57,7 @@ func (es *ElasticSearchClient[T]) QueryAnyIter() (chan T, error) {
 
 				svc := es.Client.Scroll(es.Index).KeepAlive("30m").Size(10000).
 					Query(es.Query).
-					Slice(elastic.NewSliceQuery().Id(shardID).Max(num)).FetchSourceContext(
-					elastic.NewFetchSourceContext(true).Include(es.ReturnFields...),
-				)
+					Slice(elastic.NewSliceQuery().Id(shardID).Max(num))
 
 				defer svc.Clear(context.Background())
 
