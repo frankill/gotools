@@ -624,11 +624,14 @@ func convertToGoType(field reflect.Value, value []byte) error {
 	return nil
 }
 
-func NewMysqlQuery[T any](con string) func(q *query.SQLBuilder) (chan T, error) {
+// NewMysqlQuery creates a query function for MySQL that scans results into the specified type T.
+func NewMysqlQuery[T any](con string) func(query *query.SQLBuilder) (chan T, error) {
 
-	return func(q *query.SQLBuilder) (chan T, error) {
+	return func(query *query.SQLBuilder) (chan T, error) {
+
+		query_ := query.Build()
+
 		ch := make(chan T, 3)
-		query_ := q.Build()
 
 		db, err := sql.Open("mysql", con)
 		if err != nil {
@@ -674,13 +677,8 @@ func NewMysqlQuery[T any](con string) func(q *query.SQLBuilder) (chan T, error) 
 					if field, ok := fieldMap[column]; ok {
 						rawBytes := columnValues[i].(*sql.RawBytes)
 						if err := convertToGoType(field, *rawBytes); err != nil {
-							// Handle error but do not print it
 							fmt.Println("Convert error:", err)
-						}
-					} else {
-						// Handle missing fields by setting them to zero values
-						if field, ok := fieldMap[column]; ok {
-							field.Set(reflect.Zero(field.Type()))
+							continue
 						}
 					}
 				}
