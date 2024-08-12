@@ -313,7 +313,7 @@ func (m *MysqlDB) QueryAnyIter(query *query.SQLBuilder) func() (chan []string, e
 
 	query_ := query.Build()
 	return func() (chan []string, error) {
-		ch := make(chan []string, 3)
+		ch := make(chan []string, 100)
 
 		rows, err := m.Con.Query(query_)
 
@@ -631,7 +631,7 @@ func NewMysqlQuery[T any](con string) func(query *query.SQLBuilder) (chan T, err
 
 		query_ := query.Build()
 
-		ch := make(chan T, 3)
+		ch := make(chan T, 100)
 
 		db, err := sql.Open("mysql", con)
 		if err != nil {
@@ -654,7 +654,9 @@ func NewMysqlQuery[T any](con string) func(query *query.SQLBuilder) (chan T, err
 		}
 
 		go func() {
+
 			defer close(ch)
+			defer db.Close()
 
 			for rows.Next() {
 				if err := rows.Scan(columnValues...); err != nil {
@@ -684,6 +686,56 @@ func NewMysqlQuery[T any](con string) func(query *query.SQLBuilder) (chan T, err
 				}
 
 				ch <- *instance
+			}
+		}()
+
+		return ch, nil
+	}
+}
+
+func NewMysqlQueryStr(con string) func(query *query.SQLBuilder) (chan []string, error) {
+
+	return func(query *query.SQLBuilder) (chan []string, error) {
+
+		query_ := query.Build()
+		ch := make(chan []string, 100)
+
+		db, err := sql.Open("mysql", con)
+		if err != nil {
+			return nil, err
+		}
+
+		rows, err := db.Query(query_)
+		if err != nil {
+			return nil, err
+		}
+
+		columns, err := rows.Columns()
+
+		if err != nil {
+			return nil, err
+		}
+
+		go func() {
+			defer close(ch)
+			defer db.Close()
+
+			lc := len(columns)
+			for rows.Next() {
+				row := make([]sql.NullString, lc)
+				rowPointers := make([]any, lc)
+				for i := range row {
+					rowPointers[i] = &row[i]
+				}
+
+				err := rows.Scan(rowPointers...)
+				if err != nil {
+					log.Fatalln(err)
+				}
+
+				ch <- array.ArrayMap(func(i ...sql.NullString) string {
+					return i[0].String
+				}, row)
 			}
 		}()
 
