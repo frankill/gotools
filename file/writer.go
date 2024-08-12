@@ -161,6 +161,9 @@ func WriteToTable(data [][]string, filename string, seq string, useQuote bool) e
 }
 
 func WriteToTableSliceChannel(ch chan []string, stop chan struct{}, filename string, seq string, useQuote bool) error {
+
+	defer close(stop)
+
 	file, err := os.Create(filename)
 	if err != nil {
 		return err

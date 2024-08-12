@@ -133,6 +133,9 @@ func ReadFromTable(filename string, seq string) ([][]string, error) {
 }
 
 func ReadFromTableSliceChannel(filename string, seq string, ch chan []string) error {
+
+	defer close(ch)
+
 	file, err := os.Open(filename)
 	if err != nil {
 		return err
