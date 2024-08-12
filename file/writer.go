@@ -28,12 +28,12 @@ import (
 func WriteToExcelStringSliceChannel(ch chan []string, stop chan struct{}, filename string, sheet string) error {
 
 	defer close(stop)
-	file := excelize.NewFile()
+	f := excelize.NewFile()
 
 	if sheet == "" {
 		sheet = "Sheet1"
 	}
-	stream, err := file.NewStreamWriter(sheet)
+	stream, err := f.NewStreamWriter(sheet)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func WriteToExcelStringSliceChannel(ch chan []string, stop chan struct{}, filena
 		num++
 	}
 
-	if err := file.SaveAs(filename); err != nil {
+	if err := f.SaveAs(filename); err != nil {
 		return err
 	}
 
@@ -64,12 +64,12 @@ func WriteToExcelStringSliceChannel(ch chan []string, stop chan struct{}, filena
 //	如果在写入过程中遇到错误，则返回错误。
 func WriteToExcel(data [][]string, filename string, sheet string) error {
 
-	file := excelize.NewFile()
+	f := excelize.NewFile()
 
 	if sheet == "" {
 		sheet = "Sheet1"
 	}
-	stream, err := file.NewStreamWriter(sheet)
+	stream, err := f.NewStreamWriter(sheet)
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func WriteToExcel(data [][]string, filename string, sheet string) error {
 	}
 
 	// 保存文件
-	if err := file.SaveAs(filename); err != nil {
+	if err := f.SaveAs(filename); err != nil {
 		return err
 	}
 
@@ -102,13 +102,13 @@ func WriteToExcel(data [][]string, filename string, sheet string) error {
 func WriteToCSVStringSliceChannel(ch chan []string, stop chan struct{}, filename string) error {
 
 	defer close(stop)
-	file, err := os.Create(filename)
+	f, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer f.Close()
 
-	writer := csv.NewWriter(file)
+	writer := csv.NewWriter(f)
 	defer writer.Flush()
 
 	for row := range ch {
@@ -130,13 +130,13 @@ func WriteToCSVStringSliceChannel(ch chan []string, stop chan struct{}, filename
 //
 //	如果在写入过程中遇到错误，则返回错误。
 func WriteToCSV(data [][]string, filename string) error {
-	file, err := os.Create(filename)
+	f, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer f.Close()
 
-	writer := csv.NewWriter(file)
+	writer := csv.NewWriter(f)
 	defer writer.Flush()
 
 	for _, row := range data {
@@ -149,13 +149,13 @@ func WriteToCSV(data [][]string, filename string) error {
 }
 
 func WriteToTable(data [][]string, filename string, seq string, useQuote bool) error {
-	file, err := os.Create(filename)
+	f, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer f.Close()
 
-	writer := NewWriter(file, seq, useQuote)
+	writer := NewWriter(f, seq, useQuote)
 
 	return writer.WriteAll(data)
 }
@@ -164,16 +164,19 @@ func WriteToTableSliceChannel(ch chan []string, stop chan struct{}, filename str
 
 	defer close(stop)
 
-	file, err := os.Create(filename)
+	f, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer f.Close()
 
-	writer := NewWriter(file, seq, useQuote)
+	writer := NewWriter(f, seq, useQuote)
+
+	defer writer.Flush()
 
 	for record := range ch {
 		err := writer.Write(record)
+
 		if err != nil {
 			return err
 		}

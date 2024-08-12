@@ -27,13 +27,13 @@ func ReadFromCsvSliceChannel(filename string, ch chan []string) error {
 
 	defer close(ch)
 
-	file, err := os.Open(filename)
+	f, err := os.Open(filename)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer f.Close()
 
-	reader := csv.NewReader(file)
+	reader := csv.NewReader(f)
 
 	for {
 
@@ -58,13 +58,13 @@ func ReadFromCsvSliceChannel(filename string, ch chan []string) error {
 //	如果在读取过程中遇到错误，则返回错误。
 func ReadFromCsv(filename string) ([][]string, error) {
 
-	file, err := os.Open(filename)
+	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer f.Close()
 
-	reader := csv.NewReader(file)
+	reader := csv.NewReader(f)
 
 	return reader.ReadAll()
 }
@@ -80,11 +80,11 @@ func ReadFromCsv(filename string) ([][]string, error) {
 //	一个二维字符串数组，其中每一行代表 Excel 工作表中的一行数据。
 //	如果在读取过程中遇到错误，则返回错误。
 func ReadFromExcel(filename string, sheet string) ([][]string, error) {
-	file, err := excelize.OpenFile(filename)
+	f, err := excelize.OpenFile(filename)
 	if err != nil {
 		return nil, err
 	}
-	return file.GetRows(sheet)
+	return f.GetRows(sheet)
 }
 
 // ReadFromExcelSliceChannel 从 Excel 文件中读取指定工作表的每一行数据，并通过通道发送出去。
@@ -101,11 +101,11 @@ func ReadFromExcelSliceChannel(filename string, sheet string, ch chan []string) 
 
 	defer close(ch)
 
-	file, err := excelize.OpenFile(filename)
+	f, err := excelize.OpenFile(filename)
 	if err != nil {
 		return err
 	}
-	rows, err := file.Rows(sheet)
+	rows, err := f.Rows(sheet)
 	if err != nil {
 		return err
 	}
@@ -121,13 +121,13 @@ func ReadFromExcelSliceChannel(filename string, sheet string, ch chan []string) 
 
 func ReadFromTable(filename string, seq string) ([][]string, error) {
 
-	file, err := os.Open(filename)
+	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer f.Close()
 
-	reader := NewReader(file, seq)
+	reader := NewReader(f, seq)
 
 	return reader.ReadAll()
 }
@@ -136,16 +136,21 @@ func ReadFromTableSliceChannel(filename string, seq string, ch chan []string) er
 
 	defer close(ch)
 
-	file, err := os.Open(filename)
+	f, err := os.Open(filename)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer f.Close()
 
-	reader := NewReader(file, seq)
+	reader := NewReader(f, seq)
 
 	for {
 		record, err := reader.Read()
+
+		if err == io.EOF {
+			return nil
+		}
+
 		if err != nil {
 			return err
 		}
