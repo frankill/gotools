@@ -236,6 +236,21 @@ func FromCsv(path string) func() chan []string {
 	}
 }
 
+func FromTable(path string, seq string) func() chan []string {
+
+	return func() chan []string {
+		ch := make(chan []string, BufferSize)
+
+		go func() {
+			err := file.ReadFromTableSliceChannel(path, seq, ch)
+			if err != nil {
+				log.Println(err)
+			}
+		}()
+		return ch
+	}
+}
+
 func FromExcel(path string, sheet string) func() chan []string {
 
 	return func() chan []string {
@@ -266,6 +281,23 @@ func ToCsv(path string) func(ch chan []string) {
 
 		go func() {
 			err := file.WriteToCSVStringSliceChannel(ch, stop, path)
+			if err != nil {
+				log.Println(err)
+			}
+		}()
+
+		<-stop
+	}
+
+}
+
+func ToTable(path string, seq string, useQuote bool) func(ch chan []string) {
+
+	return func(ch chan []string) {
+		stop := make(chan struct{})
+
+		go func() {
+			err := file.WriteToTableSliceChannel(ch, stop, path, seq, useQuote)
 			if err != nil {
 				log.Println(err)
 			}

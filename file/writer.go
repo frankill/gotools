@@ -1,9 +1,14 @@
 package file
 
 import (
+	"bufio"
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
+	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/frankill/gotools/array"
 	"github.com/xuri/excelize/v2"
@@ -143,107 +148,170 @@ func WriteToCSV(data [][]string, filename string) error {
 	return nil
 }
 
-// ReadFromCsvSliceChannel 从 CSV 文件中读取数据，并将每一行数据作为字符串切片发送到通道。
-// 参数:
-//
-//	filename - CSV 文件的路径。
-//	ch - 用于接收字符串切片的通道。
-//
-// 返回:
-//
-//	如果在读取过程中遇到错误，则返回错误。
-func ReadFromCsvSliceChannel(filename string, ch chan []string) error {
-
-	defer close(ch)
-
-	file, err := os.Open(filename)
+func WriteToTable(data [][]string, filename string, seq string) error {
+	file, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	reader := csv.NewReader(file)
+	writer := NewWriter(file, seq, false)
 
-	for {
-
-		row, err := reader.Read()
-		if err != nil {
-			break
-		}
-		ch <- row
-
-	}
-	return nil
+	return writer.WriteAll(data)
 }
 
-// ReadFromCsv 一次性读取整个 CSV 文件的内容，并返回一个二维字符串数组。
-// 参数:
-//
-//	filename - CSV 文件的路径。
-//
-// 返回:
-//
-//	一个二维字符串数组，其中每一行代表 CSV 文件中的一行数据。
-//	如果在读取过程中遇到错误，则返回错误。
-func ReadFromCsv(filename string) ([][]string, error) {
-
-	file, err := os.Open(filename)
+func WriteToTableSliceChannel(ch chan []string, stop chan struct{}, filename string, seq string, useQuote bool) error {
+	file, err := os.Create(filename)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer file.Close()
 
-	reader := csv.NewReader(file)
+	writer := NewWriter(file, seq, useQuote)
 
-	return reader.ReadAll()
-}
-
-// ReadFromExcel 从 Excel 文件中读取指定工作表的所有行，并返回一个二维字符串数组。
-// 参数:
-//
-//	filename - Excel 文件的路径。
-//	sheet - 工作表的名称。
-//
-// 返回:
-//
-//	一个二维字符串数组，其中每一行代表 Excel 工作表中的一行数据。
-//	如果在读取过程中遇到错误，则返回错误。
-func ReadFromExcel(filename string, sheet string) ([][]string, error) {
-	file, err := excelize.OpenFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	return file.GetRows(sheet)
-}
-
-// ReadFromExcelSliceChannel 从 Excel 文件中读取指定工作表的每一行数据，并通过通道发送出去。
-// 参数:
-//
-//	filename - Excel 文件的路径。
-//	sheet - 工作表的名称。
-//	ch - 用于发送字符串切片的通道。
-//
-// 返回:
-//
-//	如果在读取过程中遇到错误，则返回错误。
-func ReadFromExcelSliceChannel(filename string, sheet string, ch chan []string) error {
-
-	defer close(ch)
-
-	file, err := excelize.OpenFile(filename)
-	if err != nil {
-		return err
-	}
-	rows, err := file.Rows(sheet)
-	if err != nil {
-		return err
-	}
-	for rows.Next() {
-		row, err := rows.Columns()
+	for record := range ch {
+		err := writer.Write(record)
 		if err != nil {
 			return err
 		}
-		ch <- row
 	}
 	return nil
+}
+
+type Writer struct {
+	Comma    string // Field delimiter (set to ',' by NewWriter)
+	UseCRLF  bool   // True to use \r\n as the line terminator
+	w        *bufio.Writer
+	useQuote bool
+}
+
+// NewWriter returns a new Writer that writes to w.
+func NewWriter(w io.Writer, seq string, useQuote bool) *Writer {
+	return &Writer{
+		Comma:    seq,
+		w:        bufio.NewWriter(w),
+		useQuote: useQuote,
+	}
+}
+
+func (w *Writer) Write(record []string) error {
+
+	for n, field := range record {
+		if n > 0 {
+			for _, c := range w.Comma {
+				if _, err := w.w.WriteRune(c); err != nil {
+					return err
+				}
+			}
+		}
+
+		// If we don't have to have a quoted field then just
+		// write out the field and continue to the next field.
+		if !w.fieldNeedsQuotes(field) {
+			if _, err := w.w.WriteString(field); err != nil {
+				return err
+			}
+			continue
+		}
+
+		if err := w.w.WriteByte('"'); err != nil {
+			return err
+		}
+		for len(field) > 0 {
+			// Search for special characters.
+			i := strings.IndexAny(field, "\"\r\n")
+			if i < 0 {
+				i = len(field)
+			}
+
+			// Copy verbatim everything before the special character.
+			if _, err := w.w.WriteString(field[:i]); err != nil {
+				return err
+			}
+			field = field[i:]
+
+			// Encode the special character.
+			if len(field) > 0 {
+				var err error
+				switch field[0] {
+				case '"':
+					_, err = w.w.WriteString(`""`)
+				case '\r':
+					if !w.UseCRLF {
+						err = w.w.WriteByte('\r')
+					}
+				case '\n':
+					if w.UseCRLF {
+						_, err = w.w.WriteString("\r\n")
+					} else {
+						err = w.w.WriteByte('\n')
+					}
+				}
+				field = field[1:]
+				if err != nil {
+					return err
+				}
+			}
+		}
+		if err := w.w.WriteByte('"'); err != nil {
+			return err
+		}
+	}
+	var err error
+	if w.UseCRLF {
+		_, err = w.w.WriteString("\r\n")
+	} else {
+		err = w.w.WriteByte('\n')
+	}
+	return err
+}
+
+func (w *Writer) Flush() {
+	w.w.Flush()
+}
+
+func (w *Writer) Error() error {
+	_, err := w.w.Write(nil)
+	return err
+}
+
+func (w *Writer) WriteAll(records [][]string) error {
+	for _, record := range records {
+		err := w.Write(record)
+		if err != nil {
+			return err
+		}
+	}
+	return w.w.Flush()
+}
+
+func (w *Writer) fieldNeedsQuotes(field string) bool {
+
+	if !w.useQuote {
+		return false
+	}
+
+	if field == "" {
+		return false
+	}
+
+	if field == `\.` {
+		return true
+	}
+
+	if len(w.Comma) == 1 && w.Comma[0] < utf8.RuneSelf {
+		for i := 0; i < len(field); i++ {
+			c := field[i]
+			if c == '\n' || c == '\r' || c == '"' || c == byte(w.Comma[0]) {
+				return true
+			}
+		}
+	}
+
+	if strings.ContainsAny(field, w.Comma) || strings.ContainsAny(field, "\"\r\n") {
+		return true
+	}
+
+	r1, _ := utf8.DecodeRuneInString(field)
+	return unicode.IsSpace(r1)
 }
