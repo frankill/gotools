@@ -96,14 +96,14 @@ func (es *ElasticSearchClient[U]) QueryAnyIter(index string, query elastic.Query
 	go func() {
 		defer close(stringChan)
 
-		slice, err := es.Client.IndexGetSettings(es.Index).Do(context.Background())
+		slice, err := es.Client.IndexGetSettings(index).Do(context.Background())
 
 		if err != nil {
 			log.Println(err)
 			return
 		}
 
-		num, _ := strconv.Atoi(slice[es.Index].Settings["index"].(map[string]interface{})["number_of_shards"].(string))
+		num, _ := strconv.Atoi(slice[index].Settings["index"].(map[string]interface{})["number_of_shards"].(string))
 
 		shardIDs := array.ArraySeq(0, num, 1)
 
@@ -113,8 +113,8 @@ func (es *ElasticSearchClient[U]) QueryAnyIter(index string, query elastic.Query
 			go func(shardID int) {
 				defer wg.Done()
 
-				svc := es.Client.Scroll(es.Index).KeepAlive("30m").Size(10000).
-					Query(es.Query).
+				svc := es.Client.Scroll(index).KeepAlive("30m").Size(10000).
+					Query(query).
 					Slice(elastic.NewSliceQuery().Id(shardID).Max(num))
 
 				defer svc.Clear(context.Background())
@@ -126,6 +126,7 @@ func (es *ElasticSearchClient[U]) QueryAnyIter(index string, query elastic.Query
 						break
 					}
 					if err != nil {
+						log.Println(err)
 						break
 					}
 					if res == nil {
