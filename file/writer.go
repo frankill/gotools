@@ -148,14 +148,14 @@ func WriteToCSV(data [][]string, filename string) error {
 	return nil
 }
 
-func WriteToTable(data [][]string, filename string, seq string) error {
+func WriteToTable(data [][]string, filename string, seq string, useQuote bool) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	writer := NewWriter(file, seq, false)
+	writer := NewWriter(file, seq, useQuote)
 
 	return writer.WriteAll(data)
 }
