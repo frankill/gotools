@@ -6,32 +6,90 @@ import (
 	"io"
 	"log"
 	"strconv"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/frankill/gotools/array"
 	"github.com/olivere/elastic/v7"
 )
 
+type ElasticBluk[U any] struct {
+	Index   string
+	Type    string
+	Id      string
+	Routing string
+	Source  U
+}
+
 // 定义一个类型，添加 Index 和 ReturnFields 字段
-type ElasticSearchClient[T any] struct {
+type ElasticSearchClient[U any] struct {
 	Client *elastic.Client
 	Index  string
 	Query  elastic.Query
 }
 
 // 创建 ElasticSearchClient 实例的工厂函数
-func NewElasticSearchClient[T any](client *elastic.Client, index string, query elastic.Query) *ElasticSearchClient[T] {
-	return &ElasticSearchClient[T]{
+func NewElasticSearchClient[U any](client *elastic.Client) *ElasticSearchClient[U] {
+	return &ElasticSearchClient[U]{
 		Client: client,
-		Index:  index,
-		Query:  query,
 	}
 }
 
-// 查询分片数量并执行 Query
-func (es *ElasticSearchClient[T]) QueryAnyIter() (chan T, error) {
+func (es *ElasticSearchClient[U]) BulkInsert(index string, ctype string) func(ch chan ElasticBluk[U]) error {
+	return func(ch chan ElasticBluk[U]) error {
+		bulkSize := 3000
+		bulkData := make([]elastic.BulkableRequest, 0, bulkSize)
 
-	stringChan := make(chan T, 100)
+		for data := range ch {
+			bulkData = append(bulkData, createdoc(data))
+			if len(bulkData) >= bulkSize {
+				if err := es.sendBulk(bulkData); err != nil {
+					return err
+				}
+				bulkData = bulkData[:0]
+			}
+		}
+
+		// Send remaining data
+		if len(bulkData) > 0 {
+			if err := es.sendBulk(bulkData); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+}
+
+// 假设sendBulk是一个发送批次数据到Elasticsearch的函数
+func (es *ElasticSearchClient[U]) sendBulk(data []elastic.BulkableRequest) error {
+
+	request := es.Client.Bulk()
+	_, err := request.Add(data...).Refresh("false").Do(context.TODO())
+
+	if err != nil && strings.Index(err.Error(), "429") > 0 {
+		time.Sleep(30 * time.Second)
+		es.sendBulk(data)
+		return nil
+	}
+
+	return err
+
+}
+
+func createdoc[U any](doc ElasticBluk[U]) elastic.BulkableRequest {
+
+	return elastic.NewBulkIndexRequest().Index(doc.Index).Type(doc.Type).
+		Routing(doc.Routing).Id(doc.Id).UseEasyJSON(true).
+		Doc(doc.Source)
+
+}
+
+// 查询分片数量并执行 Query
+func (es *ElasticSearchClient[U]) QueryAnyIter(index string, query elastic.Query) (chan ElasticBluk[U], error) {
+
+	stringChan := make(chan ElasticBluk[U], 100)
 
 	var wg sync.WaitGroup
 
@@ -80,14 +138,20 @@ func (es *ElasticSearchClient[T]) QueryAnyIter() (chan T, error) {
 						break
 					}
 					for _, hit := range res.Hits.Hits {
-						var results T
+						var results U
 						err := json.Unmarshal(hit.Source, &results)
 						if err != nil {
 							log.Println(err)
 							continue
 						}
 
-						stringChan <- results
+						stringChan <- ElasticBluk[U]{
+							Index:   hit.Index,
+							Type:    hit.Type,
+							Id:      hit.Id,
+							Routing: hit.Routing,
+							Source:  results,
+						}
 					}
 
 				}

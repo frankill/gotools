@@ -15,6 +15,7 @@ import (
 	"github.com/frankill/gotools/db"
 	"github.com/frankill/gotools/file"
 	"github.com/frankill/gotools/query"
+	"github.com/olivere/elastic/v7"
 )
 
 var (
@@ -337,6 +338,34 @@ func ToMysqlInset(con string, q query.SqlInsert) func(ch chan []string) {
 		}
 	}
 
+}
+
+func FromElasticSearch[T any](client *elastic.Client, index string, query elastic.Query) func() chan db.ElasticBluk[T] {
+	return func() chan db.ElasticBluk[T] {
+
+		con := db.NewElasticSearchClient[T](client)
+
+		ch, err := con.QueryAnyIter(index, query)
+
+		if err != nil {
+			log.Panicln(err)
+		}
+
+		return ch
+
+	}
+}
+
+func ToElasticSearch[T any](client *elastic.Client, index, ctype string) func(ch chan db.ElasticBluk[T]) {
+	return func(ch chan db.ElasticBluk[T]) {
+
+		con := db.NewElasticSearchClient[T](client)
+
+		err := con.BulkInsert(index, ctype)(ch)
+		if err != nil {
+			log.Panicln(err)
+		}
+	}
 }
 
 // FromArray 将输入切片 `a` 中的每个元素应用函数 `f`，并返回一个包含结果的通道。
