@@ -57,17 +57,20 @@ func main() {
 package main
 
 import (
-	 
+	"fmt"
+	"strconv"
+
+	"github.com/frankill/gotools/array"
 	"github.com/frankill/gotools/iter"
 )
 
 func main() {
- 
-	input := iter.FromArray(func(x int) []string { return []string{fmt.Sprintf("%d", x)} }, array.ArraySeq(1, 100, 1))
+
+	input := iter.FromArray(func(x int) []string { return []string{fmt.Sprintf("%d", x)} })(array.ArraySeq(1, 100, 1))
 
 	pipe := iter.NewPipeline[[]string]()
 
-	pipe.SetStart(input)
+	pipe.SetStart(func() chan []string { return input })
 
 	pipe.SetEnd(iter.ToCsv("pipe.csv"))
 
@@ -79,8 +82,6 @@ func main() {
 	}))
 
 	pipe.Run()
-
-	iter.Walk(func(x []string) { fmt.Println(x) })(pipe.Compute(input()))
 
 }
 
