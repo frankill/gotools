@@ -2,11 +2,8 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
-	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/frankill/gotools/array"
@@ -78,15 +75,15 @@ func (m *MysqlDB) Close() {
 // 返回:
 //
 //	一个函数，接受一个 SqlInsert 类型的参数，执行数据库插入操作。
-func (m *MysqlDB) Insert(ch chan []string) func(query query.SqlInsert) error {
+func (m *MysqlDB) Insert(q query.SqlInsert) func(ch chan []string) error {
 
-	return func(query query.SqlInsert) error {
+	return func(ch chan []string) error {
 
 		num := 1000
 		res := make([][]any, 0, num)
 
 		commit := func() error {
-			if err := m.do(res, query); err != nil {
+			if err := m.do(res, q); err != nil {
 				return err
 			}
 			res = res[:0]
@@ -585,160 +582,4 @@ func makeRow(columns []*sql.ColumnType) []any {
 
 	return res
 
-}
-
-// Converts raw database bytes to Go native types, handling NULL values and missing fields.
-func convertToGoType(field reflect.Value, value []byte) error {
-
-	// Convert non-NULL values
-	switch field.Kind() {
-	case reflect.String:
-		field.SetString(string(value))
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		intValue, err := strconv.ParseInt(string(value), 10, 64)
-		if err != nil {
-			return err
-		}
-		field.SetInt(intValue)
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		uintValue, err := strconv.ParseUint(string(value), 10, 64)
-		if err != nil {
-			return err
-		}
-		field.SetUint(uintValue)
-	case reflect.Float32, reflect.Float64:
-		floatValue, err := strconv.ParseFloat(string(value), 64)
-		if err != nil {
-			return err
-		}
-		field.SetFloat(floatValue)
-	case reflect.Bool:
-		boolValue, err := strconv.ParseBool(string(value))
-		if err != nil {
-			return err
-		}
-		field.SetBool(boolValue)
-	default:
-		return fmt.Errorf("unsupported type: %s", field.Kind())
-	}
-	return nil
-}
-
-// NewMysqlQuery creates a query function for MySQL that scans results into the specified type T.
-func NewMysqlQuery[T any](con string) func(query *query.SQLBuilder) (chan T, error) {
-
-	return func(query *query.SQLBuilder) (chan T, error) {
-
-		query_ := query.Build()
-
-		ch := make(chan T, 100)
-
-		db, err := sql.Open("mysql", con)
-		if err != nil {
-			return nil, err
-		}
-
-		rows, err := db.Query(query_)
-		if err != nil {
-			return nil, err
-		}
-
-		columns, err := rows.Columns()
-		if err != nil {
-			return nil, err
-		}
-
-		columnValues := make([]interface{}, len(columns))
-		for i := range columnValues {
-			columnValues[i] = new(sql.RawBytes)
-		}
-
-		go func() {
-
-			defer close(ch)
-			defer db.Close()
-
-			for rows.Next() {
-				if err := rows.Scan(columnValues...); err != nil {
-					fmt.Println("Scan error:", err)
-					continue
-				}
-
-				instance := new(T)
-				v := reflect.ValueOf(instance).Elem()
-				fieldMap := make(map[string]reflect.Value)
-				t := reflect.TypeOf(instance).Elem()
-				for i := 0; i < t.NumField(); i++ {
-					field := t.Field(i)
-					if tag, ok := field.Tag.Lookup("sql"); ok {
-						fieldMap[tag] = v.Field(i)
-					}
-				}
-
-				for i, column := range columns {
-					if field, ok := fieldMap[column]; ok {
-						rawBytes := columnValues[i].(*sql.RawBytes)
-						if err := convertToGoType(field, *rawBytes); err != nil {
-							fmt.Println("Convert error:", err)
-							continue
-						}
-					}
-				}
-
-				ch <- *instance
-			}
-		}()
-
-		return ch, nil
-	}
-}
-
-func NewMysqlQueryStr(con string) func(query *query.SQLBuilder) (chan []string, error) {
-
-	return func(query *query.SQLBuilder) (chan []string, error) {
-
-		query_ := query.Build()
-		ch := make(chan []string, 100)
-
-		db, err := sql.Open("mysql", con)
-		if err != nil {
-			return nil, err
-		}
-
-		rows, err := db.Query(query_)
-		if err != nil {
-			return nil, err
-		}
-
-		columns, err := rows.Columns()
-
-		if err != nil {
-			return nil, err
-		}
-
-		go func() {
-			defer close(ch)
-			defer db.Close()
-
-			lc := len(columns)
-			for rows.Next() {
-				row := make([]sql.NullString, lc)
-				rowPointers := make([]any, lc)
-				for i := range row {
-					rowPointers[i] = &row[i]
-				}
-
-				err := rows.Scan(rowPointers...)
-				if err != nil {
-					log.Fatalln(err)
-				}
-
-				ch <- array.ArrayMap(func(i ...sql.NullString) string {
-					return i[0].String
-				}, row)
-			}
-		}()
-
-		return ch, nil
-	}
 }

@@ -2,13 +2,19 @@ package iter
 
 import (
 	"cmp"
+	"database/sql"
+	"fmt"
 	"log"
 	"math/rand/v2"
+	"reflect"
+	"strconv"
 	"sync"
 	"time"
 
 	"github.com/frankill/gotools/array"
+	"github.com/frankill/gotools/db"
 	"github.com/frankill/gotools/file"
+	"github.com/frankill/gotools/query"
 )
 
 var (
@@ -159,6 +165,178 @@ func (p *Pipeline[T]) Run() {
 	}
 
 	p.end(output) // 处理最终的输出通道
+}
+
+// NewMysqlQuery creates a query function for MySQL that scans results into the specified type T.
+func FromMysqlQuery[T any](con string) func(query *query.SQLBuilder) chan T {
+
+	return func(query *query.SQLBuilder) chan T {
+
+		query_ := query.Build()
+
+		ch := make(chan T, 100)
+
+		db, err := sql.Open("mysql", con)
+		if err != nil {
+			log.Panicln(err)
+		}
+
+		rows, err := db.Query(query_)
+		if err != nil {
+			log.Panicln(err)
+		}
+
+		columns, err := rows.Columns()
+		if err != nil {
+			log.Panicln(err)
+		}
+
+		columnValues := make([]interface{}, len(columns))
+		for i := range columnValues {
+			columnValues[i] = new(sql.RawBytes)
+		}
+
+		go func() {
+
+			defer close(ch)
+			defer db.Close()
+
+			for rows.Next() {
+				if err := rows.Scan(columnValues...); err != nil {
+					fmt.Println("Scan error:", err)
+					continue
+				}
+
+				instance := new(T)
+				v := reflect.ValueOf(instance).Elem()
+				fieldMap := make(map[string]reflect.Value)
+				t := reflect.TypeOf(instance).Elem()
+				for i := 0; i < t.NumField(); i++ {
+					field := t.Field(i)
+					if tag, ok := field.Tag.Lookup("sql"); ok {
+						fieldMap[tag] = v.Field(i)
+					}
+				}
+
+				for i, column := range columns {
+					if field, ok := fieldMap[column]; ok {
+						rawBytes := columnValues[i].(*sql.RawBytes)
+						if err := convertToGoType(field, *rawBytes); err != nil {
+							fmt.Println("Convert error:", err)
+							continue
+						}
+					}
+				}
+
+				ch <- *instance
+			}
+		}()
+
+		return ch
+	}
+}
+
+// Converts raw database bytes to Go native types, handling NULL values and missing fields.
+func convertToGoType(field reflect.Value, value []byte) error {
+
+	// Convert non-NULL values
+	switch field.Kind() {
+	case reflect.String:
+		field.SetString(string(value))
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		intValue, err := strconv.ParseInt(string(value), 10, 64)
+		if err != nil {
+			return err
+		}
+		field.SetInt(intValue)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		uintValue, err := strconv.ParseUint(string(value), 10, 64)
+		if err != nil {
+			return err
+		}
+		field.SetUint(uintValue)
+	case reflect.Float32, reflect.Float64:
+		floatValue, err := strconv.ParseFloat(string(value), 64)
+		if err != nil {
+			return err
+		}
+		field.SetFloat(floatValue)
+	case reflect.Bool:
+		boolValue, err := strconv.ParseBool(string(value))
+		if err != nil {
+			return err
+		}
+		field.SetBool(boolValue)
+	default:
+		return fmt.Errorf("unsupported type: %s", field.Kind())
+	}
+	return nil
+}
+
+func FromMysqlStr(con string) func(query *query.SQLBuilder) chan []string {
+
+	return func(query *query.SQLBuilder) chan []string {
+
+		query_ := query.Build()
+		ch := make(chan []string, 100)
+
+		db, err := sql.Open("mysql", con)
+		if err != nil {
+			log.Panicln(err)
+		}
+
+		rows, err := db.Query(query_)
+		if err != nil {
+			log.Panicln(err)
+		}
+
+		columns, err := rows.Columns()
+
+		if err != nil {
+			log.Panicln(err)
+		}
+
+		go func() {
+			defer close(ch)
+			defer db.Close()
+
+			lc := len(columns)
+			for rows.Next() {
+				row := make([]sql.NullString, lc)
+				rowPointers := make([]any, lc)
+				for i := range row {
+					rowPointers[i] = &row[i]
+				}
+
+				err := rows.Scan(rowPointers...)
+				if err != nil {
+					log.Fatalln(err)
+				}
+
+				ch <- array.ArrayMap(func(i ...sql.NullString) string {
+					return i[0].String
+				}, row)
+			}
+		}()
+
+		return ch
+	}
+}
+
+func ToMysqlInset(con string, q query.SqlInsert) func(ch chan []string) {
+
+	return func(ch chan []string) {
+
+		con := db.NewMysqlDB(con)
+
+		defer con.Close()
+
+		err := con.Insert(q)(ch)
+		if err != nil {
+			log.Panicln(err)
+		}
+	}
+
 }
 
 // FromArray 将输入切片 `a` 中的每个元素应用函数 `f`，并返回一个包含结果的通道。
