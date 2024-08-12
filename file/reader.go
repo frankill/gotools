@@ -38,6 +38,11 @@ func ReadFromCsvSliceChannel(filename string, ch chan []string) error {
 	for {
 
 		row, err := reader.Read()
+
+		if err == io.EOF {
+			break
+		}
+
 		if err != nil {
 			break
 		}
