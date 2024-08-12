@@ -340,8 +340,8 @@ func ToMysqlInset(con string, q query.SqlInsert) func(ch chan []string) {
 
 }
 
-func FromElasticSearch[T any](client *elastic.Client, index string, query elastic.Query) func() chan db.ElasticBluk[T] {
-	return func() chan db.ElasticBluk[T] {
+func FromElasticSearch[T any](client *elastic.Client) func(index string, query elastic.Query) chan db.ElasticBluk[T] {
+	return func(index string, query elastic.Query) chan db.ElasticBluk[T] {
 
 		con := db.NewElasticSearchClient[T](client)
 
@@ -375,9 +375,9 @@ func ToElasticSearch[T any](client *elastic.Client, index, ctype string) func(ch
 //
 // 返回:
 //   - 一个 `U` 类型的通道，通道中的值是对切片 `a` 中的每个元素应用函数 `f` 的结果。
-func FromArray[T any, U any](f func(x T) U, a []T) func() chan U {
+func FromArray[T any, U any](f func(x T) U) func(a []T) chan U {
 
-	return func() chan U {
+	return func(a []T) chan U {
 		ch := make(chan U, BufferSize)
 
 		go func() {
@@ -443,9 +443,9 @@ func FromCsv(path string) func() chan []string {
 	}
 }
 
-func FromTable(path string, seq string) func() chan []string {
+func FromTable(path string) func(seq string) chan []string {
 
-	return func() chan []string {
+	return func(seq string) chan []string {
 		ch := make(chan []string, BufferSize)
 
 		go func() {
@@ -458,9 +458,9 @@ func FromTable(path string, seq string) func() chan []string {
 	}
 }
 
-func FromExcel(path string, sheet string) func() chan []string {
+func FromExcel(path string) func(sheet string) chan []string {
 
-	return func() chan []string {
+	return func(sheet string) chan []string {
 		ch := make(chan []string, BufferSize)
 
 		go func() {

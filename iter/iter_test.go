@@ -21,7 +21,7 @@ func TestFormArray(t *testing.T) {
 	}
 
 	// 使用 FormArray 函数
-	resultCh := iter.FromArray(toString, input)()
+	resultCh := iter.FromArray(toString)(input)
 
 	// 收集结果
 	result := iter.Collect(resultCh)
