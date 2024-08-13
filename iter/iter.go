@@ -481,13 +481,13 @@ func FromExcel(path string) func(sheet string) chan []string {
 // 函数功能:
 //   - 从通道中读取数据，并将数据写入指定的 CSV 文件。
 //   - 使用一个 goroutine 执行写入操作，并通过 stop 通道同步写入完成。
-func ToCsv(path string) func(ch chan []string) {
+func ToCsv(path string, header ...string) func(ch chan []string) {
 
 	return func(ch chan []string) {
 		stop := make(chan struct{})
 
 		go func() {
-			err := file.WriteToCSVStringSliceChannel(ch, stop, path)
+			err := file.WriteToCSVStringSliceChannel(ch, stop, path, header)
 			if err != nil {
 				log.Println(err)
 			}
@@ -498,13 +498,13 @@ func ToCsv(path string) func(ch chan []string) {
 
 }
 
-func ToTable(path string, seq string, useQuote bool) func(ch chan []string) {
+func ToTable(path string, seq string, useQuote bool, header ...string) func(ch chan []string) {
 
 	return func(ch chan []string) {
 		stop := make(chan struct{})
 
 		go func() {
-			err := file.WriteToTableSliceChannel(ch, stop, path, seq, useQuote)
+			err := file.WriteToTableSliceChannel(ch, stop, path, seq, useQuote, header)
 			if err != nil {
 				log.Println(err)
 			}

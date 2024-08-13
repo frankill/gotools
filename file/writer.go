@@ -99,7 +99,7 @@ func WriteToExcel(data [][]string, filename string, sheet string) error {
 // 返回:
 //
 //	如果在写入过程中遇到错误，则返回错误。
-func WriteToCSVStringSliceChannel(ch chan []string, stop chan struct{}, filename string) error {
+func WriteToCSVStringSliceChannel(ch chan []string, stop chan struct{}, filename string, header []string) error {
 
 	defer close(stop)
 	f, err := os.Create(filename)
@@ -110,6 +110,12 @@ func WriteToCSVStringSliceChannel(ch chan []string, stop chan struct{}, filename
 
 	writer := csv.NewWriter(f)
 	defer writer.Flush()
+
+	if len(header) > 0 {
+		if err := writer.Write(header); err != nil {
+			return err
+		}
+	}
 
 	for row := range ch {
 		if err := writer.Write(row); err != nil {
@@ -160,7 +166,7 @@ func WriteToTable(data [][]string, filename string, seq string, useQuote bool) e
 	return writer.WriteAll(data)
 }
 
-func WriteToTableSliceChannel(ch chan []string, stop chan struct{}, filename string, seq string, useQuote bool) error {
+func WriteToTableSliceChannel(ch chan []string, stop chan struct{}, filename string, seq string, useQuote bool, header []string) error {
 
 	defer close(stop)
 
@@ -173,6 +179,12 @@ func WriteToTableSliceChannel(ch chan []string, stop chan struct{}, filename str
 	writer := NewWriter(f, seq, useQuote)
 
 	defer writer.Flush()
+
+	if len(header) > 0 {
+		if err := writer.Write(header); err != nil {
+			return err
+		}
+	}
 
 	for record := range ch {
 		err := writer.Write(record)
