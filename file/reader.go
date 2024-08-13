@@ -23,7 +23,7 @@ import (
 // 返回:
 //
 //	如果在读取过程中遇到错误，则返回错误。
-func ReadFromCsvSliceChannel(filename string, ch chan []string) error {
+func ReadFromCsvSliceChannel(filename string, header bool, ch chan []string) error {
 
 	defer close(ch)
 
@@ -34,6 +34,18 @@ func ReadFromCsvSliceChannel(filename string, ch chan []string) error {
 	defer f.Close()
 
 	reader := csv.NewReader(f)
+
+	if header {
+		_, err := reader.Read()
+
+		if err == io.EOF {
+			return nil
+		}
+
+		if err != nil {
+			return err
+		}
+	}
 
 	for {
 
@@ -61,7 +73,7 @@ func ReadFromCsvSliceChannel(filename string, ch chan []string) error {
 //
 //	一个二维字符串数组，其中每一行代表 CSV 文件中的一行数据。
 //	如果在读取过程中遇到错误，则返回错误。
-func ReadFromCsv(filename string) ([][]string, error) {
+func ReadFromCsv(filename string, header bool) ([][]string, error) {
 
 	f, err := os.Open(filename)
 	if err != nil {
@@ -70,6 +82,18 @@ func ReadFromCsv(filename string) ([][]string, error) {
 	defer f.Close()
 
 	reader := csv.NewReader(f)
+
+	if header {
+		_, err := reader.Read()
+
+		if err == io.EOF {
+			return nil, nil
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	return reader.ReadAll()
 }
@@ -84,11 +108,24 @@ func ReadFromCsv(filename string) ([][]string, error) {
 //
 //	一个二维字符串数组，其中每一行代表 Excel 工作表中的一行数据。
 //	如果在读取过程中遇到错误，则返回错误。
-func ReadFromExcel(filename string, sheet string) ([][]string, error) {
+func ReadFromExcel(filename string, sheet string, header bool) ([][]string, error) {
 	f, err := excelize.OpenFile(filename)
 	if err != nil {
 		return nil, err
 	}
+
+	if sheet == "" {
+		sheet = "Sheet1"
+	}
+
+	if header {
+		rows, err := f.GetRows(sheet)
+		if err != nil {
+			return nil, err
+		}
+		return rows[1:], nil
+	}
+
 	return f.GetRows(sheet)
 }
 
@@ -102,7 +139,7 @@ func ReadFromExcel(filename string, sheet string) ([][]string, error) {
 // 返回:
 //
 //	如果在读取过程中遇到错误，则返回错误。
-func ReadFromExcelSliceChannel(filename string, sheet string, ch chan []string) error {
+func ReadFromExcelSliceChannel(filename string, sheet string, header bool, ch chan []string) error {
 
 	defer close(ch)
 
@@ -110,9 +147,18 @@ func ReadFromExcelSliceChannel(filename string, sheet string, ch chan []string) 
 	if err != nil {
 		return err
 	}
+
+	if sheet == "" {
+		sheet = "Sheet1"
+	}
+
 	rows, err := f.Rows(sheet)
 	if err != nil {
 		return err
+	}
+
+	if header {
+		rows.Next()
 	}
 	for rows.Next() {
 		row, err := rows.Columns()
@@ -124,7 +170,7 @@ func ReadFromExcelSliceChannel(filename string, sheet string, ch chan []string) 
 	return nil
 }
 
-func ReadFromTable(filename string, seq string) ([][]string, error) {
+func ReadFromTable(filename string, seq string, header bool) ([][]string, error) {
 
 	f, err := os.Open(filename)
 	if err != nil {
@@ -134,10 +180,21 @@ func ReadFromTable(filename string, seq string) ([][]string, error) {
 
 	reader := NewReader(f, seq)
 
+	if header {
+		_, err := reader.Read()
+
+		if err == io.EOF {
+			return nil, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return reader.ReadAll()
 }
 
-func ReadFromTableSliceChannel(filename string, seq string, ch chan []string) error {
+func ReadFromTableSliceChannel(filename string, seq string, header bool, ch chan []string) error {
 
 	defer close(ch)
 
@@ -148,6 +205,17 @@ func ReadFromTableSliceChannel(filename string, seq string, ch chan []string) er
 	defer f.Close()
 
 	reader := NewReader(f, seq)
+
+	if header {
+		_, err := reader.Read()
+
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+	}
 
 	for {
 		record, err := reader.Read()

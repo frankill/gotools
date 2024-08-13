@@ -428,13 +428,13 @@ func FromMap[K comparable, V any](m map[K]V) func() chan array.Pair[K, V] {
 //
 // 返回:
 //   - 一个通道，通道中的值是读取的 CSV 文件中的每一行数据，每一行数据是一个字符串切片（[]string）。
-func FromCsv(path string) func() chan []string {
+func FromCsv(path string) func(header bool) chan []string {
 
-	return func() chan []string {
+	return func(header bool) chan []string {
 		ch := make(chan []string, BufferSize)
 
 		go func() {
-			err := file.ReadFromCsvSliceChannel(path, ch)
+			err := file.ReadFromCsvSliceChannel(path, header, ch)
 			if err != nil {
 				log.Println(err)
 			}
@@ -443,13 +443,13 @@ func FromCsv(path string) func() chan []string {
 	}
 }
 
-func FromTable(path string) func(seq string) chan []string {
+func FromTable(path string) func(header bool, seq string) chan []string {
 
-	return func(seq string) chan []string {
+	return func(header bool, seq string) chan []string {
 		ch := make(chan []string, BufferSize)
 
 		go func() {
-			err := file.ReadFromTableSliceChannel(path, seq, ch)
+			err := file.ReadFromTableSliceChannel(path, seq, header, ch)
 			if err != nil {
 				log.Println(err)
 			}
@@ -458,13 +458,13 @@ func FromTable(path string) func(seq string) chan []string {
 	}
 }
 
-func FromExcel(path string) func(sheet string) chan []string {
+func FromExcel(path string) func(sheet string, header bool) chan []string {
 
-	return func(sheet string) chan []string {
+	return func(sheet string, header bool) chan []string {
 		ch := make(chan []string, BufferSize)
 
 		go func() {
-			err := file.ReadFromExcelSliceChannel(path, sheet, ch)
+			err := file.ReadFromExcelSliceChannel(path, sheet, header, ch)
 			if err != nil {
 				log.Println(err)
 			}
@@ -515,13 +515,13 @@ func ToTable(path string, seq string, useQuote bool, header ...string) func(ch c
 
 }
 
-func ToExcel(path string, sheet string) func(ch chan []string) {
+func ToExcel(path string, sheet string, header ...string) func(ch chan []string) {
 
 	return func(ch chan []string) {
 		stop := make(chan struct{})
 
 		go func() {
-			err := file.WriteToExcelStringSliceChannel(ch, stop, path, sheet)
+			err := file.WriteToExcelStringSliceChannel(ch, stop, path, sheet, header)
 			if err != nil {
 				log.Println(err)
 			}

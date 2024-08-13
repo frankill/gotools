@@ -52,11 +52,11 @@ func TestFromCsv(t *testing.T) {
 	}
 
 	// 使用 FromCsv 函数读取文件
-	resultCh := iter.FromCsv("test.csv")()
+	resultCh := iter.FromCsv("test.csv")(true)
 
 	// 期望的结果
 	expected := [][]string{
-		{"header1", "header2", "header3"},
+
 		{"1", "2", "3"},
 		{"4", "5", "6"},
 	}

@@ -21,11 +21,12 @@ import (
 //	stop - 用于停止写入过程的信号通道。
 //	filename - 输出的 Excel 文件的路径。
 //	sheet - Excel 文件中的工作表名称，默认为 "Sheet1"。
+//	header - Excel 文件的表头，可以为空。
 //
 // 返回:
 //
 //	如果在写入过程中遇到错误，则返回错误。
-func WriteToExcelStringSliceChannel(ch chan []string, stop chan struct{}, filename string, sheet string) error {
+func WriteToExcelStringSliceChannel(ch chan []string, stop chan struct{}, filename string, sheet string, header []string) error {
 
 	defer close(stop)
 	f := excelize.NewFile()
@@ -40,6 +41,10 @@ func WriteToExcelStringSliceChannel(ch chan []string, stop chan struct{}, filena
 	defer stream.Flush()
 	num := 1
 
+	if len(header) > 0 {
+		stream.SetRow(fmt.Sprintf("A%d", num), array.ArrayToAny(header))
+		num++
+	}
 	for strSlice := range ch {
 		stream.SetRow(fmt.Sprintf("A%d", num), array.ArrayToAny(strSlice))
 		num++
@@ -62,7 +67,7 @@ func WriteToExcelStringSliceChannel(ch chan []string, stop chan struct{}, filena
 // 返回:
 //
 //	如果在写入过程中遇到错误，则返回错误。
-func WriteToExcel(data [][]string, filename string, sheet string) error {
+func WriteToExcel(data [][]string, filename string, sheet string, header []string) error {
 
 	f := excelize.NewFile()
 
@@ -75,6 +80,11 @@ func WriteToExcel(data [][]string, filename string, sheet string) error {
 	}
 	defer stream.Flush()
 	num := 1
+
+	if len(header) > 0 {
+		stream.SetRow(fmt.Sprintf("A%d", num), array.ArrayToAny(header))
+		num++
+	}
 
 	for _, row := range data {
 		stream.SetRow(fmt.Sprintf("A%d", num), array.ArrayToAny(row))
@@ -95,6 +105,7 @@ func WriteToExcel(data [][]string, filename string, sheet string) error {
 //	ch - 包含字符串切片的通道，每个切片代表一行数据。
 //	stop - 用于停止写入过程的信号通道。
 //	filename - 输出的 CSV 文件的路径。
+//	header - CSV 文件的表头，可以为空。
 //
 // 返回:
 //
@@ -131,11 +142,12 @@ func WriteToCSVStringSliceChannel(ch chan []string, stop chan struct{}, filename
 //
 //	data - 二维字符串数组，其中每一行代表 CSV 中的一行数据。
 //	filename - 输出的 CSV 文件的路径。
+//	header - CSV 文件的表头，可以为空。
 //
 // 返回:
 //
 //	如果在写入过程中遇到错误，则返回错误。
-func WriteToCSV(data [][]string, filename string) error {
+func WriteToCSV(data [][]string, filename string, header []string) error {
 	f, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -144,6 +156,12 @@ func WriteToCSV(data [][]string, filename string) error {
 
 	writer := csv.NewWriter(f)
 	defer writer.Flush()
+
+	if len(header) > 0 {
+		if err := writer.Write(header); err != nil {
+			return err
+		}
+	}
 
 	for _, row := range data {
 		if err := writer.Write(row); err != nil {
@@ -154,7 +172,7 @@ func WriteToCSV(data [][]string, filename string) error {
 	return nil
 }
 
-func WriteToTable(data [][]string, filename string, seq string, useQuote bool) error {
+func WriteToTable(data [][]string, filename string, seq string, useQuote bool, header []string) error {
 	f, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -162,6 +180,14 @@ func WriteToTable(data [][]string, filename string, seq string, useQuote bool) e
 	defer f.Close()
 
 	writer := NewWriter(f, seq, useQuote)
+
+	defer writer.Flush()
+
+	if len(header) > 0 {
+		if err := writer.Write(header); err != nil {
+			return err
+		}
+	}
 
 	return writer.WriteAll(data)
 }
