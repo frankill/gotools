@@ -661,7 +661,7 @@ func (t *TableField) SetPath(path string) *TableField {
 	return t
 }
 
-func ToTable(t TableField) func(ch chan []string) error {
+func ToTable(t *TableField) func(ch chan []string) error {
 
 	return func(ch chan []string) error {
 
@@ -751,7 +751,7 @@ func E(path string) *ExcelField {
 	}
 }
 
-func ToExcel(e ExcelField) func(ch chan []string) error {
+func ToExcel(e *ExcelField) func(ch chan []string) error {
 
 	return func(ch chan []string) error {
 
