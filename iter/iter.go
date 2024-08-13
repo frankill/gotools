@@ -631,24 +631,34 @@ func T(path string) *TableField {
 	}
 }
 
-func (t *TableField) SetHeader(header ...string) {
+func (t *TableField) SetHeader(header ...string) *TableField {
 	t.Header = header
+
+	return t
 }
 
-func (t *TableField) SetSeq(seq string) {
+func (t *TableField) SetSeq(seq string) *TableField {
 	t.Seq = seq
+
+	return t
 }
 
-func (t *TableField) SetUseQuote(useQuote bool) {
+func (t *TableField) SetUseQuote(useQuote bool) *TableField {
 	t.UseQuote = useQuote
+
+	return t
 }
 
-func (t *TableField) SetAppend(append bool) {
+func (t *TableField) SetAppend(append bool) *TableField {
 	t.Append = append
+
+	return t
 }
 
-func (t *TableField) SetPath(path string) {
+func (t *TableField) SetPath(path string) *TableField {
 	t.Path = path
+
+	return t
 }
 
 func ToTable(t TableField) func(ch chan []string) error {
@@ -704,23 +714,31 @@ type ExcelField struct {
 	Append bool
 }
 
-func (e *ExcelField) SetHeader(header ...string) {
+func (e *ExcelField) SetHeader(header ...string) *ExcelField {
 	e.Header = header
+
+	return e
 }
 
-func (e *ExcelField) SetSheet(sheet string) {
+func (e *ExcelField) SetSheet(sheet string) *ExcelField {
 
 	e.Sheet = sheet
+
+	return e
 }
 
-func (e *ExcelField) SetPath(path string) {
+func (e *ExcelField) SetPath(path string) *ExcelField {
 
 	e.Path = path
+
+	return e
 }
 
-func (e *ExcelField) SetAppend(append bool) {
+func (e *ExcelField) SetAppend(append bool) *ExcelField {
 
 	e.Append = append
+
+	return e
 }
 
 func E(path string) *ExcelField {
