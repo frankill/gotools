@@ -3,9 +3,13 @@ package iter
 import (
 	"cmp"
 	"database/sql"
+	"encoding/csv"
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"math/rand/v2"
+	"os"
 	"reflect"
 	"strconv"
 	"sync"
@@ -16,10 +20,11 @@ import (
 	"github.com/frankill/gotools/file"
 	"github.com/frankill/gotools/query"
 	"github.com/olivere/elastic/v7"
+	"github.com/xuri/excelize/v2"
 )
 
 var (
-	BufferSize = 10
+	BufferSize = 100
 )
 
 // Parallel 允许并行运行多个函数，并动态调整最大并发数
@@ -434,10 +439,43 @@ func FromCsv(path string) func(header bool) chan []string {
 		ch := make(chan []string, BufferSize)
 
 		go func() {
-			err := file.ReadFromCsvSliceChannel(path, header, ch)
+			defer close(ch)
+
+			f, err := os.Open(path)
 			if err != nil {
-				log.Println(err)
+				log.Panicln(err)
 			}
+			defer f.Close()
+
+			reader := csv.NewReader(f)
+
+			if header {
+				_, err := reader.Read()
+
+				if err == io.EOF {
+					return
+				}
+
+				if err != nil {
+					log.Panicln(err)
+				}
+			}
+
+			for {
+
+				row, err := reader.Read()
+
+				if err == io.EOF {
+					break
+				}
+
+				if err != nil {
+					break
+				}
+				ch <- row
+
+			}
+
 		}()
 		return ch
 	}
@@ -449,9 +487,38 @@ func FromTable(path string) func(header bool, seq string) chan []string {
 		ch := make(chan []string, BufferSize)
 
 		go func() {
-			err := file.ReadFromTableSliceChannel(path, seq, header, ch)
+			defer close(ch)
+
+			f, err := os.Open(path)
 			if err != nil {
-				log.Println(err)
+				log.Panicln(err)
+			}
+			defer f.Close()
+
+			reader := file.NewReader(f, seq)
+
+			if header {
+				_, err := reader.Read()
+
+				if err == io.EOF {
+					return
+				}
+				if err != nil {
+					log.Panicln(err)
+				}
+			}
+
+			for {
+				record, err := reader.Read()
+
+				if err == io.EOF {
+					return
+				}
+
+				if err != nil {
+					return
+				}
+				ch <- record
 			}
 		}()
 		return ch
@@ -464,10 +531,33 @@ func FromExcel(path string) func(sheet string, header bool) chan []string {
 		ch := make(chan []string, BufferSize)
 
 		go func() {
-			err := file.ReadFromExcelSliceChannel(path, sheet, header, ch)
+			defer close(ch)
+
+			f, err := excelize.OpenFile(path)
 			if err != nil {
-				log.Println(err)
+				log.Panicln(err)
 			}
+
+			if sheet == "" {
+				sheet = "Sheet1"
+			}
+
+			rows, err := f.Rows(sheet)
+			if err != nil {
+				log.Panicln(err)
+			}
+
+			if header {
+				rows.Next()
+			}
+			for rows.Next() {
+				row, err := rows.Columns()
+				if err != nil {
+					log.Panicln(err)
+				}
+				ch <- row
+			}
+
 		}()
 		return ch
 	}
@@ -481,53 +571,208 @@ func FromExcel(path string) func(sheet string, header bool) chan []string {
 // 函数功能:
 //   - 从通道中读取数据，并将数据写入指定的 CSV 文件。
 //   - 使用一个 goroutine 执行写入操作，并通过 stop 通道同步写入完成。
-func ToCsv(path string, header ...string) func(ch chan []string) {
+func ToCsv(path string, append bool, header ...string) func(ch chan []string) error {
 
-	return func(ch chan []string) {
-		stop := make(chan struct{})
+	return func(ch chan []string) error {
 
-		go func() {
-			err := file.WriteToCSVStringSliceChannel(ch, stop, path, header)
+		var f *os.File
+		var err error
+
+		if append {
+			f, err = os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
 			if err != nil {
-				log.Println(err)
+				return err
 			}
-		}()
+		} else {
+			f, err = os.Create(path)
+			if err != nil {
+				return err
+			}
+		}
 
-		<-stop
+		defer f.Close()
+
+		writer := csv.NewWriter(f)
+		defer writer.Flush()
+
+		if len(header) > 0 {
+			if err := writer.Write(header); err != nil {
+				return err
+			}
+		}
+
+		for row := range ch {
+			if err := writer.Write(row); err != nil {
+				return err
+			}
+		}
+
+		return nil
 	}
 
 }
 
-func ToTable(path string, seq string, useQuote bool, header ...string) func(ch chan []string) {
+type TableField struct {
+	Path     string
+	Seq      string
+	UseQuote bool
+	Header   []string
+	Append   bool
+}
 
-	return func(ch chan []string) {
-		stop := make(chan struct{})
+func T(path string) *TableField {
 
-		go func() {
-			err := file.WriteToTableSliceChannel(ch, stop, path, seq, useQuote, header)
+	return &TableField{
+		Path:     path,
+		Seq:      ",",
+		UseQuote: true,
+		Header:   []string{},
+		Append:   false,
+	}
+}
+
+func (t *TableField) SetHeader(header ...string) {
+	t.Header = header
+}
+
+func (t *TableField) SetSeq(seq string) {
+	t.Seq = seq
+}
+
+func (t *TableField) SetUseQuote(useQuote bool) {
+	t.UseQuote = useQuote
+}
+
+func (t *TableField) SetAppend(append bool) {
+	t.Append = append
+}
+
+func (t *TableField) SetPath(path string) {
+	t.Path = path
+}
+
+func ToTable(t TableField) func(ch chan []string) error {
+
+	return func(ch chan []string) error {
+
+		var f *os.File
+		var err error
+
+		if t.Append {
+			f, err = os.OpenFile(t.Path, os.O_APPEND|os.O_WRONLY, 0644)
 			if err != nil {
-				log.Println(err)
+				return err
 			}
-		}()
+		} else {
+			f, err = os.Create(t.Path)
+			if err != nil {
+				return err
+			}
+		}
+		defer f.Close()
 
-		<-stop
+		if t.Seq == "" {
+			return errors.New("seq cannot be empty")
+		}
+
+		writer := file.NewWriter(f, t.Seq, t.UseQuote)
+
+		defer writer.Flush()
+
+		if len(t.Header) > 0 {
+			if err := writer.Write(t.Header); err != nil {
+				return err
+			}
+		}
+
+		for record := range ch {
+			err := writer.Write(record)
+
+			if err != nil {
+				return err
+			}
+		}
+		return nil
 	}
 
 }
 
-func ToExcel(path string, sheet string, header ...string) func(ch chan []string) {
+type ExcelField struct {
+	Path   string
+	Sheet  string
+	Header []string
+	Append bool
+}
 
-	return func(ch chan []string) {
-		stop := make(chan struct{})
+func (e *ExcelField) SetHeader(header ...string) {
+	e.Header = header
+}
 
-		go func() {
-			err := file.WriteToExcelStringSliceChannel(ch, stop, path, sheet, header)
+func (e *ExcelField) SetSheet(sheet string) {
+
+	e.Sheet = sheet
+}
+
+func (e *ExcelField) SetPath(path string) {
+
+	e.Path = path
+}
+
+func (e *ExcelField) SetAppend(append bool) {
+
+	e.Append = append
+}
+
+func E(path string) *ExcelField {
+
+	return &ExcelField{
+		Path:   path,
+		Append: false,
+		Sheet:  "",
+		Header: []string{},
+	}
+}
+
+func ToExcel(e ExcelField) func(ch chan []string) error {
+
+	return func(ch chan []string) error {
+
+		var f *excelize.File
+		var err error
+
+		if e.Append {
+			f, err = excelize.OpenFile(e.Path)
 			if err != nil {
-				log.Println(err)
+				return err
 			}
-		}()
+		} else {
+			f = excelize.NewFile()
+		}
 
-		<-stop
+		if e.Sheet == "" {
+			e.Sheet = "Sheet1"
+		}
+		stream, err := f.NewStreamWriter(e.Sheet)
+		if err != nil {
+			return err
+		}
+		defer stream.Flush()
+		num := 1
+
+		if len(e.Header) > 0 {
+			stream.SetRow(fmt.Sprintf("A%d", num), array.ArrayToAny(e.Header))
+			num++
+		}
+		for strSlice := range ch {
+			stream.SetRow(fmt.Sprintf("A%d", num), array.ArrayToAny(strSlice))
+			num++
+		}
+
+		if err := f.SaveAs(e.Path); err != nil {
+			return err
+		}
+
+		return nil
 	}
 
 }

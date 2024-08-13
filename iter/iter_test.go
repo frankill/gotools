@@ -97,7 +97,7 @@ func TestToCsv(t *testing.T) {
 	close(dataCh) // 关闭通道，表示数据写入完毕
 
 	// 使用 ToCsv 函数写入文件
-	iter.ToCsv(filePath, "header1", "header2", "header3")(dataCh)
+	iter.ToCsv(filePath, false, "header1", "header2", "header3")(dataCh)
 
 	// 读取文件内容并验证
 	file, err := os.ReadFile(filePath)
