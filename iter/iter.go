@@ -160,7 +160,7 @@ func (p *Pipeline[T]) Compute(input chan T) chan T {
 // Run 对输入通道应用管道中的所有处理步骤 ，包含起点和终点，没有返回
 func (p *Pipeline[T]) Run() {
 	if p.start == nil || p.end == nil {
-		panic("Pipeline is missing start or end function")
+		log.Panicln("Pipeline is missing start or end function")
 	}
 
 	input := p.start() // 获取起始通道
