@@ -14,6 +14,18 @@ import (
 	"github.com/olivere/elastic/v7"
 )
 
+func EsSimple(host ...string) func(User, Pwd string) (*elastic.Client, error) {
+
+	return func(User, Pwd string) (*elastic.Client, error) {
+		return elastic.NewClient(
+			elastic.SetSniff(false),
+			elastic.SetURL(host...),
+			elastic.SetHealthcheck(false),
+			elastic.SetBasicAuth(User, Pwd),
+		)
+	}
+}
+
 type ElasticBluk[U any] struct {
 	Index   string
 	Type    string
