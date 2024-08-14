@@ -417,11 +417,17 @@ func ToExcel(e *ExcelField) func(ch chan []string) error {
 		if e.Sheet == "" {
 			e.Sheet = "Sheet1"
 		}
+
+		if _, err := f.NewSheet(e.Sheet); err != nil {
+			return err
+		}
+
 		stream, err := f.NewStreamWriter(e.Sheet)
 		if err != nil {
 			return err
 		}
 		defer stream.Flush()
+
 		num := 1
 
 		if len(e.Header) > 0 {
