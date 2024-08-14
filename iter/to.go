@@ -418,6 +418,12 @@ func ToExcel(e *ExcelField) func(ch chan []string) error {
 			e.Sheet = "Sheet1"
 		}
 
+		index, _ := f.GetSheetIndex(e.Sheet)
+
+		if index > 0 {
+			f.DeleteSheet(e.Sheet)
+		}
+
 		if _, err := f.NewSheet(e.Sheet); err != nil {
 			return err
 		}
