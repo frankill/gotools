@@ -48,6 +48,25 @@ func NewElasticSearchClient[U any](client *elastic.Client) *ElasticSearchClient[
 	}
 }
 
+func (es *ElasticSearchClient[U]) Indexs() chan string {
+
+	ch := make(chan string, 100)
+
+	go func() {
+		defer close(ch)
+		indexs, err := es.Client.IndexNames()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		for _, index := range indexs {
+			ch <- index
+		}
+	}()
+
+	return ch
+}
+
 func (es *ElasticSearchClient[U]) BulkInsert(index string, ctype string) func(ch chan ElasticBluk[U]) error {
 	return func(ch chan ElasticBluk[U]) error {
 		bulkSize := 3000
