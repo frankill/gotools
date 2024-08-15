@@ -14,6 +14,10 @@ var (
 	BufferSize = 100
 )
 
+func Identity[T any](x T) T {
+	return x
+}
+
 // Parallel 允许并行运行多个函数，并动态调整最大并发数
 type Parallel struct {
 	arr []func()       // 存储要执行的函数的切片
