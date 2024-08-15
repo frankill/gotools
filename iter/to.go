@@ -359,6 +359,7 @@ type ExcelField struct {
 	Path   string
 	Sheet  string
 	Header []string
+	Exist  bool
 	Append bool
 }
 
@@ -382,6 +383,13 @@ func (e *ExcelField) SetPath(path string) *ExcelField {
 	return e
 }
 
+func (e *ExcelField) SetExist(append bool) *ExcelField {
+
+	e.Exist = append
+
+	return e
+}
+
 func (e *ExcelField) SetAppend(append bool) *ExcelField {
 
 	e.Append = append
@@ -393,57 +401,76 @@ func E(path string) *ExcelField {
 
 	return &ExcelField{
 		Path:   path,
-		Append: false,
+		Exist:  false,
 		Sheet:  "",
 		Header: []string{},
+		Append: false,
 	}
 }
 
+func (e *ExcelField) getRow(f *excelize.File, sheet string) (int, error) {
+	rows, err := f.GetRows(sheet)
+
+	return len(rows) + 1, err
+}
 func ToExcel(e *ExcelField) func(ch chan []string) error {
 
 	return func(ch chan []string) error {
 
 		var f *excelize.File
 		var err error
+		var startRow int
 
-		if e.Append {
+		if e.Exist {
 			f, err = excelize.OpenFile(e.Path)
 			if err != nil {
 				return err
 			}
+			if e.Sheet == "" {
+				e.Sheet = "Sheet" + strconv.FormatInt(int64(f.SheetCount+1), 10)
+			}
+
 		} else {
 			f = excelize.NewFile()
+			if e.Sheet == "" {
+				e.Sheet = "Sheet1"
+			}
 		}
 
-		if e.Sheet == "" {
-			e.Sheet = "Sheet" + strconv.FormatInt(int64(f.SheetCount+1), 10)
-		}
+		startRow = 1
 
 		index, _ := f.GetSheetIndex(e.Sheet)
 
-		if index > 0 {
+		if e.Append && index >= 0 {
+			startRow, err = e.getRow(f, e.Sheet)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		if !e.Append && index >= 0 {
 			f.DeleteSheet(e.Sheet)
+			if _, err := f.NewSheet(e.Sheet); err != nil {
+				return err
+			}
 		}
 
-		if _, err := f.NewSheet(e.Sheet); err != nil {
-			return err
+		if index == -1 {
+			if _, err := f.NewSheet(e.Sheet); err != nil {
+				return err
+			}
 		}
-
-		stream, err := f.NewStreamWriter(e.Sheet)
-		if err != nil {
-			return err
-		}
-		defer stream.Flush()
-
-		num := 1
 
 		if len(e.Header) > 0 {
-			stream.SetRow(fmt.Sprintf("A%d", num), array.ArrayToAny(e.Header))
-			num++
+			data := array.ArrayToAny(e.Header)
+			f.SetSheetRow(e.Sheet, fmt.Sprintf("A%d", startRow), &data)
+			startRow++
 		}
 		for strSlice := range ch {
-			stream.SetRow(fmt.Sprintf("A%d", num), array.ArrayToAny(strSlice))
-			num++
+			data := array.ArrayToAny(strSlice)
+			f.SetSheetRow(e.Sheet, fmt.Sprintf("A%d", startRow), &data)
+			startRow++
 		}
 
 		if err := f.SaveAs(e.Path); err != nil {
