@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/frankill/gotools/array"
 	"github.com/frankill/gotools/db"
@@ -415,7 +416,7 @@ func ToExcel(e *ExcelField) func(ch chan []string) error {
 		}
 
 		if e.Sheet == "" {
-			e.Sheet = "Sheet1"
+			e.Sheet = "Sheet" + strconv.FormatInt(int64(f.SheetCount+1), 10)
 		}
 
 		index, _ := f.GetSheetIndex(e.Sheet)
