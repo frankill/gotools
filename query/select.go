@@ -3,198 +3,11 @@ package query
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 
-	"github.com/frankill/gotools/array"
 	"github.com/olivere/elastic/v7"
 )
-
-type EsQuery struct {
-	querys []elastic.Query
-	typ    string
-}
-
-func NewQuery() *EsQuery {
-	return &EsQuery{
-		typ: "",
-	}
-}
-
-func NewFilterQuery() *EsQuery {
-	return &EsQuery{
-		typ:    "filter",
-		querys: make([]elastic.Query, 0),
-	}
-}
-
-func NewMustQuery() *EsQuery {
-	return &EsQuery{
-		typ:    "must",
-		querys: make([]elastic.Query, 0),
-	}
-}
-
-func NewMustNotQuery() *EsQuery {
-	return &EsQuery{
-		typ:    "must_not",
-		querys: make([]elastic.Query, 0),
-	}
-}
-
-func NewShouldQuery() *EsQuery {
-	return &EsQuery{
-		typ:    "should",
-		querys: make([]elastic.Query, 0),
-	}
-}
-
-func (q *EsQuery) Eq(field string, value any) *EsQuery {
-	q.querys = append(q.querys, elastic.NewTermQuery(field, value))
-	return q
-}
-
-func (q *EsQuery) In(field string, values ...any) *EsQuery {
-	q.querys = append(q.querys, elastic.NewTermsQuery(field, values...))
-	return q
-}
-
-func (q *EsQuery) NotIn(field string, values ...any) *EsQuery {
-	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewTermsQuery(field, values...)))
-	return q
-}
-
-func (q *EsQuery) Gt(field string, value any) *EsQuery {
-	q.querys = append(q.querys, elastic.NewRangeQuery(field).Gt(value))
-	return q
-}
-
-func (q *EsQuery) Gte(field string, value any) *EsQuery {
-	q.querys = append(q.querys, elastic.NewRangeQuery(field).Gte(value))
-	return q
-}
-
-func (q *EsQuery) Lt(field string, value any) *EsQuery {
-	q.querys = append(q.querys, elastic.NewRangeQuery(field).Lt(value))
-	return q
-}
-
-func (q *EsQuery) Lte(field string, value any) *EsQuery {
-	q.querys = append(q.querys, elastic.NewRangeQuery(field).Lte(value))
-	return q
-}
-
-func (q *EsQuery) Neq(field string, value any) *EsQuery {
-	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewTermQuery(field, value)))
-	return q
-}
-
-func (q *EsQuery) Like(field string, value string) *EsQuery {
-	q.querys = append(q.querys, elastic.NewRegexpQuery(field, value))
-	return q
-}
-
-func (q *EsQuery) Wildcard(field string, value string) *EsQuery {
-	q.querys = append(q.querys, elastic.NewWildcardQuery(field, value))
-	return q
-}
-
-func (q *EsQuery) Prefix(field string, value string) *EsQuery {
-	q.querys = append(q.querys, elastic.NewPrefixQuery(field, value))
-	return q
-}
-
-func (q *EsQuery) Fuzzy(field string, value string) *EsQuery {
-	q.querys = append(q.querys, elastic.NewFuzzyQuery(field, value))
-	return q
-}
-
-func (q *EsQuery) NotLike(field string, value string) *EsQuery {
-	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewRegexpQuery(field, value)))
-	return q
-}
-
-func (q *EsQuery) NotPrefix(field string, value string) *EsQuery {
-	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewPrefixQuery(field, value)))
-	return q
-}
-
-func (q *EsQuery) NotWildcard(field string, value string) *EsQuery {
-	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewWildcardQuery(field, value)))
-	return q
-}
-
-func (q *EsQuery) Script(script string, params map[string]interface{}, lang string) *EsQuery {
-	scriptQuery := elastic.NewScript(script).Params(params).Lang(lang)
-	q.querys = append(q.querys, elastic.NewScriptQuery(scriptQuery))
-	return q
-}
-
-func (q *EsQuery) ScriptID(scriptID string) *EsQuery {
-	q.querys = append(q.querys, elastic.NewScriptQuery(elastic.NewScriptStored(scriptID)))
-	return q
-}
-
-func (q *EsQuery) Exists(field string) *EsQuery {
-	q.querys = append(q.querys, elastic.NewExistsQuery(field))
-	return q
-}
-
-func (q *EsQuery) NotExists(field string) *EsQuery {
-	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewExistsQuery(field)))
-	return q
-}
-
-func (q *EsQuery) Between(field string, lower, upper any) *EsQuery {
-	q.querys = append(q.querys, elastic.NewRangeQuery(field).Gte(lower).Lte(upper))
-	return q
-}
-
-func (q *EsQuery) Should(clauses *EsQuery, should int) *EsQuery {
-	q.querys = append(q.querys, elastic.NewBoolQuery().Should(clauses.querys...).MinimumNumberShouldMatch(should))
-	return q
-}
-
-func (q *EsQuery) Must(clauses *EsQuery) *EsQuery {
-	q.querys = append(q.querys, elastic.NewBoolQuery().Must(clauses.querys...))
-	return q
-}
-
-func (q *EsQuery) MustNot(clauses *EsQuery) *EsQuery {
-	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(clauses.querys...))
-	return q
-}
-
-func (q *EsQuery) Filter(clauses *EsQuery) *EsQuery {
-	q.querys = append(q.querys, elastic.NewBoolQuery().Filter(clauses.querys...))
-	return q
-}
-
-func (q *EsQuery) Where(clauses *EsQuery) *EsQuery {
-	q.querys = append(q.querys, clauses.querys...)
-	return q
-}
-
-func (q *EsQuery) Build() elastic.Query {
-
-	if q.typ == "filter" {
-		return elastic.NewBoolQuery().Filter(q.querys...)
-	} else if q.typ == "must" {
-		return elastic.NewBoolQuery().Must(q.querys...)
-	} else if q.typ == "must_not" {
-		return elastic.NewBoolQuery().MustNot(q.querys...)
-	} else if q.typ == "should" {
-		return elastic.NewBoolQuery().Should(q.querys...)
-	}
-	return nil
-}
-
-func (q *EsQuery) Source() string {
-	source, _ := q.Build().Source()
-	b, _ := json.Marshal(source)
-	return string(b)
-}
 
 func ExtractTableName(sql string) string {
 	re := regexp.MustCompile(`\bFROM\s+(\w+)`)
@@ -499,110 +312,187 @@ func (sb *SQLBuilder) Build() string {
 	return sql.String()
 }
 
-type SqlInsert interface {
-	AddValues(vals ...[]any)
-	Build() (string, []any)
-	Clear()
+type EsQuery struct {
+	querys []elastic.Query
+	typ    string
 }
 
-type MysqlInsert struct {
-	TableName     string
-	Columns       []string
-	UpdateColumns []string
-	InsertValues  [][]any
-	IsUpdate      bool
-	IsReplace     bool
-	IsIgnore      bool
-}
-
-func NewMysqlInsert(tableName string, Replace bool, ignore bool) *MysqlInsert {
-	return &MysqlInsert{
-		TableName: tableName,
-		IsReplace: Replace,
-		IsIgnore:  ignore,
+func NewQuery() *EsQuery {
+	return &EsQuery{
+		typ: "",
 	}
 }
 
-func (m *MysqlInsert) AddColumn(col ...string) *MysqlInsert {
-	m.Columns = append(m.Columns, col...)
-	return m
+func NewFilterQuery() *EsQuery {
+	return &EsQuery{
+		typ:    "filter",
+		querys: make([]elastic.Query, 0),
+	}
 }
 
-func (m *MysqlInsert) AddUpdateColumn(col ...string) *MysqlInsert {
-	if m.IsReplace {
-		log.Println("Warning: Replace insert type does not support update columns.")
-		return m
+func NewMustQuery() *EsQuery {
+	return &EsQuery{
+		typ:    "must",
+		querys: make([]elastic.Query, 0),
 	}
-
-	if m.IsIgnore {
-		log.Println("Warning: Ignore insert type does not support update columns.")
-		return m
-	}
-	m.UpdateColumns = append(m.UpdateColumns, col...)
-	m.IsUpdate = true
-
-	return m
 }
 
-func (m *MysqlInsert) AddValues(vals ...[]any) {
-	m.InsertValues = append(m.InsertValues, vals...)
+func NewMustNotQuery() *EsQuery {
+	return &EsQuery{
+		typ:    "must_not",
+		querys: make([]elastic.Query, 0),
+	}
 }
 
-func (m *MysqlInsert) AddValue(vals ...any) *MysqlInsert {
-	m.InsertValues = append(m.InsertValues, vals)
-	return m
+func NewShouldQuery() *EsQuery {
+	return &EsQuery{
+		typ:    "should",
+		querys: make([]elastic.Query, 0),
+	}
 }
 
-func (m *MysqlInsert) Build() (string, []any) {
-
-	if len(m.Columns) < len(m.UpdateColumns) {
-		log.Println("Warning: Insert columns count is less than update columns count.")
-		return "", nil
-	}
-
-	var builder strings.Builder
-	if m.IsReplace {
-		builder.WriteString("REPLACE")
-	} else {
-		builder.WriteString("INSERT")
-	}
-
-	if m.IsIgnore {
-		builder.WriteString(" IGNORE")
-	}
-
-	if (len(m.Columns) == 1 && m.Columns[0] == "*") || len(m.Columns) == 0 {
-		builder.WriteString(fmt.Sprintf(" INTO %s VALUES ", m.TableName))
-	} else {
-		builder.WriteString(fmt.Sprintf(" INTO `%s` (`%s`) VALUES ", m.TableName, strings.Join(m.Columns, "`, `")))
-	}
-
-	var perch string
-
-	if len(m.Columns) > 1 {
-		perch = "(" + strings.Join(array.Rep("?", len(m.Columns)), ", ") + ")"
-	} else if len(m.InsertValues) > 0 {
-		perch = "(" + strings.Join(array.Rep("?", len(m.InsertValues[0])), ", ") + ")"
-	}
-
-	if perch != "" {
-		builder.WriteString(strings.Join(array.Rep(perch, array.Max(len(m.InsertValues), 1)), ", "))
-	}
-
-	if m.IsUpdate && len(m.UpdateColumns) > 0 {
-		builder.WriteString(" ON DUPLICATE KEY UPDATE ")
-
-		var updateStrings []string
-		for _, col := range m.UpdateColumns {
-			updateStrings = append(updateStrings, fmt.Sprintf("`%s` = VALUES(`%s`)", col, col))
-		}
-
-		builder.WriteString(strings.Join(updateStrings, ", "))
-	}
-
-	return builder.String(), array.ArrayConcat(m.InsertValues...)
+func (q *EsQuery) Eq(field string, value any) *EsQuery {
+	q.querys = append(q.querys, elastic.NewTermQuery(field, value))
+	return q
 }
 
-func (m *MysqlInsert) Clear() {
-	m.InsertValues = [][]any{}
+func (q *EsQuery) In(field string, values ...any) *EsQuery {
+	q.querys = append(q.querys, elastic.NewTermsQuery(field, values...))
+	return q
+}
+
+func (q *EsQuery) NotIn(field string, values ...any) *EsQuery {
+	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewTermsQuery(field, values...)))
+	return q
+}
+
+func (q *EsQuery) Gt(field string, value any) *EsQuery {
+	q.querys = append(q.querys, elastic.NewRangeQuery(field).Gt(value))
+	return q
+}
+
+func (q *EsQuery) Gte(field string, value any) *EsQuery {
+	q.querys = append(q.querys, elastic.NewRangeQuery(field).Gte(value))
+	return q
+}
+
+func (q *EsQuery) Lt(field string, value any) *EsQuery {
+	q.querys = append(q.querys, elastic.NewRangeQuery(field).Lt(value))
+	return q
+}
+
+func (q *EsQuery) Lte(field string, value any) *EsQuery {
+	q.querys = append(q.querys, elastic.NewRangeQuery(field).Lte(value))
+	return q
+}
+
+func (q *EsQuery) Neq(field string, value any) *EsQuery {
+	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewTermQuery(field, value)))
+	return q
+}
+
+func (q *EsQuery) Like(field string, value string) *EsQuery {
+	q.querys = append(q.querys, elastic.NewRegexpQuery(field, value))
+	return q
+}
+
+func (q *EsQuery) Wildcard(field string, value string) *EsQuery {
+	q.querys = append(q.querys, elastic.NewWildcardQuery(field, value))
+	return q
+}
+
+func (q *EsQuery) Prefix(field string, value string) *EsQuery {
+	q.querys = append(q.querys, elastic.NewPrefixQuery(field, value))
+	return q
+}
+
+func (q *EsQuery) Fuzzy(field string, value string) *EsQuery {
+	q.querys = append(q.querys, elastic.NewFuzzyQuery(field, value))
+	return q
+}
+
+func (q *EsQuery) NotLike(field string, value string) *EsQuery {
+	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewRegexpQuery(field, value)))
+	return q
+}
+
+func (q *EsQuery) NotPrefix(field string, value string) *EsQuery {
+	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewPrefixQuery(field, value)))
+	return q
+}
+
+func (q *EsQuery) NotWildcard(field string, value string) *EsQuery {
+	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewWildcardQuery(field, value)))
+	return q
+}
+
+func (q *EsQuery) Script(script string, params map[string]interface{}, lang string) *EsQuery {
+	scriptQuery := elastic.NewScript(script).Params(params).Lang(lang)
+	q.querys = append(q.querys, elastic.NewScriptQuery(scriptQuery))
+	return q
+}
+
+func (q *EsQuery) ScriptID(scriptID string) *EsQuery {
+	q.querys = append(q.querys, elastic.NewScriptQuery(elastic.NewScriptStored(scriptID)))
+	return q
+}
+
+func (q *EsQuery) Exists(field string) *EsQuery {
+	q.querys = append(q.querys, elastic.NewExistsQuery(field))
+	return q
+}
+
+func (q *EsQuery) NotExists(field string) *EsQuery {
+	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewExistsQuery(field)))
+	return q
+}
+
+func (q *EsQuery) Between(field string, lower, upper any) *EsQuery {
+	q.querys = append(q.querys, elastic.NewRangeQuery(field).Gte(lower).Lte(upper))
+	return q
+}
+
+func (q *EsQuery) Should(clauses *EsQuery, should int) *EsQuery {
+	q.querys = append(q.querys, elastic.NewBoolQuery().Should(clauses.querys...).MinimumNumberShouldMatch(should))
+	return q
+}
+
+func (q *EsQuery) Must(clauses *EsQuery) *EsQuery {
+	q.querys = append(q.querys, elastic.NewBoolQuery().Must(clauses.querys...))
+	return q
+}
+
+func (q *EsQuery) MustNot(clauses *EsQuery) *EsQuery {
+	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(clauses.querys...))
+	return q
+}
+
+func (q *EsQuery) Filter(clauses *EsQuery) *EsQuery {
+	q.querys = append(q.querys, elastic.NewBoolQuery().Filter(clauses.querys...))
+	return q
+}
+
+func (q *EsQuery) Where(clauses *EsQuery) *EsQuery {
+	q.querys = append(q.querys, clauses.querys...)
+	return q
+}
+
+func (q *EsQuery) Build() elastic.Query {
+
+	if q.typ == "filter" {
+		return elastic.NewBoolQuery().Filter(q.querys...)
+	} else if q.typ == "must" {
+		return elastic.NewBoolQuery().Must(q.querys...)
+	} else if q.typ == "must_not" {
+		return elastic.NewBoolQuery().MustNot(q.querys...)
+	} else if q.typ == "should" {
+		return elastic.NewBoolQuery().Should(q.querys...)
+	}
+	return nil
+}
+
+func (q *EsQuery) Source() string {
+	source, _ := q.Build().Source()
+	b, _ := json.Marshal(source)
+	return string(b)
 }
