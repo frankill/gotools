@@ -11,172 +11,172 @@ import (
 	"github.com/olivere/elastic/v7"
 )
 
-type esQuery struct {
+type EsQuery struct {
 	querys []elastic.Query
 	typ    string
 }
 
-func NewQuery() *esQuery {
-	return &esQuery{
+func NewQuery() *EsQuery {
+	return &EsQuery{
 		typ: "",
 	}
 }
 
-func NewFilterQuery() *esQuery {
-	return &esQuery{
+func NewFilterQuery() *EsQuery {
+	return &EsQuery{
 		typ:    "filter",
 		querys: make([]elastic.Query, 0),
 	}
 }
 
-func NewMustQuery() *esQuery {
-	return &esQuery{
+func NewMustQuery() *EsQuery {
+	return &EsQuery{
 		typ:    "must",
 		querys: make([]elastic.Query, 0),
 	}
 }
 
-func NewMustNotQuery() *esQuery {
-	return &esQuery{
+func NewMustNotQuery() *EsQuery {
+	return &EsQuery{
 		typ:    "must_not",
 		querys: make([]elastic.Query, 0),
 	}
 }
 
-func NewShouldQuery() *esQuery {
-	return &esQuery{
+func NewShouldQuery() *EsQuery {
+	return &EsQuery{
 		typ:    "should",
 		querys: make([]elastic.Query, 0),
 	}
 }
 
-func (q *esQuery) Eq(field string, value any) *esQuery {
+func (q *EsQuery) Eq(field string, value any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewTermQuery(field, value))
 	return q
 }
 
-func (q *esQuery) In(field string, values ...any) *esQuery {
+func (q *EsQuery) In(field string, values ...any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewTermsQuery(field, values...))
 	return q
 }
 
-func (q *esQuery) NotIn(field string, values ...any) *esQuery {
+func (q *EsQuery) NotIn(field string, values ...any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewTermsQuery(field, values...)))
 	return q
 }
 
-func (q *esQuery) Gt(field string, value any) *esQuery {
+func (q *EsQuery) Gt(field string, value any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewRangeQuery(field).Gt(value))
 	return q
 }
 
-func (q *esQuery) Gte(field string, value any) *esQuery {
+func (q *EsQuery) Gte(field string, value any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewRangeQuery(field).Gte(value))
 	return q
 }
 
-func (q *esQuery) Lt(field string, value any) *esQuery {
+func (q *EsQuery) Lt(field string, value any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewRangeQuery(field).Lt(value))
 	return q
 }
 
-func (q *esQuery) Lte(field string, value any) *esQuery {
+func (q *EsQuery) Lte(field string, value any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewRangeQuery(field).Lte(value))
 	return q
 }
 
-func (q *esQuery) Neq(field string, value any) *esQuery {
+func (q *EsQuery) Neq(field string, value any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewTermQuery(field, value)))
 	return q
 }
 
-func (q *esQuery) Like(field string, value string) *esQuery {
+func (q *EsQuery) Like(field string, value string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewRegexpQuery(field, value))
 	return q
 }
 
-func (q *esQuery) Wildcard(field string, value string) *esQuery {
+func (q *EsQuery) Wildcard(field string, value string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewWildcardQuery(field, value))
 	return q
 }
 
-func (q *esQuery) Prefix(field string, value string) *esQuery {
+func (q *EsQuery) Prefix(field string, value string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewPrefixQuery(field, value))
 	return q
 }
 
-func (q *esQuery) Fuzzy(field string, value string) *esQuery {
+func (q *EsQuery) Fuzzy(field string, value string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewFuzzyQuery(field, value))
 	return q
 }
 
-func (q *esQuery) NotLike(field string, value string) *esQuery {
+func (q *EsQuery) NotLike(field string, value string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewRegexpQuery(field, value)))
 	return q
 }
 
-func (q *esQuery) NotPrefix(field string, value string) *esQuery {
+func (q *EsQuery) NotPrefix(field string, value string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewPrefixQuery(field, value)))
 	return q
 }
 
-func (q *esQuery) NotWildcard(field string, value string) *esQuery {
+func (q *EsQuery) NotWildcard(field string, value string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewWildcardQuery(field, value)))
 	return q
 }
 
-func (q *esQuery) Script(script string, params map[string]interface{}, lang string) *esQuery {
+func (q *EsQuery) Script(script string, params map[string]interface{}, lang string) *EsQuery {
 	scriptQuery := elastic.NewScript(script).Params(params).Lang(lang)
 	q.querys = append(q.querys, elastic.NewScriptQuery(scriptQuery))
 	return q
 }
 
-func (q *esQuery) ScriptID(scriptID string) *esQuery {
+func (q *EsQuery) ScriptID(scriptID string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewScriptQuery(elastic.NewScriptStored(scriptID)))
 	return q
 }
 
-func (q *esQuery) Exists(field string) *esQuery {
+func (q *EsQuery) Exists(field string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewExistsQuery(field))
 	return q
 }
 
-func (q *esQuery) NotExists(field string) *esQuery {
+func (q *EsQuery) NotExists(field string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewExistsQuery(field)))
 	return q
 }
 
-func (q *esQuery) Between(field string, lower, upper any) *esQuery {
+func (q *EsQuery) Between(field string, lower, upper any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewRangeQuery(field).Gte(lower).Lte(upper))
 	return q
 }
 
-func (q *esQuery) Should(clauses *esQuery, should int) *esQuery {
+func (q *EsQuery) Should(clauses *EsQuery, should int) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().Should(clauses.querys...).MinimumNumberShouldMatch(should))
 	return q
 }
 
-func (q *esQuery) Must(clauses *esQuery) *esQuery {
+func (q *EsQuery) Must(clauses *EsQuery) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().Must(clauses.querys...))
 	return q
 }
 
-func (q *esQuery) MustNot(clauses *esQuery) *esQuery {
+func (q *EsQuery) MustNot(clauses *EsQuery) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(clauses.querys...))
 	return q
 }
 
-func (q *esQuery) Filter(clauses *esQuery) *esQuery {
+func (q *EsQuery) Filter(clauses *EsQuery) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().Filter(clauses.querys...))
 	return q
 }
 
-func (q *esQuery) Where(clauses *esQuery) *esQuery {
+func (q *EsQuery) Where(clauses *EsQuery) *EsQuery {
 	q.querys = append(q.querys, clauses.querys...)
 	return q
 }
 
-func (q *esQuery) Build() elastic.Query {
+func (q *EsQuery) Build() elastic.Query {
 
 	if q.typ == "filter" {
 		return elastic.NewBoolQuery().Filter(q.querys...)
@@ -190,7 +190,7 @@ func (q *esQuery) Build() elastic.Query {
 	return nil
 }
 
-func (q *esQuery) Source() string {
+func (q *EsQuery) Source() string {
 	source, _ := q.Build().Source()
 	b, _ := json.Marshal(source)
 	return string(b)
