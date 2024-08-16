@@ -131,7 +131,7 @@ func (es *ElasticSearchClient[U]) QueryAnyIter(index string, q any) (chan Elasti
 	switch v := q.(type) {
 	case elastic.Query:
 		q_ = v
-	case query.EsQuery:
+	case *query.EsQuery:
 		q_ = v.Build()
 	case string:
 		q_ = elastic.NewRawStringQuery(v)
