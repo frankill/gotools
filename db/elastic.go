@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/frankill/gotools/array"
+	"github.com/frankill/gotools/query"
 	"github.com/olivere/elastic/v7"
 )
 
@@ -118,11 +120,24 @@ func createdoc[U any](doc ElasticBluk[U]) elastic.BulkableRequest {
 }
 
 // 查询分片数量并执行 Query
-func (es *ElasticSearchClient[U]) QueryAnyIter(index string, query elastic.Query) (chan ElasticBluk[U], error) {
+func (es *ElasticSearchClient[U]) QueryAnyIter(index string, q any) (chan ElasticBluk[U], error) {
 
 	stringChan := make(chan ElasticBluk[U], 100)
 
 	var wg sync.WaitGroup
+
+	var q_ elastic.Query
+
+	switch v := q.(type) {
+	case elastic.Query:
+		q_ = v
+	case query.EsQuery:
+		q_ = v.Build()
+	case string:
+		q_ = elastic.NewRawStringQuery(v)
+	default:
+		return nil, errors.New("unsupported query type")
+	}
 
 	go func() {
 		defer close(stringChan)
@@ -145,7 +160,7 @@ func (es *ElasticSearchClient[U]) QueryAnyIter(index string, query elastic.Query
 				defer wg.Done()
 
 				svc := es.Client.Scroll(index).KeepAlive("30m").Size(10000).
-					Query(query).
+					Query(q_).
 					Slice(elastic.NewSliceQuery().Id(shardID).Max(num))
 
 				defer svc.Clear(context.Background())

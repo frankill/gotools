@@ -1,6 +1,7 @@
 package query
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"regexp"
@@ -12,9 +13,10 @@ import (
 
 type EsQuery struct {
 	Querys []elastic.Query
+	typ    string
 }
 
-func NewEsQuery() *EsQuery {
+func NewEsQuery(typ string) *EsQuery {
 	return &EsQuery{
 		Querys: make([]elastic.Query, 0),
 	}
@@ -27,6 +29,11 @@ func (q *EsQuery) Eq(field string, value any) *EsQuery {
 
 func (q *EsQuery) In(field string, values ...any) *EsQuery {
 	q.Querys = append(q.Querys, elastic.NewTermsQuery(field, values...))
+	return q
+}
+
+func (q *EsQuery) NotIn(field string, values ...any) *EsQuery {
+	q.Querys = append(q.Querys, elastic.NewBoolQuery().MustNot(elastic.NewTermsQuery(field, values...)))
 	return q
 }
 
@@ -106,18 +113,33 @@ func (q *EsQuery) Exists(field string) *EsQuery {
 	return q
 }
 
+func (q *EsQuery) NotExists(field string) *EsQuery {
+	q.Querys = append(q.Querys, elastic.NewBoolQuery().MustNot(elastic.NewExistsQuery(field)))
+	return q
+}
+
 func (q *EsQuery) Between(field string, lower, upper any) *EsQuery {
 	q.Querys = append(q.Querys, elastic.NewRangeQuery(field).Gte(lower).Lte(upper))
 	return q
 }
 
-func (q *EsQuery) Or(clauses *EsQuery, should int) *EsQuery {
+func (q *EsQuery) Should(clauses *EsQuery, should int) *EsQuery {
 	q.Querys = append(q.Querys, elastic.NewBoolQuery().Should(clauses.Querys...).MinimumNumberShouldMatch(should))
 	return q
 }
 
-func (q *EsQuery) And(clauses *EsQuery) *EsQuery {
+func (q *EsQuery) Must(clauses *EsQuery) *EsQuery {
 	q.Querys = append(q.Querys, elastic.NewBoolQuery().Must(clauses.Querys...))
+	return q
+}
+
+func (q *EsQuery) MustNot(clauses *EsQuery) *EsQuery {
+	q.Querys = append(q.Querys, elastic.NewBoolQuery().MustNot(clauses.Querys...))
+	return q
+}
+
+func (q *EsQuery) Filter(clauses *EsQuery) *EsQuery {
+	q.Querys = append(q.Querys, elastic.NewBoolQuery().Filter(clauses.Querys...))
 	return q
 }
 
@@ -127,7 +149,23 @@ func (q *EsQuery) Where(clauses *EsQuery) *EsQuery {
 }
 
 func (q *EsQuery) Build() elastic.Query {
+
+	if q.typ == "filter" {
+		return elastic.NewBoolQuery().Filter(q.Querys...)
+	} else if q.typ == "must" {
+		return elastic.NewBoolQuery().Must(q.Querys...)
+	} else if q.typ == "must_not" {
+		return elastic.NewBoolQuery().MustNot(q.Querys...)
+	} else if q.typ == "should" {
+		return elastic.NewBoolQuery().Should(q.Querys...)
+	}
 	return elastic.NewBoolQuery().Filter(q.Querys...)
+}
+
+func (q *EsQuery) Source() string {
+	source, _ := q.Build().Source()
+	b, _ := json.Marshal(source)
+	return string(b)
 }
 
 func ExtractTableName(sql string) string {

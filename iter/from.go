@@ -343,8 +343,8 @@ func FromMysqlStr(con string) func(query *query.SQLBuilder) chan []string {
 // 返回:
 //
 //	chan interface{}: 查询结果数据通道。
-func FromElasticSearch[T any](client *elastic.Client) func(index string, query elastic.Query) chan db.ElasticBluk[T] {
-	return func(index string, query elastic.Query) chan db.ElasticBluk[T] {
+func FromElasticSearch[T any](client *elastic.Client) func(index string, query any) chan db.ElasticBluk[T] {
+	return func(index string, query any) chan db.ElasticBluk[T] {
 
 		con := db.NewElasticSearchClient[T](client)
 
