@@ -11,12 +11,21 @@ import (
 	"github.com/olivere/elastic/v7"
 )
 
+type EsQueryType string
+
+const (
+	Filter  EsQueryType = "filter"
+	Must    EsQueryType = "must"
+	Should  EsQueryType = "should"
+	MustNot EsQueryType = "must_not"
+)
+
 type EsQuery struct {
 	Querys []elastic.Query
 	typ    string
 }
 
-func NewEsQuery(typ string) *EsQuery {
+func NewEsQuery(typ EsQueryType) *EsQuery {
 	return &EsQuery{
 		Querys: make([]elastic.Query, 0),
 	}
