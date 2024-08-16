@@ -11,22 +11,41 @@ import (
 	"github.com/olivere/elastic/v7"
 )
 
-type EsQueryType string
-
-const (
-	Filter  EsQueryType = "filter"
-	Must    EsQueryType = "must"
-	Should  EsQueryType = "should"
-	MustNot EsQueryType = "must_not"
-)
-
 type EsQuery struct {
 	Querys []elastic.Query
 	typ    string
 }
 
-func NewEsQuery(typ EsQueryType) *EsQuery {
+func NewQuery(typ string) *EsQuery {
 	return &EsQuery{
+		typ: typ,
+	}
+}
+
+func NewFilterQuery() *EsQuery {
+	return &EsQuery{
+		typ:    "filter",
+		Querys: make([]elastic.Query, 0),
+	}
+}
+
+func NewMustQuery() *EsQuery {
+	return &EsQuery{
+		typ:    "must",
+		Querys: make([]elastic.Query, 0),
+	}
+}
+
+func NewMustNotQuery() *EsQuery {
+	return &EsQuery{
+		typ:    "must_not",
+		Querys: make([]elastic.Query, 0),
+	}
+}
+
+func NewShouldQuery() *EsQuery {
+	return &EsQuery{
+		typ:    "should",
 		Querys: make([]elastic.Query, 0),
 	}
 }
@@ -168,7 +187,7 @@ func (q *EsQuery) Build() elastic.Query {
 	} else if q.typ == "should" {
 		return elastic.NewBoolQuery().Should(q.Querys...)
 	}
-	return elastic.NewBoolQuery().Filter(q.Querys...)
+	return nil
 }
 
 func (q *EsQuery) Source() string {
