@@ -7,7 +7,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -22,6 +21,13 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+func ErrorCH(ch chan error) {
+
+	for err := range ch {
+		log.Println(err)
+	}
+}
+
 // FromGzip 方法从 gzip 文件中读取数据并发送到通道中
 // 参数:
 //
@@ -31,22 +37,26 @@ import (
 // 返回:
 //
 // 一个通道，用于接收从 gzip 文件中读取的数据。
-func FromGzip(path string) func(skip int) chan string {
-	return func(skip int) chan string {
+func FromGzip(path string) func(skip int) (chan string, chan error) {
+	return func(skip int) (chan string, chan error) {
 		ch := make(chan string, BufferSize)
+		errs := make(chan error, 1)
 
 		go func() {
 			defer close(ch)
+			defer close(errs)
 
 			f, err := os.Open(path)
 			if err != nil {
-				log.Panicln(err)
+				errs <- err
+				return
 			}
 			defer f.Close()
 
 			gz, err := gzip.NewReader(f)
 			if err != nil {
-				log.Panicln(err)
+				errs <- err
+				return
 			}
 			defer gz.Close()
 
@@ -62,7 +72,7 @@ func FromGzip(path string) func(skip int) chan string {
 			}
 		}()
 
-		return ch
+		return ch, errs
 	}
 }
 
@@ -75,18 +85,21 @@ func FromGzip(path string) func(skip int) chan string {
 // 返回:
 //
 // 一个通道，用于接收从文件中读取的数据。
-func FromJson[T any](path string) func(skip int) chan T {
+func FromJson[T any](path string) func(skip int) (chan T, chan error) {
 
-	return func(skip int) chan T {
+	return func(skip int) (chan T, chan error) {
 
 		ch := make(chan T, BufferSize)
+		errs := make(chan error, 1)
 
 		go func() {
 			defer close(ch)
+			defer close(errs)
 
 			f, err := os.Open(path)
 			if err != nil {
-				log.Panicln(err)
+				errs <- err
+				return
 			}
 			defer f.Close()
 
@@ -101,14 +114,15 @@ func FromJson[T any](path string) func(skip int) chan T {
 				var t T
 				err = json.Unmarshal(scanner.Bytes(), &t)
 				if err != nil {
-					log.Panicln(err)
+					errs <- err
+					return
 				}
 
 				ch <- t
 			}
 		}()
 
-		return ch
+		return ch, errs
 	}
 }
 
@@ -121,18 +135,20 @@ func FromJson[T any](path string) func(skip int) chan T {
 // 返回:
 //
 // 一个通道，用于接收从文件中读取的数据。
-func FromTxt(path string) func(skip int) chan string {
+func FromTxt(path string) func(skip int) (chan string, chan error) {
 
-	return func(skip int) chan string {
+	return func(skip int) (chan string, chan error) {
 
 		ch := make(chan string, BufferSize)
+		errs := make(chan error, 1)
 
 		go func() {
 			defer close(ch)
 
 			f, err := os.Open(path)
 			if err != nil {
-				log.Panicln(err)
+				errs <- err
+				return
 			}
 			defer f.Close()
 
@@ -148,7 +164,7 @@ func FromTxt(path string) func(skip int) chan string {
 			}
 		}()
 
-		return ch
+		return ch, errs
 
 	}
 }
@@ -165,7 +181,7 @@ type ftype struct {
 //
 // 返回:
 //
-//	chan interface{}: 查询结果数据通道。
+//	chan T: 查询结果数据通道
 //	error: 错误信息，如果查询失败。
 //
 // 示例:
@@ -174,65 +190,70 @@ type ftype struct {
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
-func FromMysqlQuery[T any](con string) func(query *query.SQLBuilder) chan T {
+func FromMysqlQuery[T any](con string) func(query *query.SQLBuilder) (chan T, chan error) {
 
-	return func(query *query.SQLBuilder) chan T {
+	return func(query *query.SQLBuilder) (chan T, chan error) {
 
 		query_ := query.Build()
 
 		ch := make(chan T, BufferSize)
-
-		db, err := sql.Open("mysql", con)
-		if err != nil {
-			log.Panicln(err)
-		}
-
-		rows, err := db.Query(query_)
-		if err != nil {
-			log.Panicln(err)
-		}
-
-		columns, err := rows.Columns()
-		if err != nil {
-			log.Panicln(err)
-		}
-
-		columnValues := make([]interface{}, len(columns))
-		for i := range columnValues {
-			columnValues[i] = new(sql.RawBytes)
-		}
-
-		instance := new(T)
-		v := reflect.ValueOf(instance).Elem()
-		fieldMap := make(map[string]ftype)
-		t := reflect.TypeOf(instance).Elem()
-		for i := 0; i < t.NumField(); i++ {
-			field := t.Field(i)
-			if tag, ok := field.Tag.Lookup("sql"); ok {
-				var tmp ftype
-				tmp.t = v.Field(i)
-				tmp.n = fieldType(tmp.t)
-				fieldMap[tag] = tmp
-			}
-		}
+		errs := make(chan error, 1)
 
 		go func() {
 
 			defer close(ch)
+			defer close(errs)
+
+			db, err := sql.Open("mysql", con)
+			if err != nil {
+				errs <- err
+				return
+			}
 			defer db.Close()
+
+			rows, err := db.Query(query_)
+			if err != nil {
+				errs <- err
+				return
+			}
+
+			columns, err := rows.Columns()
+			if err != nil {
+				errs <- err
+				return
+			}
+
+			columnValues := make([]interface{}, len(columns))
+			for i := range columnValues {
+				columnValues[i] = new(sql.RawBytes)
+			}
+
+			instance := new(T)
+			v := reflect.ValueOf(instance).Elem()
+			fieldMap := make(map[string]ftype)
+			t := reflect.TypeOf(instance).Elem()
+			for i := 0; i < t.NumField(); i++ {
+				field := t.Field(i)
+				if tag, ok := field.Tag.Lookup("sql"); ok {
+					var tmp ftype
+					tmp.t = v.Field(i)
+					tmp.n = fieldType(tmp.t)
+					fieldMap[tag] = tmp
+				}
+			}
 
 			for rows.Next() {
 				if err := rows.Scan(columnValues...); err != nil {
-					fmt.Println("Scan error:", err)
-					continue
+					errs <- err
+					return
 				}
 
 				for i, column := range columns {
 					if field, ok := fieldMap[column]; ok {
 						rawBytes := columnValues[i].(*sql.RawBytes)
 						if err := convertToGoType(field, *rawBytes); err != nil {
-							fmt.Println("Convert error:", err)
-							continue
+							errs <- err
+							return
 						}
 					}
 				}
@@ -241,7 +262,7 @@ func FromMysqlQuery[T any](con string) func(query *query.SQLBuilder) chan T {
 			}
 		}()
 
-		return ch
+		return ch, errs
 	}
 }
 
@@ -310,31 +331,36 @@ func convertToGoType(field ftype, value []byte) error {
 //
 //	chan []string: 查询结果数据通道。
 
-func FromMysqlStr(con string) func(query *query.SQLBuilder) chan []string {
+func FromMysqlStr(con string) func(query *query.SQLBuilder) (chan []string, chan error) {
 
-	return func(query *query.SQLBuilder) chan []string {
+	return func(query *query.SQLBuilder) (chan []string, chan error) {
 
 		query_ := query.Build()
 		ch := make(chan []string, 100)
-
-		db, err := sql.Open("mysql", con)
-		if err != nil {
-			log.Panicln(err)
-		}
-
-		rows, err := db.Query(query_)
-		if err != nil {
-			log.Panicln(err)
-		}
-
-		columns, err := rows.Columns()
-
-		if err != nil {
-			log.Panicln(err)
-		}
+		errs := make(chan error, 1)
 
 		go func() {
 			defer close(ch)
+			defer close(errs)
+
+			db, err := sql.Open("mysql", con)
+			if err != nil {
+				errs <- err
+				return
+			}
+
+			rows, err := db.Query(query_)
+			if err != nil {
+				errs <- err
+				return
+			}
+
+			columns, err := rows.Columns()
+
+			if err != nil {
+				errs <- err
+				return
+			}
 			defer db.Close()
 
 			lc := len(columns)
@@ -347,7 +373,8 @@ func FromMysqlStr(con string) func(query *query.SQLBuilder) chan []string {
 
 				err := rows.Scan(rowPointers...)
 				if err != nil {
-					log.Fatalln(err)
+					errs <- err
+					return
 				}
 
 				ch <- array.ArrayMap(func(i ...sql.NullString) string {
@@ -356,7 +383,7 @@ func FromMysqlStr(con string) func(query *query.SQLBuilder) chan []string {
 			}
 		}()
 
-		return ch
+		return ch, errs
 	}
 }
 
@@ -370,18 +397,12 @@ func FromMysqlStr(con string) func(query *query.SQLBuilder) chan []string {
 // 返回:
 //
 //	chan interface{}: 查询结果数据通道。
-func FromElasticSearch[T any](client *elastic.Client) func(index string, query any) chan db.ElasticBluk[T] {
-	return func(index string, query any) chan db.ElasticBluk[T] {
+func FromElasticSearch[T any](client *elastic.Client) func(index string, query any) (chan db.ElasticBluk[T], chan error) {
+	return func(index string, query any) (chan db.ElasticBluk[T], chan error) {
 
 		con := db.NewElasticSearchClient[T](client)
 
-		ch, err := con.QueryAnyIter(index, query)
-
-		if err != nil {
-			log.Panicln(err)
-		}
-
-		return ch
+		return con.QueryAnyIter(index, query)
 
 	}
 }
@@ -446,17 +467,20 @@ func FromMap[K comparable, V any](m map[K]V) func() chan array.Pair[K, V] {
 //
 // 返回:
 //   - 一个通道，通道中的值是读取的 CSV 文件中的每一行数据，每一行数据是一个字符串切片（[]string）。
-func FromCsv(path string) func(header bool) chan []string {
+func FromCsv(path string) func(header bool) (chan []string, chan error) {
 
-	return func(header bool) chan []string {
+	return func(header bool) (chan []string, chan error) {
 		ch := make(chan []string, BufferSize)
+		errs := make(chan error, 1)
 
 		go func() {
 			defer close(ch)
+			defer close(errs)
 
 			f, err := os.Open(path)
 			if err != nil {
-				log.Panicln(err)
+				errs <- err
+				return
 			}
 			defer f.Close()
 
@@ -470,7 +494,8 @@ func FromCsv(path string) func(header bool) chan []string {
 				}
 
 				if err != nil {
-					log.Panicln(err)
+					errs <- err
+					return
 				}
 			}
 
@@ -490,7 +515,7 @@ func FromCsv(path string) func(header bool) chan []string {
 			}
 
 		}()
-		return ch
+		return ch, errs
 	}
 }
 
@@ -503,17 +528,19 @@ func FromCsv(path string) func(header bool) chan []string {
 //
 // 返回:
 //   - 一个通道，通道中的值是读取的表格文件中的每一行数据，每一行数据是一个字符串切片（[]string）。
-func FromTable(path string) func(header bool, seq string) chan []string {
+func FromTable(path string) func(header bool, seq string) (chan []string, chan error) {
 
-	return func(header bool, seq string) chan []string {
+	return func(header bool, seq string) (chan []string, chan error) {
 		ch := make(chan []string, BufferSize)
+		errs := make(chan error, 1)
 
 		go func() {
 			defer close(ch)
 
 			f, err := os.Open(path)
 			if err != nil {
-				log.Panicln(err)
+				errs <- err
+				return
 			}
 			defer f.Close()
 
@@ -526,7 +553,8 @@ func FromTable(path string) func(header bool, seq string) chan []string {
 					return
 				}
 				if err != nil {
-					log.Panicln(err)
+					errs <- err
+					return
 				}
 			}
 
@@ -538,12 +566,13 @@ func FromTable(path string) func(header bool, seq string) chan []string {
 				}
 
 				if err != nil {
+					errs <- err
 					return
 				}
 				ch <- record
 			}
 		}()
-		return ch
+		return ch, errs
 	}
 }
 
@@ -555,17 +584,20 @@ func FromTable(path string) func(header bool, seq string) chan []string {
 //
 // 返回:
 //   - 一个通道，通道中的值是读取的 Excel 文件中的每一行数据，每一行数据是一个字符串切片（[]string）。
-func FromExcel(path string) func(sheet string, header bool) chan []string {
+func FromExcel(path string) func(sheet string, header bool) (chan []string, chan error) {
 
-	return func(sheet string, header bool) chan []string {
+	return func(sheet string, header bool) (chan []string, chan error) {
 		ch := make(chan []string, BufferSize)
+		errs := make(chan error, 1)
 
 		go func() {
 			defer close(ch)
+			defer close(errs)
 
 			f, err := excelize.OpenFile(path)
 			if err != nil {
-				log.Panicln(err)
+				errs <- err
+				return
 			}
 
 			if sheet == "" {
@@ -574,7 +606,8 @@ func FromExcel(path string) func(sheet string, header bool) chan []string {
 
 			rows, err := f.Rows(sheet)
 			if err != nil {
-				log.Panicln(err)
+				errs <- err
+				return
 			}
 
 			if header {
@@ -583,12 +616,13 @@ func FromExcel(path string) func(sheet string, header bool) chan []string {
 			for rows.Next() {
 				row, err := rows.Columns()
 				if err != nil {
-					log.Panicln(err)
+					errs <- err
+					return
 				}
 				ch <- row
 			}
 
 		}()
-		return ch
+		return ch, errs
 	}
 }

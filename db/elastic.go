@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"io"
 	"log"
 	"strconv"
@@ -120,9 +119,20 @@ func createdoc[U any](doc ElasticBluk[U]) elastic.BulkableRequest {
 }
 
 // 查询分片数量并执行 Query
-func (es *ElasticSearchClient[U]) QueryAnyIter(index string, q any) (chan ElasticBluk[U], error) {
+// 用于查询分片数量
+// 参数:
+//
+//	index: 索引名称
+//	q: 查询条件 , 支持 string 和 *query.EsQuery, elastic.Query
+//
+// 返回:
+//
+//	chan ElasticBluk[U]: 查询结果通道
+//	chan error: 错误通道
+func (es *ElasticSearchClient[U]) QueryAnyIter(index string, q any) (chan ElasticBluk[U], chan error) {
 
 	stringChan := make(chan ElasticBluk[U], 100)
+	errors := make(chan error, 1)
 
 	var wg sync.WaitGroup
 
@@ -136,16 +146,17 @@ func (es *ElasticSearchClient[U]) QueryAnyIter(index string, q any) (chan Elasti
 	case string:
 		q_ = elastic.NewRawStringQuery(v)
 	default:
-		return nil, errors.New("unsupported query type")
+		log.Panicln("unsupported query type")
 	}
 
 	go func() {
 		defer close(stringChan)
+		defer close(errors)
 
 		slice, err := es.Client.IndexGetSettings(index).Do(context.Background())
 
 		if err != nil {
-			log.Println(err)
+			errors <- err
 			return
 		}
 
@@ -172,7 +183,7 @@ func (es *ElasticSearchClient[U]) QueryAnyIter(index string, q any) (chan Elasti
 						break
 					}
 					if err != nil {
-						log.Println(err)
+						errors <- err
 						break
 					}
 					if res == nil {
@@ -188,7 +199,7 @@ func (es *ElasticSearchClient[U]) QueryAnyIter(index string, q any) (chan Elasti
 						var results U
 						err := json.Unmarshal(hit.Source, &results)
 						if err != nil {
-							log.Println(err)
+							errors <- err
 							continue
 						}
 
