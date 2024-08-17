@@ -230,7 +230,7 @@ func FromMysqlQuery[T any](con string) func(query *query.SQLBuilder) (chan T, ch
 
 			instance := new(T)
 			v := reflect.ValueOf(instance).Elem()
-			fieldMap := make(map[string]ftype)
+			fieldMap := make(map[string]ftype, len(columns))
 			t := reflect.TypeOf(instance).Elem()
 			for i := 0; i < t.NumField(); i++ {
 				field := t.Field(i)
