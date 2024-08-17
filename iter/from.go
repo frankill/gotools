@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -152,6 +153,11 @@ func FromTxt(path string) func(skip int) chan string {
 	}
 }
 
+type ftype struct {
+	t reflect.Value
+	n int
+}
+
 // FromMysqlQuery 从 MySQL 数据库中执行查询并返回数据通道。
 // 参数:
 //
@@ -174,7 +180,7 @@ func FromMysqlQuery[T any](con string) func(query *query.SQLBuilder) chan T {
 
 		query_ := query.Build()
 
-		ch := make(chan T, 100)
+		ch := make(chan T, BufferSize)
 
 		db, err := sql.Open("mysql", con)
 		if err != nil {
@@ -196,6 +202,20 @@ func FromMysqlQuery[T any](con string) func(query *query.SQLBuilder) chan T {
 			columnValues[i] = new(sql.RawBytes)
 		}
 
+		instance := new(T)
+		v := reflect.ValueOf(instance).Elem()
+		fieldMap := make(map[string]ftype)
+		t := reflect.TypeOf(instance).Elem()
+		for i := 0; i < t.NumField(); i++ {
+			field := t.Field(i)
+			if tag, ok := field.Tag.Lookup("sql"); ok {
+				var tmp ftype
+				tmp.t = v.Field(i)
+				tmp.n = fieldType(tmp.t)
+				fieldMap[tag] = tmp
+			}
+		}
+
 		go func() {
 
 			defer close(ch)
@@ -205,17 +225,6 @@ func FromMysqlQuery[T any](con string) func(query *query.SQLBuilder) chan T {
 				if err := rows.Scan(columnValues...); err != nil {
 					fmt.Println("Scan error:", err)
 					continue
-				}
-
-				instance := new(T)
-				v := reflect.ValueOf(instance).Elem()
-				fieldMap := make(map[string]reflect.Value)
-				t := reflect.TypeOf(instance).Elem()
-				for i := 0; i < t.NumField(); i++ {
-					field := t.Field(i)
-					if tag, ok := field.Tag.Lookup("sql"); ok {
-						fieldMap[tag] = v.Field(i)
-					}
 				}
 
 				for i, column := range columns {
@@ -236,40 +245,58 @@ func FromMysqlQuery[T any](con string) func(query *query.SQLBuilder) chan T {
 	}
 }
 
-// Converts raw database bytes to Go native types, handling NULL values and missing fields.
-func convertToGoType(field reflect.Value, value []byte) error {
+func fieldType(field reflect.Value) int {
 
-	// Convert non-NULL values
 	switch field.Kind() {
 	case reflect.String:
-		field.SetString(string(value))
+		return 1
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return 2
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return 3
+	case reflect.Float32, reflect.Float64:
+		return 4
+	case reflect.Bool:
+		return 5
+	default:
+		return 0
+	}
+}
+
+// Converts raw database bytes to Go native types, handling NULL values and missing fields.
+func convertToGoType(field ftype, value []byte) error {
+
+	switch field.n {
+	case 1:
+		field.t.SetString(string(value))
+	case 2:
 		intValue, err := strconv.ParseInt(string(value), 10, 64)
 		if err != nil {
 			return err
 		}
-		field.SetInt(intValue)
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		uintValue, err := strconv.ParseUint(string(value), 10, 64)
+		field.t.SetInt(intValue)
+	case 3:
+		intValue, err := strconv.ParseUint(string(value), 10, 64)
 		if err != nil {
 			return err
 		}
-		field.SetUint(uintValue)
-	case reflect.Float32, reflect.Float64:
-		floatValue, err := strconv.ParseFloat(string(value), 64)
+		field.t.SetUint(intValue)
+	case 4:
+		intValue, err := strconv.ParseFloat(string(value), 64)
 		if err != nil {
 			return err
 		}
-		field.SetFloat(floatValue)
-	case reflect.Bool:
-		boolValue, err := strconv.ParseBool(string(value))
+		field.t.SetFloat(intValue)
+	case 5:
+		intValue, err := strconv.ParseBool(string(value))
 		if err != nil {
 			return err
 		}
-		field.SetBool(boolValue)
+		field.t.SetBool(intValue)
 	default:
-		return fmt.Errorf("unsupported type: %s", field.Kind())
+		return errors.New("unknown field type")
 	}
+
 	return nil
 }
 
