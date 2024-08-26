@@ -144,6 +144,7 @@ func FromTxt(path string) func(skip int) (chan string, chan error) {
 
 		go func() {
 			defer close(ch)
+			defer close(errs)
 
 			f, err := os.Open(path)
 			if err != nil {
@@ -536,6 +537,7 @@ func FromTable(path string) func(header bool, seq string, escape byte) (chan []s
 
 		go func() {
 			defer close(ch)
+			defer close(errs)
 
 			f, err := os.Open(path)
 			if err != nil {
