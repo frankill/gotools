@@ -79,7 +79,7 @@ func (w *Writer) Write(record []string) error {
 					_, err = w.w.WriteString(escapeQuote)
 				case '\\':
 					if w.escape == '\\' {
-						_, err = w.w.WriteString(`\\`)
+						_, err = w.w.WriteString(`\\\\`)
 					}
 				case '\r':
 					if !w.UseCRLF {

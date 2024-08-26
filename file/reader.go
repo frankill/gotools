@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 	"unicode"
 	"unicode/utf8"
 )
@@ -328,7 +329,12 @@ parseField:
 	dst = dst[:len(r.fieldIndexes)]
 	var preIdx int
 	for i, idx := range r.fieldIndexes {
-		dst[i] = str[preIdx:idx]
+		if r.Escape == '\\' && strings.Contains(str[preIdx:idx], "\\") {
+			dst[i] = strings.ReplaceAll(strings.Replace(str[preIdx:idx], "\\\\", "\\", -1), "\\\"", "\"")
+		} else {
+			dst[i] = str[preIdx:idx]
+		}
+
 		preIdx = idx
 	}
 

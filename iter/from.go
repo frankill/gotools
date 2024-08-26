@@ -528,9 +528,9 @@ func FromCsv(path string) func(header bool) (chan []string, chan error) {
 //
 // 返回:
 //   - 一个通道，通道中的值是读取的表格文件中的每一行数据，每一行数据是一个字符串切片（[]string）。
-func FromTable(path string) func(header bool, seq string) (chan []string, chan error) {
+func FromTable(path string) func(header bool, seq string, escape byte) (chan []string, chan error) {
 
-	return func(header bool, seq string) (chan []string, chan error) {
+	return func(header bool, seq string, escape byte) (chan []string, chan error) {
 		ch := make(chan []string, BufferSize)
 		errs := make(chan error, 1)
 
@@ -544,7 +544,7 @@ func FromTable(path string) func(header bool, seq string) (chan []string, chan e
 			}
 			defer f.Close()
 
-			reader := file.NewReader(f, seq)
+			reader := file.NewReader(f, seq, escape)
 
 			if header {
 				_, err := reader.Read()
