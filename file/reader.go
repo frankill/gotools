@@ -42,6 +42,8 @@ var (
 )
 
 type Reader struct {
+	Escape byte
+
 	Comma string
 
 	Comment rune
@@ -74,10 +76,20 @@ type Reader struct {
 }
 
 // NewReader returns a new Reader that reads from r.
-func NewReader(r io.Reader, sep string) *Reader {
+func NewReader(r io.Reader, sep string, escape byte) *Reader {
+
+	if sep == "" {
+		sep = ","
+	}
+
+	if escape != '\\' {
+		escape = '"'
+	}
+
 	return &Reader{
-		Comma: sep,
-		r:     bufio.NewReader(r),
+		Comma:  sep,
+		r:      bufio.NewReader(r),
+		Escape: escape,
 	}
 }
 
@@ -244,19 +256,19 @@ parseField:
 			line = line[quoteLen:]
 			pos.col += quoteLen
 			for {
-				i := bytes.IndexByte(line, '"')
+				i := r.IndexByte(line, '"')
 				if i >= 0 {
 					// Hit next quote.
 					r.recordBuffer = append(r.recordBuffer, line[:i]...)
 					line = line[i+quoteLen:]
 					pos.col += i + quoteLen
 					switch rn := nextRune(line); {
-					case rn == '"':
+					case rn == '"' && r.Escape == '"':
 						// `""` sequence (append quote).
 						r.recordBuffer = append(r.recordBuffer, '"')
 						line = line[quoteLen:]
 						pos.col += quoteLen
-					case string(line[:commaLen]) == r.Comma:
+					case string(line[:commaLen]) == r.Comma && len(line) >= commaLen:
 						// `",` sequence (end of field).
 						line = line[commaLen:]
 						pos.col += commaLen
@@ -334,4 +346,31 @@ parseField:
 		r.FieldsPerRecord = len(dst)
 	}
 	return dst, err
+}
+
+func (r *Reader) IndexByte(s []byte, c byte) int {
+
+	l := len(s)
+
+	if l == 0 {
+		return -1
+	}
+
+	if s[0] == c {
+		return 0
+	}
+
+	for i := 1; i < l; i++ {
+
+		if s[i] == c {
+
+			if s[i-1] == '\\' && r.Escape == '\\' {
+				continue
+			}
+
+			return i
+		}
+	}
+	return -1
+
 }
