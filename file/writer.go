@@ -9,22 +9,33 @@ import (
 )
 
 type Writer struct {
-	Comma    string // Field delimiter (set to ',' by NewWriter)
-	UseCRLF  bool   // True to use \r\n as the line terminator
-	w        *bufio.Writer
-	useQuote bool
+	Comma     string // Field delimiter (set to ',' by NewWriter)
+	UseCRLF   bool   // True to use \r\n as the line terminator
+	w         *bufio.Writer
+	useQuote  bool
+	escape    byte
+	escapeStr string
 }
 
 // NewWriter returns a new Writer that writes to w.
-func NewWriter(w io.Writer, seq string, useQuote bool) *Writer {
+func NewWriter(w io.Writer, seq string, useQuote bool, escape byte) *Writer {
+
+	if escape != '\\' {
+		escape = '"'
+	}
+
 	return &Writer{
-		Comma:    seq,
-		w:        bufio.NewWriter(w),
-		useQuote: useQuote,
+		Comma:     seq,
+		w:         bufio.NewWriter(w),
+		useQuote:  useQuote,
+		escape:    escape,
+		escapeStr: string(escape),
 	}
 }
 
 func (w *Writer) Write(record []string) error {
+
+	escapeQuote := string(w.escape) + `"`
 
 	for n, field := range record {
 		if n > 0 {
@@ -49,7 +60,7 @@ func (w *Writer) Write(record []string) error {
 		}
 		for len(field) > 0 {
 			// Search for special characters.
-			i := strings.IndexAny(field, "\"\r\n")
+			i := strings.IndexAny(field, "\"\r\n"+w.escapeStr)
 			if i < 0 {
 				i = len(field)
 			}
@@ -65,7 +76,11 @@ func (w *Writer) Write(record []string) error {
 				var err error
 				switch field[0] {
 				case '"':
-					_, err = w.w.WriteString(`""`)
+					_, err = w.w.WriteString(escapeQuote)
+				case '\\':
+					if w.escape == '\\' {
+						_, err = w.w.WriteString(`\\`)
+					}
 				case '\r':
 					if !w.UseCRLF {
 						err = w.w.WriteByte('\r')
@@ -96,13 +111,8 @@ func (w *Writer) Write(record []string) error {
 	return err
 }
 
-func (w *Writer) Flush() {
-	w.w.Flush()
-}
-
-func (w *Writer) Error() error {
-	_, err := w.w.Write(nil)
-	return err
+func (w *Writer) Flush() error {
+	return w.w.Flush()
 }
 
 func (w *Writer) WriteAll(records [][]string) error {
@@ -135,10 +145,17 @@ func (w *Writer) fieldNeedsQuotes(field string) bool {
 			if c == '\n' || c == '\r' || c == '"' || c == byte(w.Comma[0]) {
 				return true
 			}
+			if w.escape == '\\' && c == '\\' {
+				return true
+			}
 		}
 	}
 
 	if strings.ContainsAny(field, w.Comma) || strings.ContainsAny(field, "\"\r\n") {
+		return true
+	}
+
+	if w.escape == '\\' && strings.ContainsAny(field, `\\`) {
 		return true
 	}
 

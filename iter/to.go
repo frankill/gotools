@@ -257,6 +257,7 @@ type TableField struct {
 	UseQuote bool
 	Header   []string
 	Append   bool
+	Escape   byte
 }
 
 func T(path string) *TableField {
@@ -267,7 +268,14 @@ func T(path string) *TableField {
 		UseQuote: true,
 		Header:   []string{},
 		Append:   false,
+		Escape:   '"',
 	}
+}
+
+func (t *TableField) SetEscape(escape byte) *TableField {
+	t.Escape = escape
+
+	return t
 }
 
 func (t *TableField) SetHeader(header ...string) *TableField {
@@ -333,7 +341,7 @@ func ToTable(t *TableField) func(ch chan []string) error {
 			return errors.New("seq cannot be empty")
 		}
 
-		writer := file.NewWriter(f, t.Seq, t.UseQuote)
+		writer := file.NewWriter(f, t.Seq, t.UseQuote, t.Escape)
 
 		defer writer.Flush()
 
