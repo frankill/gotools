@@ -27,12 +27,39 @@ func EsSimple(host ...string) func(User, Pwd string) (*elastic.Client, error) {
 	}
 }
 
+// EsScriptID returns a function that creates an Elasticsearch stored script
+// with a specified ID and parameters.
+func EsScriptID(id string) func(doc map[string]any) *elastic.Script {
+	return func(doc map[string]any) *elastic.Script {
+		return elastic.NewScriptStored(id).Params(doc)
+	}
+}
+
+// EsScript returns a function that creates an Elasticsearch inline script
+// with a specified language and script content, and parameters.
+func EsScript(lang string, script string) func(data map[string]any) *elastic.Script {
+	return func(data map[string]any) *elastic.Script {
+		if lang == "" {
+			lang = "painless" // Default script language if not provided
+		}
+		if script == "" {
+			log.Panic("script cannot be empty")
+		}
+		return elastic.NewScript(script).Lang(lang).Params(data)
+	}
+}
+
+// ElasticBluk represents a bulk request for Elasticsearch
 type ElasticBluk[U any] struct {
-	Index   string
-	OpType  string
-	Id      string
-	Routing string
-	Source  U
+	Index          string
+	OpType         string // Operation type: "index", "create", "update", "delete", "script"
+	Id             string
+	Routing        string
+	Source         U
+	DocAsUpsert    bool            // For update operations
+	Script         *elastic.Script // For script-based operations
+	ScriptAsUpsert bool
+	ScriptUpsert   any
 }
 
 // 定义一个类型，添加 Index 和 ReturnFields 字段
@@ -120,10 +147,41 @@ func (es *ElasticSearchClient[U]) sendBulk(data []elastic.BulkableRequest) error
 
 func createdoc[U any](doc ElasticBluk[U]) elastic.BulkableRequest {
 
-	return elastic.NewBulkIndexRequest().Index(doc.Index).OpType(doc.OpType).
-		Routing(doc.Routing).Id(doc.Id).UseEasyJSON(true).
-		Doc(doc.Source)
+	switch doc.OpType {
+	case "index", "create":
+		return elastic.NewBulkIndexRequest().Index(doc.Index).OpType(doc.OpType).
+			Routing(doc.Routing).Id(doc.Id).UseEasyJSON(true).
+			Doc(doc.Source)
+	case "update":
+		update := elastic.NewBulkUpdateRequest().Index(doc.Index).Id(doc.Id).
+			Routing(doc.Routing).Doc(doc.Source).UseEasyJSON(true)
+		if doc.DocAsUpsert {
+			update.DocAsUpsert(true)
+		}
+		return update
+	case "delete":
+		return elastic.NewBulkDeleteRequest().Index(doc.Index).Id(doc.Id).Routing(doc.Routing).UseEasyJSON(true)
+	case "script":
+		update := elastic.NewBulkUpdateRequest().
+			Index(doc.Index).
+			Id(doc.Id).
+			Routing(doc.Routing).
+			Script(doc.Script).
+			ScriptedUpsert(doc.ScriptAsUpsert)
 
+		if doc.ScriptAsUpsert {
+			if doc.ScriptUpsert != nil {
+				update.Upsert(doc.ScriptUpsert)
+			} else {
+				// Default upsert document if not provided
+				update.Upsert(map[string]interface{}{})
+			}
+		}
+		return update
+	default:
+		log.Panicln("unsupported operation type:", doc.OpType)
+		return nil
+	}
 }
 
 // 查询分片数量并执行 Query
