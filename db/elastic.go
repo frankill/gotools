@@ -152,6 +152,7 @@ func (es *ElasticSearchClient[U]) QueryAnyIter(index string, q any) (chan Elasti
 	go func() {
 		defer close(stringChan)
 		defer close(errors)
+		defer wg.Wait()
 
 		slice, err := es.Client.IndexGetSettings(index).Do(context.Background())
 
@@ -217,10 +218,8 @@ func (es *ElasticSearchClient[U]) QueryAnyIter(index string, q any) (chan Elasti
 			}(shardID)
 		}
 
-		// 等待所有分片查询完成
-		wg.Wait()
 	}()
 
-	// 返回通道和 nil 错误
-	return stringChan, nil
+	// 返回通道和   错误通道
+	return stringChan, errors
 }
