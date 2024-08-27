@@ -188,12 +188,12 @@ func ToMysqlInset(con string, q query.SqlInsert) func(ch chan []string) {
 // 返回:
 //
 //	error: 错误信息，如果写入失败。
-func ToElasticSearch[T any](client *elastic.Client, index, ctype string) func(ch chan db.ElasticBluk[T]) error {
+func ToElasticSearch[T any](client *elastic.Client) func(ch chan db.ElasticBluk[T]) error {
 	return func(ch chan db.ElasticBluk[T]) error {
 
 		con := db.NewElasticSearchClient[T](client)
 
-		err := con.BulkInsert(index, ctype)(ch)
+		err := con.BulkInsert()(ch)
 		if err != nil {
 			return err
 		}

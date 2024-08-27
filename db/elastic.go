@@ -29,7 +29,7 @@ func EsSimple(host ...string) func(User, Pwd string) (*elastic.Client, error) {
 
 type ElasticBluk[U any] struct {
 	Index   string
-	Type    string
+	OpType  string
 	Id      string
 	Routing string
 	Source  U
@@ -38,7 +38,6 @@ type ElasticBluk[U any] struct {
 // 定义一个类型，添加 Index 和 ReturnFields 字段
 type ElasticSearchClient[U any] struct {
 	Client *elastic.Client
-	Index  string
 	Query  elastic.Query
 }
 
@@ -68,7 +67,7 @@ func (es *ElasticSearchClient[U]) Indexs() chan string {
 	return ch
 }
 
-func (es *ElasticSearchClient[U]) BulkInsert(index string, ctype string) func(ch chan ElasticBluk[U]) error {
+func (es *ElasticSearchClient[U]) BulkInsert() func(ch chan ElasticBluk[U]) error {
 	return func(ch chan ElasticBluk[U]) error {
 		bulkSize := 3000
 		bulkData := make([]elastic.BulkableRequest, 0, bulkSize)
@@ -97,22 +96,31 @@ func (es *ElasticSearchClient[U]) BulkInsert(index string, ctype string) func(ch
 // 假设sendBulk是一个发送批次数据到Elasticsearch的函数
 func (es *ElasticSearchClient[U]) sendBulk(data []elastic.BulkableRequest) error {
 
-	request := es.Client.Bulk()
-	_, err := request.Add(data...).Refresh("false").Do(context.TODO())
+	const maxRetries = 10
+	retries := 0
 
-	if err != nil && strings.Index(err.Error(), "429") > 0 {
-		time.Sleep(30 * time.Second)
-		es.sendBulk(data)
+	for {
+		request := es.Client.Bulk()
+		_, err := request.Add(data...).Refresh("false").Do(context.TODO())
+		if err != nil {
+			if strings.Contains(err.Error(), "429") {
+				retries++
+				if retries >= maxRetries {
+					return err
+				}
+				time.Sleep(30 * time.Second)
+				continue
+			}
+			return err
+		}
 		return nil
 	}
-
-	return err
 
 }
 
 func createdoc[U any](doc ElasticBluk[U]) elastic.BulkableRequest {
 
-	return elastic.NewBulkIndexRequest().Index(doc.Index).Type(doc.Type).
+	return elastic.NewBulkIndexRequest().Index(doc.Index).OpType(doc.OpType).
 		Routing(doc.Routing).Id(doc.Id).UseEasyJSON(true).
 		Doc(doc.Source)
 
@@ -152,7 +160,6 @@ func (es *ElasticSearchClient[U]) QueryAnyIter(index string, q any) (chan Elasti
 	go func() {
 		defer close(stringChan)
 		defer close(errors)
-		defer wg.Wait()
 
 		slice, err := es.Client.IndexGetSettings(index).Do(context.Background())
 
@@ -206,7 +213,6 @@ func (es *ElasticSearchClient[U]) QueryAnyIter(index string, q any) (chan Elasti
 
 						stringChan <- ElasticBluk[U]{
 							Index:   hit.Index,
-							Type:    hit.Type,
 							Id:      hit.Id,
 							Routing: hit.Routing,
 							Source:  results,
@@ -217,6 +223,8 @@ func (es *ElasticSearchClient[U]) QueryAnyIter(index string, q any) (chan Elasti
 
 			}(shardID)
 		}
+
+		wg.Wait()
 
 	}()
 
