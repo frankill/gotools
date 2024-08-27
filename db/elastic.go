@@ -29,7 +29,7 @@ func EsSimple(host ...string) func(User, Pwd string) (*elastic.Client, error) {
 
 // EsScriptID returns a function that creates an Elasticsearch stored script
 // with a specified ID and parameters.
-func EsScriptID(id string) func(doc map[string]any) *elastic.Script {
+func EsScriptID(id string) func(data map[string]any) *elastic.Script {
 	return func(doc map[string]any) *elastic.Script {
 		return elastic.NewScriptStored(id).Params(doc)
 	}
