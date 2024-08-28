@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 
@@ -160,9 +159,9 @@ func ToTxt(path string, append bool) func(ch chan string) error {
 // 返回:
 //
 // 一个函数， 用于执行数据库插入操作。
-func ToMysqlInset(con string, q query.SqlInsert) func(ch chan []string) {
+func ToMysqlInset(con string, q query.SqlInsert) func(ch chan []string) error {
 
-	return func(ch chan []string) {
+	return func(ch chan []string) error {
 
 		con := db.NewMysqlDB(con)
 
@@ -170,8 +169,10 @@ func ToMysqlInset(con string, q query.SqlInsert) func(ch chan []string) {
 
 		err := con.Insert(q)(ch)
 		if err != nil {
-			log.Panicln(err)
+			return err
 		}
+
+		return nil
 	}
 
 }
