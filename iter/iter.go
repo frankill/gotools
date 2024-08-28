@@ -741,3 +741,54 @@ func Window[T any](windowSize int, ch chan T) chan []T {
 
 	return out
 }
+
+func Split[T any](fn func(T) int, num int) func(ch chan T) []chan T {
+	// 创建一个包含 num 个通道的切片
+	a := make([]chan T, num)
+	for i := 0; i < num; i++ {
+		a[i] = make(chan T)
+	}
+
+	return func(ch chan T) []chan T {
+		go func() {
+			defer func() {
+				for _, v := range a {
+					close(v)
+				}
+			}()
+
+			for v := range ch {
+				// 确保 fn(v) 不超出通道切片的范围
+				index := fn(v)
+				if index >= 0 && index < num {
+					a[index] <- v
+				}
+			}
+		}()
+
+		return a
+	}
+}
+
+// Maps 将函数 `fn` 应用于每个通道 `cs` 并返回一个接收结果的通道。
+func Maps[T any, U any](fn func(chan T) U) func(cs ...chan T) chan U {
+	return func(cs ...chan T) chan U {
+		out := make(chan U, len(cs))
+		var wg sync.WaitGroup
+
+		go func() {
+			defer close(out)
+			for _, c := range cs {
+				wg.Add(1)
+				go func(ch chan T) {
+					defer wg.Done()
+					// 将 fn 结果发送到 out 通道
+					out <- fn(ch)
+				}(c)
+			}
+			wg.Wait()
+		}()
+
+		return out
+	}
+}

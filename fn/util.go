@@ -32,13 +32,13 @@ func StringToInt(str string) int {
 // StrToInt converts a string to an integer in the range [0, num). It first computes
 // the MD5 hash of the string, then computes the CRC32 checksum of the hash,
 // and finally takes modulo num to ensure the result is in the specified range.
-func StrToInt(str string, num int) string {
+func StrToInt(str string, num int) int {
 	if num <= 0 {
-		return "0" // Handle invalid range
+		return 0 // Handle invalid range
 	}
 
 	md5Res := Md5(str)
 	crc32IntRes := StringToInt(Crc32(md5Res))
 
-	return fmt.Sprintf("%d", crc32IntRes%num)
+	return crc32IntRes % num
 }
