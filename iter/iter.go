@@ -771,19 +771,19 @@ func Split[T any](fn func(T) int, num int) func(ch chan T) []chan T {
 }
 
 // Maps 将函数 `fn` 应用于每个通道 `cs` 并返回一个接收结果的通道。
-func Maps[T any, U any](fn func(chan T) U) func(cs ...chan T) chan U {
+func Maps[T any, U any](fn func(ch chan T, num int) U) func(cs ...chan T) chan U {
 	return func(cs ...chan T) chan U {
 		out := make(chan U, len(cs))
 		var wg sync.WaitGroup
 
 		go func() {
 			defer close(out)
-			for _, c := range cs {
+			for loc, c := range cs {
 				wg.Add(1)
 				go func(ch chan T) {
 					defer wg.Done()
 					// 将 fn 结果发送到 out 通道
-					out <- fn(ch)
+					out <- fn(ch, loc)
 				}(c)
 			}
 			wg.Wait()
