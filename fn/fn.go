@@ -35,7 +35,7 @@ type FuncWrapper struct {
 }
 
 // NewFuncWrapper 创建一个新的 FuncWrapper 实例，初始化时只设置函数，参数为空。
-func NewFuncWrapper(f FuncType) *FuncWrapper {
+func NewFunc(f FuncType) *FuncWrapper {
 	if !isFunction(f) {
 		log.Fatalln("Invalid function type.")
 	}
@@ -79,3 +79,5 @@ func (fw *FuncWrapper) Call(args ...any) any {
 func (fw *FuncWrapper) Clone() *FuncWrapper {
 	return &FuncWrapper{fun: fw.fun, params: fw.params}
 }
+
+
