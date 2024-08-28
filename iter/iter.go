@@ -720,7 +720,7 @@ func GroupBy[U cmp.Ordered, T any, K comparable](by chan K, data chan T, order c
 //   - 输出通道，其中包含滚动窗口的数据切片。
 func Window[T any](windowSize int, ch chan T) chan []T {
 	window := make([]T, 0, windowSize)
-	out := make(chan []T, 3)
+	out := make(chan []T, BufferSize)
 
 	go func() {
 		defer close(out)
@@ -746,7 +746,7 @@ func Split[T any](fn func(T) int, num int) func(ch chan T) []chan T {
 	// 创建一个包含 num 个通道的切片
 	a := make([]chan T, num)
 	for i := 0; i < num; i++ {
-		a[i] = make(chan T)
+		a[i] = make(chan T, BufferSize)
 	}
 
 	return func(ch chan T) []chan T {
