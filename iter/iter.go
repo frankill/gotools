@@ -742,6 +742,13 @@ func Window[T any](windowSize int, ch chan T) chan []T {
 	return out
 }
 
+// Split 将通道中的数据分组
+// 参数:
+//   - fn: 一个函数，接受一个类型为 T 的值，返回一个整数值，表示该值属于哪个分组。
+//   - num: 分组的数量。
+// 返回:
+//   - 一个函数，接受一个通道，返回一个包含 num 个通道的切片。
+
 func Split[T any](fn func(T) int, num int) func(ch chan T) []chan T {
 	// 创建一个包含 num 个通道的切片
 	a := make([]chan T, num)
@@ -770,21 +777,27 @@ func Split[T any](fn func(T) int, num int) func(ch chan T) []chan T {
 	}
 }
 
-// Maps 将函数 `fn` 应用于每个通道 `cs` 并返回一个接收结果的通道。
+// Maps 将多个通道中的数据进行映射
+// 参数:
+//   - fn: 一个函数，接受一个类型为 T 的值 ，类型为int的通道位置，返回一个类型为 U 的值。
+//   - cs: 一个包含多个通道的切片。
+//
+// 返回:
+//   - 一个通道，用于接收映射后的数据。
 func Maps[T any, U any](fn func(ch chan T, num int) U) func(cs ...chan T) chan U {
 	return func(cs ...chan T) chan U {
-		out := make(chan U, len(cs))
+		out := make(chan U, len(cs)) // 创建接收结果的通道
 		var wg sync.WaitGroup
 
 		go func() {
 			defer close(out)
 			for loc, c := range cs {
 				wg.Add(1)
-				go func(ch chan T) {
+				go func(index int, ch chan T) {
 					defer wg.Done()
 					// 将 fn 结果发送到 out 通道
-					out <- fn(ch, loc)
-				}(c)
+					out <- fn(ch, index)
+				}(loc, c)
 			}
 			wg.Wait()
 		}()
