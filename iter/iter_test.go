@@ -469,7 +469,7 @@ func TestFind(t *testing.T) {
 			close(inputCh) // 关闭通道，表示数据写入完毕
 
 			// 使用 Find 函数
-			result := iter.Find(tt.f)(inputCh)
+			result := iter.First(tt.f)(inputCh)
 
 			// 比较结果和期望结果
 			if result != tt.expected {

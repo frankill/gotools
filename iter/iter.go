@@ -295,15 +295,42 @@ func Partition[T any](f func(x T) bool) func(ch chan T) (chan T, chan T) {
 //   - 从输入通道 ch 中读取数据，应用函数 f 来检查每个值是否满足条件。
 //   - 如果找到第一个满足条件的值，则返回该值。
 //   - 如果通道关闭且没有找到满足条件的值，则返回类型 T 的零值。
-func Find[T any](f func(x T) bool) func(ch chan T) T {
+func First[T any](f func(x T) bool) func(ch chan T) T {
 
 	return func(ch chan T) T {
+
+		var result T
 		for v := range ch {
 			if f(v) {
 				return v
 			}
 		}
+
+		return result
+	}
+}
+
+// Last 从通道中查找最后一个满足条件的值。
+// 参数:
+//   - f: 一个函数，接受一个类型为 T 的值，返回一个布尔值，表示该值是否满足条件。
+//   - ch: 一个通道，通道中的值是类型为 T 的数据。
+//
+// 返回:
+//   - 最后一个满足条件的值。如果通道中的值都不满足条件，返回类型 T 的零值。
+//
+// 函数功能:
+//   - 从输入通道 ch 中读取数据，应用函数 f 来检查每个值是否满足条件。
+//   - 如果找到最后一个满足条件的值，则返回该值。
+//   - 如果通道关闭且没有找到满足条件的值，则返回类型 T 的零值。
+func Last[T any](f func(x T) bool) func(ch chan T) T {
+	return func(ch chan T) T {
+
 		var result T
+		for v := range ch {
+			if f(v) {
+				result = v
+			}
+		}
 		return result
 	}
 }
