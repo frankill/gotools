@@ -58,7 +58,7 @@ func main() {
 				}
 				return true
 			})(
-				iter.FromArray(Identity[int])(array.ArraySeq(1, 100, 1)),
+				iter.FromArray(iter.Identity[int])(array.ArraySeq(1, 100, 1)),
 			),
 		),
 	)
@@ -89,7 +89,7 @@ func main() {
 
 	pipe.SetStart(func() chan []string { return input })
 
-	pipe.SetEnd(iter.ToCsv("pipe.csv"))
+	pipe.SetEnd( func ( ch chan []string) {iter.ToCsv("pipe.csv",false)(ch)} )
 
 	pipe.AddStep(iter.Map(func(x []string) []string { return append(x, "test") }))
 
