@@ -37,6 +37,7 @@ func ErrorCH(ch chan error) {
 // 返回:
 //
 // 一个通道，用于接收从 gzip 文件中读取的数据。
+// 一个通道，用于接收错误信息
 func FromGzip(path string) func(skip int) (chan string, chan error) {
 	return func(skip int) (chan string, chan error) {
 		ch := make(chan string, BufferSize)
@@ -85,6 +86,7 @@ func FromGzip(path string) func(skip int) (chan string, chan error) {
 // 返回:
 //
 // 一个通道，用于接收从文件中读取的数据。
+// 一个通道，用于接收错误信息
 func FromJson[T any](path string) func(skip int) (chan T, chan error) {
 
 	return func(skip int) (chan T, chan error) {
@@ -135,6 +137,7 @@ func FromJson[T any](path string) func(skip int) (chan T, chan error) {
 // 返回:
 //
 // 一个通道，用于接收从文件中读取的数据。
+// error: 错误信息
 func FromTxt(path string) func(skip int) (chan string, chan error) {
 
 	return func(skip int) (chan string, chan error) {
@@ -178,7 +181,7 @@ type ftype struct {
 // FromMysqlQuery 从 MySQL 数据库中执行查询并返回数据通道。
 // 参数:
 //
-//	query: 执行的 SQL 查询语句。
+//	query: *query.SQLBuilder - 查询语句
 //
 // 返回:
 //
@@ -319,12 +322,12 @@ func convertToGoType(field ftype, value []byte) error {
 // 使用 SQL 查询字符串。
 // 参数:
 //
-//	queryStr: SQL 查询字符串。
+//	query - *SQLBuilder 类型的结构体，用于构建 SQL 查询语句。
 //
 // 返回:
 //
 //	chan []string: 查询结果数据通道。
-
+//	error: 错误信息，如果查询失败。
 func FromMysqlStr(con string) func(query *query.SQLBuilder) (chan []string, chan error) {
 
 	return func(query *query.SQLBuilder) (chan []string, chan error) {
@@ -390,7 +393,8 @@ func FromMysqlStr(con string) func(query *query.SQLBuilder) (chan []string, chan
 //
 // 返回:
 //
-//	chan interface{}: 查询结果数据通道。
+//	chan db.ElasticBluk[T]: 数据通道。
+//	chan error: 错误通道。
 func FromElasticSearch[T any](client *elastic.Client) func(index string, query any) (chan db.ElasticBluk[T], chan error) {
 	return func(index string, query any) (chan db.ElasticBluk[T], chan error) {
 
@@ -461,6 +465,7 @@ func FromMap[K comparable, V any](m map[K]V) func() chan array.Pair[K, V] {
 //
 // 返回:
 //   - 一个通道，通道中的值是读取的 CSV 文件中的每一行数据，每一行数据是一个字符串切片（[]string）。
+//   - 一个通道，通道中的值是读取 CSV 文件时发生的错误。
 func FromCsv(path string) func(header bool) (chan []string, chan error) {
 
 	return func(header bool) (chan []string, chan error) {
@@ -513,15 +518,16 @@ func FromCsv(path string) func(header bool) (chan []string, chan error) {
 	}
 }
 
-// FromTable 从指定的表格文件路径读取数据，并将其以切片的形式发送到通道。
+// FromTable 从指定的文本文件路径读取数据，并将其以切片的形式发送到通道。
 // 参数:
 //
-//   - path: 表格文件的路径，字符串类型。
+//   - path: 文本文件的路径，字符串类型。
 //   - header: 是否包含表头，布尔类型。
-//   - seq: 表格文件的分隔符，字符串类型。
+//   - seq: 文本文件的分隔符，字符串类型。
 //
 // 返回:
 //   - 一个通道，通道中的值是读取的表格文件中的每一行数据，每一行数据是一个字符串切片（[]string）。
+//   - 一个通道，通道中的值是读取表格文件时发生的错误。
 func FromTable(path string) func(header bool, seq string, escape byte) (chan []string, chan error) {
 
 	return func(header bool, seq string, escape byte) (chan []string, chan error) {
@@ -578,6 +584,7 @@ func FromTable(path string) func(header bool, seq string, escape byte) (chan []s
 //   - header: 是否包含表头，布尔类型。
 //
 // 返回:
+//   - 一个通道，通道中的值是读取的 Excel 文件中的每一行数据，每一行数据是一个字符串切片（[]string）。
 //   - 一个通道，通道中的值是读取的 Excel 文件中的每一行数据，每一行数据是一个字符串切片（[]string）。
 func FromExcel(path string) func(sheet string, header bool) (chan []string, chan error) {
 
