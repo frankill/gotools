@@ -312,17 +312,14 @@ func (sb *SQLBuilder) Build() string {
 	return sql.String()
 }
 
+// EsQuery 用于构建 Elasticsearch 查询
 type EsQuery struct {
-	querys []elastic.Query
-	typ    string
+	querys   []elastic.Query
+	typ      string
+	shoudnum int
 }
 
-func NewQuery() *EsQuery {
-	return &EsQuery{
-		typ: "",
-	}
-}
-
+// NewFilterQuery 创建一个新的过滤器查询
 func NewFilterQuery() *EsQuery {
 	return &EsQuery{
 		typ:    "filter",
@@ -330,6 +327,7 @@ func NewFilterQuery() *EsQuery {
 	}
 }
 
+// NewMustQuery 创建一个新的must查询
 func NewMustQuery() *EsQuery {
 	return &EsQuery{
 		typ:    "must",
@@ -337,6 +335,7 @@ func NewMustQuery() *EsQuery {
 	}
 }
 
+// NewMustNotQuery 创建一个新的must_not查询
 func NewMustNotQuery() *EsQuery {
 	return &EsQuery{
 		typ:    "must_not",
@@ -344,139 +343,167 @@ func NewMustNotQuery() *EsQuery {
 	}
 }
 
-func NewShouldQuery() *EsQuery {
+// NewShouldQuery 创建一个新的should查询
+func NewShouldQuery(num int) *EsQuery {
 	return &EsQuery{
-		typ:    "should",
-		querys: make([]elastic.Query, 0),
+		typ:      "should",
+		querys:   make([]elastic.Query, 0),
+		shoudnum: num,
 	}
 }
 
+// Eq 方法用于生成 field = value 的term语句
 func (q *EsQuery) Eq(field string, value any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewTermQuery(field, value))
 	return q
 }
 
+// In 方法用于生成 field IN (value1, value2, ...) 的terms语句
 func (q *EsQuery) In(field string, values ...any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewTermsQuery(field, values...))
 	return q
 }
 
+// NotIn 方法用于生成 field NOT IN (value1, value2, ...) 的terms语句
 func (q *EsQuery) NotIn(field string, values ...any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewTermsQuery(field, values...)))
 	return q
 }
 
+// Range 方法用于生成 field  > value 的range语句
 func (q *EsQuery) Gt(field string, value any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewRangeQuery(field).Gt(value))
 	return q
 }
 
+// Range 方法用于生成 field  >= value 的range语句
 func (q *EsQuery) Gte(field string, value any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewRangeQuery(field).Gte(value))
 	return q
 }
 
+// Range 方法用于生成 field  < value 的range语句
 func (q *EsQuery) Lt(field string, value any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewRangeQuery(field).Lt(value))
 	return q
 }
 
+// Range 方法用于生成 field  <= value 的range语句
 func (q *EsQuery) Lte(field string, value any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewRangeQuery(field).Lte(value))
 	return q
 }
 
+// Range 方法用于生成 field  != value 的range语句
 func (q *EsQuery) Neq(field string, value any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewTermQuery(field, value)))
 	return q
 }
 
+// Like 方法用于生成正则查询语句
 func (q *EsQuery) Like(field string, value string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewRegexpQuery(field, value))
 	return q
 }
 
+// Wildcard 方法用于生成通配符查询语句
 func (q *EsQuery) Wildcard(field string, value string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewWildcardQuery(field, value))
 	return q
 }
 
+// prefix 用于生成 前缀查询语句
 func (q *EsQuery) Prefix(field string, value string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewPrefixQuery(field, value))
 	return q
 }
 
+// fuzzy 用于生成 模糊查询语句
 func (q *EsQuery) Fuzzy(field string, value string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewFuzzyQuery(field, value))
 	return q
 }
 
+// NotLike 方法用于生成正则查询语句的not结果
 func (q *EsQuery) NotLike(field string, value string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewRegexpQuery(field, value)))
 	return q
 }
 
+// NotPrefix 用于生成前缀查询语句的not结果
 func (q *EsQuery) NotPrefix(field string, value string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewPrefixQuery(field, value)))
 	return q
 }
 
+// NotWildcard 用于生成通配符查询语句的not结果
 func (q *EsQuery) NotWildcard(field string, value string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewWildcardQuery(field, value)))
 	return q
 }
 
-func (q *EsQuery) Script(script string, params map[string]interface{}, lang string) *EsQuery {
+// Script 方法用于生成脚本查询
+func (q *EsQuery) Script(script string, params map[string]any, lang string) *EsQuery {
 	scriptQuery := elastic.NewScript(script).Params(params).Lang(lang)
 	q.querys = append(q.querys, elastic.NewScriptQuery(scriptQuery))
 	return q
 }
 
+// ScriptID 方法用于生成脚本查询
 func (q *EsQuery) ScriptID(scriptID string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewScriptQuery(elastic.NewScriptStored(scriptID)))
 	return q
 }
 
+// Exists 方法用于生成exists查询，检查字段是否存在
 func (q *EsQuery) Exists(field string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewExistsQuery(field))
 	return q
 }
 
+// NotExists 方法用于生成exists查询，检查字段是否不存在
 func (q *EsQuery) NotExists(field string) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(elastic.NewExistsQuery(field)))
 	return q
 }
 
+// Range 方法用于生成 field  between lower and upper 的range语句
 func (q *EsQuery) Between(field string, lower, upper any) *EsQuery {
 	q.querys = append(q.querys, elastic.NewRangeQuery(field).Gte(lower).Lte(upper))
 	return q
 }
 
+// Should 方法用于生成should查询
 func (q *EsQuery) Should(clauses *EsQuery, should int) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().Should(clauses.querys...).MinimumNumberShouldMatch(should))
 	return q
 }
 
+// Must 方法用于生成must查询
 func (q *EsQuery) Must(clauses *EsQuery) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().Must(clauses.querys...))
 	return q
 }
 
+// MustNot 方法用于生成must_not查询
 func (q *EsQuery) MustNot(clauses *EsQuery) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().MustNot(clauses.querys...))
 	return q
 }
 
+// Filter 方法用于生成filter查询
 func (q *EsQuery) Filter(clauses *EsQuery) *EsQuery {
 	q.querys = append(q.querys, elastic.NewBoolQuery().Filter(clauses.querys...))
 	return q
 }
 
-func (q *EsQuery) Where(clauses *EsQuery) *EsQuery {
-	q.querys = append(q.querys, clauses.querys...)
-	return q
-}
+// // Where 方法用于生成where查询
+// func (q *EsQuery) Where(clauses *EsQuery) *EsQuery {
+// 	q.querys = append(q.querys, clauses.querys...)
+// 	return q
+// }
 
+// Build 方法用于生成es查询
 func (q *EsQuery) Build() elastic.Query {
 
 	if q.typ == "filter" {
@@ -486,11 +513,12 @@ func (q *EsQuery) Build() elastic.Query {
 	} else if q.typ == "must_not" {
 		return elastic.NewBoolQuery().MustNot(q.querys...)
 	} else if q.typ == "should" {
-		return elastic.NewBoolQuery().Should(q.querys...)
+		return elastic.NewBoolQuery().Should(q.querys...).MinimumNumberShouldMatch(q.shoudnum)
 	}
 	return nil
 }
 
+// Source 方法用于获取es查询语句
 func (q *EsQuery) Source() string {
 	source, _ := q.Build().Source()
 	b, _ := json.Marshal(source)

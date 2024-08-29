@@ -7,38 +7,47 @@ import (
 	"strconv"
 )
 
-// Md5 returns the MD5 hash of the given string in hexadecimal format.
+// Md5 返回一个字符串的md5
+// 参数：string
+// 返回：string
 func Md5(str string) string {
 	data := []byte(str)
 	has := md5.Sum(data)
 	return fmt.Sprintf("%x", has)
 }
 
-// Crc32 returns the CRC32 checksum of the given string in decimal format.
+// Crc32 返回一个字符串的crc32
+// 参数：string
+// 返回：string
 func Crc32(str string) string {
 	data := []byte(str)
 	return fmt.Sprint(crc32.ChecksumIEEE(data))
 }
 
-// StringToInt converts a string to an integer. Returns 0 if conversion fails.
-func StringToInt(str string) int {
+func sToInt(str string) int {
 	int64Val, err := strconv.Atoi(str)
 	if err != nil {
-		return 0 // Default value or handle the error as needed
+		return 0
 	}
 	return int64Val
 }
 
-// StrToInt converts a string to an integer in the range [0, num). It first computes
-// the MD5 hash of the string, then computes the CRC32 checksum of the hash,
-// and finally takes modulo num to ensure the result is in the specified range.
+// StrToInt 将字符串转换为int, 首先计算md5, 然后计算crc32, 然后取余
+// 参数:
+//
+//	str - 字符串
+//	num - int范围
+//
+// 返回:
+//
+//	转换后的int
 func StrToInt(str string, num int) int {
 	if num <= 0 {
 		return 0 // Handle invalid range
 	}
 
 	md5Res := Md5(str)
-	crc32IntRes := StringToInt(Crc32(md5Res))
+	crc32IntRes := sToInt(Crc32(md5Res))
 
 	return crc32IntRes % num
 }

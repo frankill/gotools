@@ -1,10 +1,81 @@
 package query_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/frankill/gotools/query"
 )
+
+func TestEsQuery_MultipleQueries(t *testing.T) {
+	// 创建一个新的EsQuery实例
+	query := query.NewMustQuery()
+
+	// 使用Eq方法添加一个查询条件
+	query.Eq("fieldName1", "value1")
+
+	// 使用In方法添加一个查询条件
+	query.In("fieldName2", "value2", "value3")
+
+	// 使用Gt方法添加一个查询条件
+	query.Gt("fieldName3", 10)
+
+	// 构建查询
+	buildQuery := query.Build()
+
+	// 断言构建的查询不为空
+	if buildQuery == nil {
+		t.Errorf("Expected non-nil query, got nil")
+	}
+
+	// 将查询序列化为JSON字符串，以便检查
+	source, err := buildQuery.Source()
+	if err != nil {
+		t.Fatalf("Failed to get query source: %v", err)
+	}
+	b, err := json.Marshal(source)
+	if err != nil {
+		t.Fatalf("Failed to marshal query source: %v", err)
+	}
+
+	// 期望的查询条件JSON字符串
+	expected := `{"bool":{"must":[{"term":{"fieldName1":"value1"}},{"terms":{"fieldName2":["value2","value3"]}},{"range":{"fieldName3":{"from":10,"include_lower":false,"include_upper":true,"to":null}}}]}}`
+	if string(b) != expected {
+		t.Errorf("Expected query %s, got %s", expected, string(b))
+	}
+}
+
+func TestEsQuery_Eq(t *testing.T) {
+	// 创建一个新的EsQuery实例
+	query := query.NewMustQuery()
+
+	// 使用Eq方法添加一个查询条件
+	query.Eq("fieldName", "value")
+
+	// 构建查询
+	buildQuery := query.Build()
+
+	// 断言构建的查询不为空
+	if buildQuery == nil {
+		t.Errorf("Expected non-nil query, got nil")
+	}
+
+	// 将查询序列化为JSON字符串，以便检查
+	source, err := buildQuery.Source()
+	if err != nil {
+		t.Fatalf("Failed to get query source: %v", err)
+	}
+	b, err := json.Marshal(source)
+	if err != nil {
+		t.Fatalf("Failed to marshal query source: %v", err)
+	}
+
+	// 期望的查询条件JSON字符串
+	expected := `{"bool":{"must":{"term":{"fieldName":"value"}}}}`
+	if string(b) != expected {
+		t.Errorf("Expected query %s, got %s", expected, string(b))
+	}
+}
 
 // 示例测试函数 TestSQLBuilder_Build 测试 SQLBuilder 的功能
 func TestSQLBuilder_Build(t *testing.T) {
