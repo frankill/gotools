@@ -1713,7 +1713,7 @@ func ArraySequenceCount[A ~[]T, T comparable](arr1 A, arr2 A) int {
 //	当需要从切片中快速查找某个元素是否存在时，可以将切片转换为映射，利用映射的O(1)查找复杂度。
 //	该函数非常有用，因为它可以快速地创建一个唯一的键集合，从而节省内存空间。
 func ArrayToMap[K comparable](arr []K) map[K]struct{} {
-	m := make(map[K]struct{})
+	m := make(map[K]struct{}, len(arr))
 	for _, v := range arr {
 		m[v] = struct{}{}
 	}
