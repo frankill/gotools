@@ -1,7 +1,6 @@
 package iter
 
 import (
-	"cmp"
 	"sync"
 
 	"github.com/frankill/gotools/array"
@@ -477,6 +476,17 @@ func Union[T any](chs ...chan T) chan T {
 	return out
 }
 
+// Intersection 返回两个通道的交集
+// 参数:
+//   - ch1: 一个通道，通道中的值是类型为 T 的数据。
+//   - ch2: 一个通道，通道中的值是类型为 T 的数据。
+//
+// 返回:
+//   - 一个通道，通道中的值是类型为 T 的数据，表示两个通道的交集。
+//
+// 注意:
+// 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
+// 如果第二个通道数据很多，要考虑内存占用问题。
 func Intersection[T comparable](ch1 chan T, ch2 chan T) chan T {
 
 	ch := make(chan T, BufferSize)
@@ -499,6 +509,17 @@ func Intersection[T comparable](ch1 chan T, ch2 chan T) chan T {
 
 }
 
+// Subtract 返回两个通道的差集
+// 参数:
+//   - ch1: 一个通道，通道中的值是类型为 T 的数据。
+//   - ch2: 一个通道，通道中的值是类型为 T 的数据。
+//
+// 返回:
+//   - 一个通道，通道中的值是类型为 T 的数据，表示两个通道的差集。
+//
+// 注意:
+// 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
+// 如果第二个通道数据很多，要考虑内存占用问题。
 func Subtract[T comparable](ch1 chan T, ch2 chan T) chan T {
 
 	ch := make(chan T, BufferSize)
@@ -520,6 +541,17 @@ func Subtract[T comparable](ch1 chan T, ch2 chan T) chan T {
 	return ch
 }
 
+// Cartesian 生成笛卡尔积
+// 参数:
+//   - ch1: 一个通道，通道中的值是类型为 T 的数据。
+//   - ch2: 一个通道，通道中的值是类型为 T 的数据。
+//
+// 返回:
+//   - 一个通道，通道中的值是类型为 array.Pair[T, T] 的数据，表示笛卡尔积。
+//
+// 注意:
+// 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
+// 如果第二个通道数据很多，要考虑内存占用问题。
 func Cartesian[T any](ch1 chan T, ch2 chan T) chan array.Pair[T, T] {
 
 	ch := make(chan array.Pair[T, T], BufferSize)
@@ -547,32 +579,6 @@ func Cartesian[T any](ch1 chan T, ch2 chan T) chan array.Pair[T, T] {
 
 	return ch
 
-}
-
-func GroupBy[U cmp.Ordered, T any, K comparable](by chan K, data chan T, order chan U) chan array.Pair[K, []T] {
-	ch := make(chan array.Pair[K, []T], BufferSize)
-
-	go func() {
-		defer close(ch)
-
-		// 收集所有通道的数据
-		keys := Collect(by)
-		values := Collect(data)
-		orders := Collect(order)
-
-		// 使用 GroupByOrder 分组数据
-		group := array.GroupByOrder(keys, values, orders)
-
-		// 将分组结果发送到结果通道
-		for k, v := range group {
-			ch <- array.Pair[K, []T]{
-				First:  k,
-				Second: v,
-			}
-		}
-	}()
-
-	return ch
 }
 
 // Window 滚动窗口函数

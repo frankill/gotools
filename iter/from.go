@@ -184,13 +184,6 @@ type ftype struct {
 //
 //	chan T: 查询结果数据通道
 //	error: 错误信息，如果查询失败。
-//
-// 示例:
-//
-//	resultChan, err := FromMysqlQuery("SELECT * FROM table WHERE condition")
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
 func FromMysqlQuery[T any](con string) func(query *query.SQLBuilder) (chan T, chan error) {
 
 	return func(query *query.SQLBuilder) (chan T, chan error) {
