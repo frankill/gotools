@@ -177,6 +177,17 @@ func ToMysqlInset(con string, q query.SqlInsert) func(ch chan []string) error {
 
 }
 
+// ToCKInsert 方法将通道中的数据插入到 ClickHouse 数据库中
+// 参数:
+//
+// ck *db.CKinfo - *db.CKinfo 类型的结构体，用于构建 ck 客户端信息
+//
+//	q - *SQLBuilder 类型的结构体，用于构建 SQL 查询语句。
+//	ch - 一个通道，用于接收待插入的数据。
+//
+// 返回:
+//
+// 一个函数， 用于执行数据库插入操作。
 func ToCK(ck *db.CKinfo, q query.SqlInsert) func(ch chan []string) error {
 
 	return func(ch chan []string) error {
