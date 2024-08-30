@@ -446,14 +446,14 @@ func FromMysql[T any](con string) func(query *query.SQLBuilder) (chan T, chan er
 			defer close(ch)
 			defer close(errs)
 
-			db, err := sql.Open("mysql", con)
+			con, err := sql.Open("mysql", con)
 			if err != nil {
 				errs <- err
 				return
 			}
-			defer db.Close()
+			defer con.Close()
 
-			rows, err := db.Query(query_)
+			rows, err := con.Query(query_)
 			if err != nil {
 				errs <- err
 				return
@@ -479,7 +479,7 @@ func FromMysql[T any](con string) func(query *query.SQLBuilder) (chan T, chan er
 				if tag, ok := field.Tag.Lookup("sql"); ok {
 					var tmp ftype
 					tmp.t = v.Field(i)
-					tmp.n = mysqlFieldType(tmp.t)
+					tmp.n = fieldType(tmp.t)
 					fieldMap[tag] = tmp
 				}
 			}
@@ -493,7 +493,7 @@ func FromMysql[T any](con string) func(query *query.SQLBuilder) (chan T, chan er
 				for i, column := range columns {
 					if field, ok := fieldMap[column]; ok {
 						rawBytes := columnValues[i].(*sql.RawBytes)
-						if err := mysqlConvertToGoType(field, *rawBytes); err != nil {
+						if err := convertToGoType(field, *rawBytes); err != nil {
 							errs <- err
 							return
 						}
@@ -508,7 +508,80 @@ func FromMysql[T any](con string) func(query *query.SQLBuilder) (chan T, chan er
 	}
 }
 
-func mysqlFieldType(field reflect.Value) int {
+func FromCK[T any](user, pwd, database string, host ...string) func(query *query.SQLBuilder) (chan T, chan error) {
+
+	return func(query *query.SQLBuilder) (chan T, chan error) {
+
+		query_ := query.Build()
+
+		ch := make(chan T, BufferSize)
+		errs := make(chan error, 1)
+
+		go func() {
+
+			defer close(ch)
+			defer close(errs)
+
+			con := db.NewCK(user, pwd, database, host...).Con
+
+			defer con.Close()
+
+			rows, err := con.Query(query_)
+			if err != nil {
+				errs <- err
+				return
+			}
+
+			columns, err := rows.Columns()
+			if err != nil {
+				errs <- err
+				return
+			}
+
+			columnValues := make([]interface{}, len(columns))
+			for i := range columnValues {
+				columnValues[i] = new(sql.RawBytes)
+			}
+
+			instance := new(T)
+			v := reflect.ValueOf(instance).Elem()
+			fieldMap := make(map[string]ftype, len(columns))
+			t := reflect.TypeOf(instance).Elem()
+			for i := 0; i < t.NumField(); i++ {
+				field := t.Field(i)
+				if tag, ok := field.Tag.Lookup("sql"); ok {
+					var tmp ftype
+					tmp.t = v.Field(i)
+					tmp.n = fieldType(tmp.t)
+					fieldMap[tag] = tmp
+				}
+			}
+
+			for rows.Next() {
+				if err := rows.Scan(columnValues...); err != nil {
+					errs <- err
+					return
+				}
+
+				for i, column := range columns {
+					if field, ok := fieldMap[column]; ok {
+						rawBytes := columnValues[i].(*sql.RawBytes)
+						if err := convertToGoType(field, *rawBytes); err != nil {
+							errs <- err
+							return
+						}
+					}
+				}
+
+				ch <- *instance
+			}
+		}()
+
+		return ch, errs
+	}
+}
+
+func fieldType(field reflect.Value) int {
 
 	switch field.Kind() {
 	case reflect.String:
@@ -527,7 +600,7 @@ func mysqlFieldType(field reflect.Value) int {
 }
 
 // Converts raw database bytes to Go native types, handling NULL values and missing fields.
-func mysqlConvertToGoType(field ftype, value []byte) error {
+func convertToGoType(field ftype, value []byte) error {
 
 	switch field.n {
 	case 1:
