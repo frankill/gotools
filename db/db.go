@@ -286,26 +286,30 @@ func (m *DB) QueryAny(query *query.SQLBuilder) func() ([][]string, error) {
 // 返回:
 //
 //	一个函数，返回一个通道，用于发送查询结果的每一行数据，以及可能的错误。
-func (m *DB) QueryAnyIter(query *query.SQLBuilder) func() (chan []string, error) {
+func (m *DB) QueryAnyIter(query *query.SQLBuilder) func() (chan []string, chan error) {
 
-	query_ := query.Build()
-	return func() (chan []string, error) {
+	return func() (chan []string, chan error) {
+		query_ := query.Build()
 		ch := make(chan []string, 100)
-
-		rows, err := m.Con.Query(query_)
-
-		if err != nil {
-			return nil, err
-		}
-
-		columns, err := rows.Columns()
-
-		if err != nil {
-			return nil, err
-		}
+		errs := make(chan error, 1)
 
 		go func() {
 			defer close(ch)
+			defer close(errs)
+
+			rows, err := m.Con.Query(query_)
+			if err != nil {
+				errs <- err
+				return
+			}
+
+			columns, err := rows.Columns()
+
+			if err != nil {
+				errs <- err
+				return
+			}
+			defer m.Con.Close()
 
 			lc := len(columns)
 			for rows.Next() {
@@ -317,7 +321,8 @@ func (m *DB) QueryAnyIter(query *query.SQLBuilder) func() (chan []string, error)
 
 				err := rows.Scan(rowPointers...)
 				if err != nil {
-					log.Fatalln(err)
+					errs <- err
+					return
 				}
 
 				ch <- array.ArrayMap(func(i ...sql.NullString) string {
@@ -326,7 +331,7 @@ func (m *DB) QueryAnyIter(query *query.SQLBuilder) func() (chan []string, error)
 			}
 		}()
 
-		return ch, nil
+		return ch, errs
 
 	}
 

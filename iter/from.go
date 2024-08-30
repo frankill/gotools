@@ -173,217 +173,6 @@ func FromTxt(path string) func(skip int) (chan string, chan error) {
 	}
 }
 
-type ftype struct {
-	t reflect.Value
-	n int
-}
-
-// FromMysqlQuery 从 MySQL 数据库中执行查询并返回数据通道。
-// 参数:
-//
-//	query: *query.SQLBuilder - 查询语句
-//
-// 返回:
-//
-//	chan T: 查询结果数据通道
-//	error: 错误信息，如果查询失败。
-func FromMysqlQuery[T any](con string) func(query *query.SQLBuilder) (chan T, chan error) {
-
-	return func(query *query.SQLBuilder) (chan T, chan error) {
-
-		query_ := query.Build()
-
-		ch := make(chan T, BufferSize)
-		errs := make(chan error, 1)
-
-		go func() {
-
-			defer close(ch)
-			defer close(errs)
-
-			db, err := sql.Open("mysql", con)
-			if err != nil {
-				errs <- err
-				return
-			}
-			defer db.Close()
-
-			rows, err := db.Query(query_)
-			if err != nil {
-				errs <- err
-				return
-			}
-
-			columns, err := rows.Columns()
-			if err != nil {
-				errs <- err
-				return
-			}
-
-			columnValues := make([]interface{}, len(columns))
-			for i := range columnValues {
-				columnValues[i] = new(sql.RawBytes)
-			}
-
-			instance := new(T)
-			v := reflect.ValueOf(instance).Elem()
-			fieldMap := make(map[string]ftype, len(columns))
-			t := reflect.TypeOf(instance).Elem()
-			for i := 0; i < t.NumField(); i++ {
-				field := t.Field(i)
-				if tag, ok := field.Tag.Lookup("sql"); ok {
-					var tmp ftype
-					tmp.t = v.Field(i)
-					tmp.n = fieldType(tmp.t)
-					fieldMap[tag] = tmp
-				}
-			}
-
-			for rows.Next() {
-				if err := rows.Scan(columnValues...); err != nil {
-					errs <- err
-					return
-				}
-
-				for i, column := range columns {
-					if field, ok := fieldMap[column]; ok {
-						rawBytes := columnValues[i].(*sql.RawBytes)
-						if err := convertToGoType(field, *rawBytes); err != nil {
-							errs <- err
-							return
-						}
-					}
-				}
-
-				ch <- *instance
-			}
-		}()
-
-		return ch, errs
-	}
-}
-
-func fieldType(field reflect.Value) int {
-
-	switch field.Kind() {
-	case reflect.String:
-		return 1
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return 2
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return 3
-	case reflect.Float32, reflect.Float64:
-		return 4
-	case reflect.Bool:
-		return 5
-	default:
-		return 0
-	}
-}
-
-// Converts raw database bytes to Go native types, handling NULL values and missing fields.
-func convertToGoType(field ftype, value []byte) error {
-
-	switch field.n {
-	case 1:
-		field.t.SetString(string(value))
-	case 2:
-		intValue, err := strconv.ParseInt(string(value), 10, 64)
-		if err != nil {
-			return err
-		}
-		field.t.SetInt(intValue)
-	case 3:
-		intValue, err := strconv.ParseUint(string(value), 10, 64)
-		if err != nil {
-			return err
-		}
-		field.t.SetUint(intValue)
-	case 4:
-		intValue, err := strconv.ParseFloat(string(value), 64)
-		if err != nil {
-			return err
-		}
-		field.t.SetFloat(intValue)
-	case 5:
-		intValue, err := strconv.ParseBool(string(value))
-		if err != nil {
-			return err
-		}
-		field.t.SetBool(intValue)
-	default:
-		return errors.New("unknown field type")
-	}
-
-	return nil
-}
-
-// FromMysqlStr 从 MySQL 数据库中执行查询并返回数据通道，
-// 使用 SQL 查询字符串。
-// 参数:
-//
-//	query - *SQLBuilder 类型的结构体，用于构建 SQL 查询语句。
-//
-// 返回:
-//
-//	chan []string: 查询结果数据通道。
-//	error: 错误信息，如果查询失败。
-func FromMysqlStr(con string) func(query *query.SQLBuilder) (chan []string, chan error) {
-
-	return func(query *query.SQLBuilder) (chan []string, chan error) {
-
-		query_ := query.Build()
-		ch := make(chan []string, 100)
-		errs := make(chan error, 1)
-
-		go func() {
-			defer close(ch)
-			defer close(errs)
-
-			db, err := sql.Open("mysql", con)
-			if err != nil {
-				errs <- err
-				return
-			}
-
-			rows, err := db.Query(query_)
-			if err != nil {
-				errs <- err
-				return
-			}
-
-			columns, err := rows.Columns()
-
-			if err != nil {
-				errs <- err
-				return
-			}
-			defer db.Close()
-
-			lc := len(columns)
-			for rows.Next() {
-				row := make([]sql.NullString, lc)
-				rowPointers := make([]any, lc)
-				for i := range row {
-					rowPointers[i] = &row[i]
-				}
-
-				err := rows.Scan(rowPointers...)
-				if err != nil {
-					errs <- err
-					return
-				}
-
-				ch <- array.ArrayMap(func(i ...sql.NullString) string {
-					return i[0].String
-				}, row)
-			}
-		}()
-
-		return ch, errs
-	}
-}
-
 // FromElasticSearch 从 ElasticSearch 中读取数据。
 // 参数:
 //
@@ -626,5 +415,177 @@ func FromExcel(path string) func(sheet string, header bool) (chan []string, chan
 
 		}()
 		return ch, errs
+	}
+}
+
+type ftype struct {
+	t reflect.Value
+	n int
+}
+
+// FromMysqlQuery 从 MySQL 数据库中执行查询并返回数据通道。
+// 参数:
+//
+//	query: *query.SQLBuilder - 查询语句
+//
+// 返回:
+//
+//	chan T: 查询结果数据通道
+//	error: 错误信息，如果查询失败。
+func FromMysql[T any](con string) func(query *query.SQLBuilder) (chan T, chan error) {
+
+	return func(query *query.SQLBuilder) (chan T, chan error) {
+
+		query_ := query.Build()
+
+		ch := make(chan T, BufferSize)
+		errs := make(chan error, 1)
+
+		go func() {
+
+			defer close(ch)
+			defer close(errs)
+
+			db, err := sql.Open("mysql", con)
+			if err != nil {
+				errs <- err
+				return
+			}
+			defer db.Close()
+
+			rows, err := db.Query(query_)
+			if err != nil {
+				errs <- err
+				return
+			}
+
+			columns, err := rows.Columns()
+			if err != nil {
+				errs <- err
+				return
+			}
+
+			columnValues := make([]interface{}, len(columns))
+			for i := range columnValues {
+				columnValues[i] = new(sql.RawBytes)
+			}
+
+			instance := new(T)
+			v := reflect.ValueOf(instance).Elem()
+			fieldMap := make(map[string]ftype, len(columns))
+			t := reflect.TypeOf(instance).Elem()
+			for i := 0; i < t.NumField(); i++ {
+				field := t.Field(i)
+				if tag, ok := field.Tag.Lookup("sql"); ok {
+					var tmp ftype
+					tmp.t = v.Field(i)
+					tmp.n = mysqlFieldType(tmp.t)
+					fieldMap[tag] = tmp
+				}
+			}
+
+			for rows.Next() {
+				if err := rows.Scan(columnValues...); err != nil {
+					errs <- err
+					return
+				}
+
+				for i, column := range columns {
+					if field, ok := fieldMap[column]; ok {
+						rawBytes := columnValues[i].(*sql.RawBytes)
+						if err := mysqlConvertToGoType(field, *rawBytes); err != nil {
+							errs <- err
+							return
+						}
+					}
+				}
+
+				ch <- *instance
+			}
+		}()
+
+		return ch, errs
+	}
+}
+
+func mysqlFieldType(field reflect.Value) int {
+
+	switch field.Kind() {
+	case reflect.String:
+		return 1
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return 2
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return 3
+	case reflect.Float32, reflect.Float64:
+		return 4
+	case reflect.Bool:
+		return 5
+	default:
+		return 0
+	}
+}
+
+// Converts raw database bytes to Go native types, handling NULL values and missing fields.
+func mysqlConvertToGoType(field ftype, value []byte) error {
+
+	switch field.n {
+	case 1:
+		field.t.SetString(string(value))
+	case 2:
+		intValue, err := strconv.ParseInt(string(value), 10, 64)
+		if err != nil {
+			return err
+		}
+		field.t.SetInt(intValue)
+	case 3:
+		intValue, err := strconv.ParseUint(string(value), 10, 64)
+		if err != nil {
+			return err
+		}
+		field.t.SetUint(intValue)
+	case 4:
+		intValue, err := strconv.ParseFloat(string(value), 64)
+		if err != nil {
+			return err
+		}
+		field.t.SetFloat(intValue)
+	case 5:
+		intValue, err := strconv.ParseBool(string(value))
+		if err != nil {
+			return err
+		}
+		field.t.SetBool(intValue)
+	default:
+		return errors.New("unknown field type")
+	}
+
+	return nil
+}
+
+// FromMysqlStr 从 MySQL 数据库中执行查询并返回数据通道，
+// 使用 SQL 查询字符串。
+// 参数:
+//
+//	query - *SQLBuilder 类型的结构体，用于构建 SQL 查询语句。
+//
+// 返回:
+//
+//	chan []string: 查询结果数据通道。
+//	error: 错误信息，如果查询失败。
+func FromMysqlStr(con string) func(query *query.SQLBuilder) (chan []string, chan error) {
+
+	return func(query *query.SQLBuilder) (chan []string, chan error) {
+
+		return db.NewMysqlDB(con).QueryAnyIter(query)()
+
+	}
+}
+
+func FromCKStr(user, pwd, database string, host ...string) func(query *query.SQLBuilder) (chan []string, chan error) {
+
+	return func(query *query.SQLBuilder) (chan []string, chan error) {
+
+		return db.NewCK(user, pwd, database, host...).QueryAnyIter(query)()
 	}
 }
