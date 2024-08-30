@@ -3,6 +3,7 @@ package iter
 import (
 	"bufio"
 	"compress/gzip"
+	"context"
 	"database/sql"
 	"encoding/csv"
 	"encoding/json"
@@ -476,7 +477,7 @@ func FromMysql[T any](con string) func(query *query.SQLBuilder) (chan T, chan er
 			t := reflect.TypeOf(instance).Elem()
 			for i := 0; i < t.NumField(); i++ {
 				field := t.Field(i)
-				if tag, ok := field.Tag.Lookup("sql"); ok {
+				if tag, ok := field.Tag.Lookup("mysql"); ok {
 					var tmp ftype
 					tmp.t = v.Field(i)
 					tmp.n = fieldType(tmp.t)
@@ -508,7 +509,7 @@ func FromMysql[T any](con string) func(query *query.SQLBuilder) (chan T, chan er
 	}
 }
 
-func FromCK[T any](user, pwd, database string, host_port ...string) func(query *query.SQLBuilder) (chan T, chan error) {
+func FromCK[T any](ck *db.CKinfo) func(query *query.SQLBuilder) (chan T, chan error) {
 
 	return func(query *query.SQLBuilder) (chan T, chan error) {
 
@@ -522,59 +523,28 @@ func FromCK[T any](user, pwd, database string, host_port ...string) func(query *
 			defer close(ch)
 			defer close(errs)
 
-			con := db.NewCK(user, pwd, database, host_port...).Con
-
+			con, err := db.NewCKLoc(ck)
+			if err != nil {
+				errs <- err
+				return
+			}
 			defer con.Close()
 
-			rows, err := con.Query(query_)
+			rows, err := con.Query(context.Background(), query_)
+
 			if err != nil {
 				errs <- err
 				return
 			}
-
-			columns, err := rows.Columns()
-			if err != nil {
-				errs <- err
-				return
-			}
-
-			columnValues := make([]interface{}, len(columns))
-			for i := range columnValues {
-				columnValues[i] = new(sql.RawBytes)
-			}
-
-			instance := new(T)
-			v := reflect.ValueOf(instance).Elem()
-			fieldMap := make(map[string]ftype, len(columns))
-			t := reflect.TypeOf(instance).Elem()
-			for i := 0; i < t.NumField(); i++ {
-				field := t.Field(i)
-				if tag, ok := field.Tag.Lookup("sql"); ok {
-					var tmp ftype
-					tmp.t = v.Field(i)
-					tmp.n = fieldType(tmp.t)
-					fieldMap[tag] = tmp
-				}
-			}
-
 			for rows.Next() {
-				if err := rows.Scan(columnValues...); err != nil {
+				var instance T
+				if err := rows.ScanStruct(&instance); err != nil {
 					errs <- err
 					return
 				}
-
-				for i, column := range columns {
-					if field, ok := fieldMap[column]; ok {
-						rawBytes := columnValues[i].(*sql.RawBytes)
-						if err := convertToGoType(field, *rawBytes); err != nil {
-							errs <- err
-							return
-						}
-					}
-				}
-
-				ch <- *instance
+				ch <- instance
 			}
+
 		}()
 
 		return ch, errs
@@ -655,10 +625,10 @@ func FromMysqlStr(con string) func(query *query.SQLBuilder) (chan []string, chan
 	}
 }
 
-func FromCKStr(user, pwd, database string, host ...string) func(query *query.SQLBuilder) (chan []string, chan error) {
+func FromCKStr(ck *db.CKinfo) func(query *query.SQLBuilder) (chan []string, chan error) {
 
 	return func(query *query.SQLBuilder) (chan []string, chan error) {
 
-		return db.NewCK(user, pwd, database, host...).QueryAnyIter(query)()
+		return db.NewCK(ck).QueryAnyIter(query)()
 	}
 }
