@@ -177,6 +177,24 @@ func ToMysqlInset(con string, q query.SqlInsert) func(ch chan []string) error {
 
 }
 
+func ToCK(ck *db.CKinfo, q query.SqlInsert) func(ch chan []string) error {
+
+	return func(ch chan []string) error {
+
+		con := db.NewCK(ck)
+
+		defer con.Close()
+
+		err := con.Insert(q)(ch)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+}
+
 // ToElasticSearch 将数据写入 ElasticSearch。
 // 参数:
 //
