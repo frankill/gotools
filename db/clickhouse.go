@@ -11,9 +11,9 @@ type CK struct {
 	DB
 }
 
-func NewCK(user string, pwd string, database string, host ...string) *CK {
+func NewCK(user string, pwd string, database string, host_port ...string) *CK {
 	conn := clickhouse.OpenDB(&clickhouse.Options{
-		Addr: host,
+		Addr: host_port,
 		Auth: clickhouse.Auth{
 			Database: database,
 			Username: user,

@@ -508,7 +508,7 @@ func FromMysql[T any](con string) func(query *query.SQLBuilder) (chan T, chan er
 	}
 }
 
-func FromCK[T any](user, pwd, database string, host ...string) func(query *query.SQLBuilder) (chan T, chan error) {
+func FromCK[T any](user, pwd, database string, host_port ...string) func(query *query.SQLBuilder) (chan T, chan error) {
 
 	return func(query *query.SQLBuilder) (chan T, chan error) {
 
@@ -522,7 +522,7 @@ func FromCK[T any](user, pwd, database string, host ...string) func(query *query
 			defer close(ch)
 			defer close(errs)
 
-			con := db.NewCK(user, pwd, database, host...).Con
+			con := db.NewCK(user, pwd, database, host_port...).Con
 
 			defer con.Close()
 
