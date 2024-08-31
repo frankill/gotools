@@ -188,9 +188,9 @@ func ToMysqlInset(con string, q query.SqlInsert) func(ch chan []string) error {
 // 返回:
 //
 // 一个函数， 用于执行数据库插入操作。
-func ToCK(ck *db.CKinfo, q query.SqlInsert) func(ch chan []string) error {
+func ToCK(ck *db.CKinfo, q query.SqlInsert) func(ch chan []any) error {
 
-	return func(ch chan []string) error {
+	return func(ch chan []any) error {
 
 		con := db.NewCK(ck)
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
+	"github.com/frankill/gotools/query"
 )
 
 type CK struct {
@@ -95,4 +96,75 @@ func NewCK(ck *CKinfo) *CK {
 	conn := clickhouse.OpenDB(&c)
 
 	return &CK{DB{Con: conn}}
+}
+func (m *CK) Insert(q query.SqlInsert) func(ch chan []any) error {
+
+	return func(ch chan []any) error {
+
+		num := 1000
+		res := make([][]any, 0, num)
+
+		commit := func() error {
+			if err := m.do(res, q); err != nil {
+				return err
+			}
+			res = res[:0]
+			return nil
+		}
+
+		for v := range ch {
+
+			if len(v) == 0 {
+				continue
+			}
+
+			res = append(res, v)
+
+			if len(res) == num {
+				err := commit()
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		if len(res) > 0 {
+			err := commit()
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+}
+
+func (m *CK) do(data [][]any, query query.SqlInsert) error {
+
+	query.AddValues()
+	stmt, _ := query.Build()
+
+	defer query.Clear()
+
+	tj, err := m.Con.Begin()
+
+	if err != nil {
+		return err
+	}
+
+	smt, err := tj.Prepare(stmt)
+	if err != nil {
+		return err
+	}
+	for _, v := range data {
+
+		_, err = smt.Exec(v...)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = tj.Commit()
+
+	return err
 }

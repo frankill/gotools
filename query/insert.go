@@ -14,6 +14,34 @@ type SqlInsert interface {
 	Clear()
 }
 
+type CKInsert struct {
+	TableName string
+	Columns   []string
+}
+
+func NewCKInsert(tableName string) *CKInsert {
+	return &CKInsert{
+		TableName: tableName,
+	}
+}
+
+func (c *CKInsert) AddColumn(col ...string) *CKInsert {
+	c.Columns = append(c.Columns, col...)
+	return c
+}
+
+func (c *CKInsert) Clear() {
+
+}
+
+func (c *CKInsert) AddValues(vals ...[]any) {
+
+}
+
+func (c *CKInsert) Build() (string, []any) {
+	return fmt.Sprintf("INSERT INTO %s (%s) ", c.TableName, strings.Join(c.Columns, ", ")), nil
+}
+
 type MysqlInsert struct {
 	TableName     string
 	Columns       []string
