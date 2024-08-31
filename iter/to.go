@@ -159,9 +159,9 @@ func ToTxt(path string, append bool) func(ch chan string) error {
 // 返回:
 //
 // 一个函数， 用于执行数据库插入操作。
-func ToMysqlInset(con string, q query.SqlInsert) func(ch chan []string) error {
+func ToMysqlInset(con string, q query.SqlInsert) func(ch chan []any) error {
 
-	return func(ch chan []string) error {
+	return func(ch chan []any) error {
 
 		con := db.NewMysqlDB(con)
 

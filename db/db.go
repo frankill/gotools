@@ -55,9 +55,9 @@ func (m *DB) Close() {
 // 返回:
 //
 //	一个函数，接受一个 SqlInsert 类型的参数，执行数据库插入操作。
-func (m *DB) Insert(q query.SqlInsert) func(ch chan []string) error {
+func (m *DB) Insert(q query.SqlInsert) func(ch chan []any) error {
 
-	return func(ch chan []string) error {
+	return func(ch chan []any) error {
 
 		num := 1000
 		res := make([][]any, 0, num)
@@ -76,7 +76,7 @@ func (m *DB) Insert(q query.SqlInsert) func(ch chan []string) error {
 				continue
 			}
 
-			res = append(res, ModifyFunTemp(v))
+			res = append(res, v)
 
 			if len(res) == num {
 				err := commit()
