@@ -354,3 +354,27 @@ func Rep[T any](x T, n int) []T {
 	}
 	return result
 }
+
+// Apply 对切片的每个元素应用函数。
+// 参数:
+//
+//	fun: 用于应用的函数。
+//	arr: 用于操作的切片。
+//
+// 返回值:
+//
+//	返回一个类型为 []U 的切片，其中包含了 fun 对每个 arr 中的元素进行了应用后的结果。
+func Apply[S ~[]T, T any, U any](fun func(x T) U, arr S) []U {
+
+	if len(arr) == 0 {
+		return make([]U, 0)
+	}
+
+	res := make([]U, len(arr))
+
+	for i, v := range arr {
+		res[i] = fun(v)
+	}
+	return res
+
+}
