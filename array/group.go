@@ -321,6 +321,28 @@ func GroupData[D ~[]U, B ~[]T, T comparable, U any](by B, data D) map[T][]U {
 	return res
 }
 
+// GroupByFunc 根据给定的函数进行分组。
+//
+// 参数:
+// - f: 用于分组的函数。
+// - data: 要进行分组的元素数据切片。
+//
+// 返回值:
+// - map[T][]U: 一个映射，键为 T 类型的分组标识，值为对应分组内的 U 类型元素切片。
+func GroupByFunc[D ~[]U, T comparable, U any](f func(U) T, data D) map[T][]U {
+
+	if len(data) == 0 {
+		return map[T][]U{}
+	}
+
+	res := map[T][]U{}
+
+	for i := 0; i < len(data); i++ {
+		res[f(data[i])] = append(res[f(data[i])], data[i])
+	}
+	return res
+}
+
 // Group 函数根据输入的切片 by 对数据进行分组，返回一个映射，映射的键是 by 中的唯一元素，值是对应元素在原切片中的索引集合。
 //
 // by: 需要分组的切片
