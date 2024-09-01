@@ -320,7 +320,7 @@ type EsQuery struct {
 }
 
 // NewFilterQuery 创建一个新的过滤器查询
-func NewFilterQuery() *EsQuery {
+func NewESFilterQuery() *EsQuery {
 	return &EsQuery{
 		typ:    "filter",
 		querys: make([]elastic.Query, 0),
@@ -328,7 +328,7 @@ func NewFilterQuery() *EsQuery {
 }
 
 // NewMustQuery 创建一个新的must查询
-func NewMustQuery() *EsQuery {
+func NewESMustQuery() *EsQuery {
 	return &EsQuery{
 		typ:    "must",
 		querys: make([]elastic.Query, 0),
@@ -336,7 +336,7 @@ func NewMustQuery() *EsQuery {
 }
 
 // NewMustNotQuery 创建一个新的must_not查询
-func NewMustNotQuery() *EsQuery {
+func NewESMustNotQuery() *EsQuery {
 	return &EsQuery{
 		typ:    "must_not",
 		querys: make([]elastic.Query, 0),
@@ -344,7 +344,7 @@ func NewMustNotQuery() *EsQuery {
 }
 
 // NewShouldQuery 创建一个新的should查询
-func NewShouldQuery(num int) *EsQuery {
+func NewESShouldQuery(num int) *EsQuery {
 	return &EsQuery{
 		typ:      "should",
 		querys:   make([]elastic.Query, 0),

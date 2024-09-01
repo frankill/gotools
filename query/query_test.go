@@ -9,7 +9,7 @@ import (
 
 func TestEsQuery_MultipleQueries(t *testing.T) {
 	// 创建一个新的EsQuery实例
-	query := query.NewMustQuery()
+	query := query.NewESMustQuery()
 
 	// 使用Eq方法添加一个查询条件
 	query.Eq("fieldName1", "value1")
@@ -47,7 +47,7 @@ func TestEsQuery_MultipleQueries(t *testing.T) {
 
 func TestEsQuery_Eq(t *testing.T) {
 	// 创建一个新的EsQuery实例
-	query := query.NewMustQuery()
+	query := query.NewESMustQuery()
 
 	// 使用Eq方法添加一个查询条件
 	query.Eq("fieldName", "value")
