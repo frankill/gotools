@@ -3,6 +3,7 @@ package iter
 import (
 	"compress/gzip"
 	"encoding/csv"
+	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -518,4 +519,42 @@ func ToExcel(e *ExcelField) func(ch chan []string) error {
 		return nil
 	}
 
+}
+
+// ToGob 接收一个路径和一个通道，将通道中的数据按块写入到指定路径的 gob 文件中。
+func ToGob[T any](path string) func(ch chan T) error {
+	return func(ch chan T) error {
+		// 创建文件
+		f, err := os.Create(path)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		// 创建 gob 编码器
+		enc := gob.NewEncoder(f)
+
+		// 逐个编码通道中的数据
+		for record := range ch {
+			if err := enc.Encode(record); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+}
+
+func ToGobArr[S ~[]T, T any](path string) func(data S) error {
+	return func(data S) error {
+
+		f, err := os.Create(path)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		enc := gob.NewEncoder(f)
+
+		return enc.Encode(data)
+	}
 }

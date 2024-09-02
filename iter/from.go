@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/csv"
+	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"io"
@@ -631,4 +632,39 @@ func FromCKStr(ck *db.CKinfo) func(query *query.SQLBuilder) (chan []string, chan
 
 		return db.NewCK(ck).QueryAnyIter(query)()
 	}
+}
+
+// FromGob 从指定的 gob 文件路径读取数据，并通过通道返回。
+func FromGob[T any](path string) (chan T, chan error) {
+	ch := make(chan T, BufferSize)
+	errs := make(chan error, 1) // 只有一个错误通道缓冲区
+
+	file, err := os.Open(path)
+	if err != nil {
+		errs <- err
+		close(errs)
+		return ch, errs
+	}
+	defer file.Close()
+
+	decoder := gob.NewDecoder(file)
+
+	go func() {
+		defer close(ch)
+		defer close(errs)
+		for {
+			var instance T
+			if err := decoder.Decode(&instance); err != nil {
+				if err.Error() == "EOF" {
+					// 文件结束，正常退出
+					return
+				}
+				errs <- err
+				return
+			}
+			ch <- instance
+		}
+	}()
+
+	return ch, errs
 }

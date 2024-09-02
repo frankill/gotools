@@ -1,13 +1,17 @@
 package iter
 
 import (
+	"os"
+	"path/filepath"
+	"strconv"
 	"sync"
 
 	"github.com/frankill/gotools/array"
 )
 
 var (
-	BufferSize = 100
+	BufferSize     = 100
+	SortWindowSize = 100000
 )
 
 func Identity[T any](x T) T {
@@ -674,4 +678,125 @@ func Maps[T any, U any](fn func(ch chan T, num int) U) func(cs ...chan T) chan U
 
 		return out
 	}
+}
+
+func Join[T any, U any, R any](f func(x T, y U) R) func(ch1 chan T, ch2 chan U) chan R {
+
+	return func(ch1 chan T, ch2 chan U) chan R {
+		ch := make(chan R, BufferSize)
+
+		return ch
+	}
+}
+
+func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
+
+	return func(ch chan T) chan T {
+
+		ch_ := make(chan T, BufferSize)
+
+		go func() {
+			defer close(ch_)
+
+			// TODO: 优化
+			data := Collect(ch)
+			array.ArraySortLocal(f, data)
+
+			for _, v := range data {
+				ch_ <- v
+			}
+
+		}()
+		return ch_
+
+	}
+}
+
+func SortBigData[T any](f func(x, y T) bool) func(ch chan T) chan T {
+
+	return func(ch chan T) chan T {
+		ch_ := Window(3, ch)
+		num := 0
+		file := []string{}
+
+		defer func() {
+			for _, v := range file {
+				os.Remove(v)
+			}
+		}()
+
+		for v := range ch_ {
+
+			array.ArraySortLocal(f, v)
+
+			p, _ := os.MkdirTemp("", "frank/")
+			fn := filepath.Join(p, strconv.Itoa(num), ".gob")
+			file = append(file, fn)
+
+			ToGob[T](fn)(FromArray[T](Identity)(v))
+			num++
+		}
+
+		fs := array.Apply(func(x string) chan T {
+
+			c, err := FromGob[T](x)
+			defer ErrorCH(err)
+
+			return c
+
+		}, file)
+
+		mins := make([]T, 0, len(fs))
+
+		for _, v := range fs {
+
+			mins = append(mins, <-v)
+
+		}
+
+		sortedCh := make(chan T, BufferSize)
+		defer close(sortedCh)
+
+		for {
+
+			minIndex := -1
+
+			for i := range mins {
+
+				if minIndex == -1 {
+					minIndex = i
+				}
+
+				if !f(mins[minIndex], mins[i]) {
+					minIndex = i
+				}
+			}
+
+			if minIndex == -1 {
+
+				break
+			}
+
+			sortedCh <- mins[minIndex]
+
+			item, ok := <-fs[minIndex]
+
+			if ok {
+				mins[minIndex] = item
+			} else {
+
+				mins = append(mins[:minIndex], mins[minIndex+1:]...)
+				fs = append(fs[:minIndex], fs[minIndex+1:]...)
+
+			}
+		}
+
+		return sortedCh
+
+	}
+
+}
+
+func Group[T any](ch chan T) chan T {
+	return ch
 }
