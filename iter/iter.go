@@ -680,15 +680,35 @@ func Maps[T any, U any](fn func(ch chan T, num int) U) func(cs ...chan T) chan U
 	}
 }
 
+// Join 按照某个函数进行连接
+// 参数:
+//   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个类型为 R 的值。
+//   - ch1: 一个通道，用于接收第一个数据。 必须排序过
+//   - ch2: 一个通道，用于接收第二个数据。 必须排序过
+//
+// 返回:
+//   - 一个通道，用于接收连接后的数据。
 func Join[T any, U any, R any](f func(x T, y U) R) func(ch1 chan T, ch2 chan U) chan R {
 
 	return func(ch1 chan T, ch2 chan U) chan R {
 		ch := make(chan R, BufferSize)
 
+		go func() {
+			defer close(ch)
+
+		}()
+
 		return ch
 	}
 }
 
+// sort 排序通道，并返回排序后的chan
+// 参数:
+//   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个布尔值，表示是否满足排序条件。
+//   - ch: 一个通道，用于接收数据。
+//
+// 返回:
+//   - 一个通道，用于接收排序后的数据。
 func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
@@ -712,6 +732,13 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 	}
 }
 
+// SortBigData 针对数据较大的情况进行处理，使用了外部文件排序
+// 参数:
+//   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个布尔值，表示是否满足排序条件。
+//   - ch: 一个通道，用于接收数据。
+//
+// 返回:
+//   - 一个通道，用于接收排序后的数据。
 func SortBigData[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
@@ -797,6 +824,13 @@ func SortBigData[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 }
 
-func Group[T any](ch chan T) chan T {
+// Group 对通道进行分组，返回一个chan
+// 参数:
+//   - ch: 一个通道，用于接收数据。数据必须是排序后的
+//
+// 返回:
+//   - 一个通道，用于接收分组后的数据。
+func GroupBigData[T any](ch chan T) chan T {
+
 	return ch
 }
