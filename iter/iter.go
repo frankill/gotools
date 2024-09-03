@@ -732,6 +732,70 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 	}
 }
 
+// MergeSort 合并排序多个通道，按照func(x, y T) bool进行排序
+// 参数:
+//   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个布尔值，表示是否满足排序条件。
+//   - cs: 一个包含多个通道的切片。
+//
+// 返回:
+//   - 一个通道，用于接收排序后的数据。
+func MergeSort[T any](f func(x, y T) bool) func(cs ...chan T) chan T {
+
+	return func(cs ...chan T) chan T {
+
+		mins := make([]T, 0, len(cs))
+		sortedCh := make(chan T, BufferSize)
+
+		go func() {
+
+			defer close(sortedCh)
+
+			for i, ch := range cs {
+				item, ok := <-ch
+				if ok {
+					mins[i] = item
+				}
+			}
+			for {
+
+				minIndex := -1
+
+				for i := range mins {
+
+					if minIndex == -1 {
+						minIndex = i
+					}
+
+					if !f(mins[minIndex], mins[i]) {
+						minIndex = i
+					}
+				}
+
+				if minIndex == -1 {
+
+					break
+				}
+
+				sortedCh <- mins[minIndex]
+
+				item, ok := <-cs[minIndex]
+
+				if ok {
+					mins[minIndex] = item
+				} else {
+
+					mins = append(mins[:minIndex], mins[minIndex+1:]...)
+					cs = append(cs[:minIndex], cs[minIndex+1:]...)
+
+				}
+			}
+		}()
+
+		return sortedCh
+
+	}
+}
+
 // SortBigData 针对数据较大的情况进行处理，使用了外部文件排序
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个布尔值，表示是否满足排序条件。
@@ -742,7 +806,7 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 func SortBigData[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
-		ch_ := Window(3, ch)
+		ch_ := Window(SortWindowSize, ch)
 		num := 0
 		file := []string{}
 
@@ -773,52 +837,7 @@ func SortBigData[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 		}, file)
 
-		mins := make([]T, 0, len(fs))
-
-		for _, v := range fs {
-
-			mins = append(mins, <-v)
-
-		}
-
-		sortedCh := make(chan T, BufferSize)
-		defer close(sortedCh)
-
-		for {
-
-			minIndex := -1
-
-			for i := range mins {
-
-				if minIndex == -1 {
-					minIndex = i
-				}
-
-				if !f(mins[minIndex], mins[i]) {
-					minIndex = i
-				}
-			}
-
-			if minIndex == -1 {
-
-				break
-			}
-
-			sortedCh <- mins[minIndex]
-
-			item, ok := <-fs[minIndex]
-
-			if ok {
-				mins[minIndex] = item
-			} else {
-
-				mins = append(mins[:minIndex], mins[minIndex+1:]...)
-				fs = append(fs[:minIndex], fs[minIndex+1:]...)
-
-			}
-		}
-
-		return sortedCh
+		return MergeSort(f)(fs...)
 
 	}
 
