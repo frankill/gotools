@@ -774,7 +774,7 @@ func MergeSort[T any](f func(x, y T) bool) func(cs ...chan T) chan T {
 	}
 }
 
-// SortBigData 针对数据较大的情况进行处理，使用了外部文件排序
+// Sort 针对数据较大的情况进行处理，使用了外部文件排序，如果内存满足请使用SortSimple
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个布尔值，表示是否满足排序条件。
 //   - ch: 一个通道，用于接收数据。
