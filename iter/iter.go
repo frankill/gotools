@@ -491,7 +491,7 @@ func Union[T any](chs ...chan T) chan T {
 // 注意:
 // 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
 // 如果第二个通道数据很多，要考虑内存占用问题。
-func Intersection[T comparable](ch1 chan T, ch2 chan T) chan T {
+func InterSimple[T comparable](ch1 chan T, ch2 chan T) chan T {
 
 	ch := make(chan T, BufferSize)
 
@@ -524,7 +524,7 @@ func Intersection[T comparable](ch1 chan T, ch2 chan T) chan T {
 // 注意:
 // 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
 // 如果第二个通道数据很多，要考虑内存占用问题。
-func Subtract[T comparable](ch1 chan T, ch2 chan T) chan T {
+func SubSimple[T comparable](ch1 chan T, ch2 chan T) chan T {
 
 	ch := make(chan T, BufferSize)
 
@@ -680,28 +680,6 @@ func Maps[T any, U any](fn func(ch chan T, num int) U) func(cs ...chan T) chan U
 	}
 }
 
-// Join 按照某个函数进行连接
-// 参数:
-//   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个类型为 R 的值。
-//   - ch1: 一个通道，用于接收第一个数据。 必须排序过
-//   - ch2: 一个通道，用于接收第二个数据。 必须排序过
-//
-// 返回:
-//   - 一个通道，用于接收连接后的数据。
-func Join[T any, U any, R any](f func(x T, y U) R) func(ch1 chan T, ch2 chan U) chan R {
-
-	return func(ch1 chan T, ch2 chan U) chan R {
-		ch := make(chan R, BufferSize)
-
-		go func() {
-			defer close(ch)
-
-		}()
-
-		return ch
-	}
-}
-
 // sort 排序通道，并返回排序后的chan
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个布尔值，表示是否满足排序条件。
@@ -709,7 +687,7 @@ func Join[T any, U any, R any](f func(x T, y U) R) func(ch1 chan T, ch2 chan U) 
 //
 // 返回:
 //   - 一个通道，用于接收排序后的数据。
-func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
+func SortSimple[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
 
@@ -803,7 +781,7 @@ func MergeSort[T any](f func(x, y T) bool) func(cs ...chan T) chan T {
 //
 // 返回:
 //   - 一个通道，用于接收排序后的数据。
-func SortBigData[T any](f func(x, y T) bool) func(ch chan T) chan T {
+func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
 		ch_ := Window(SortWindowSize, ch)
@@ -843,13 +821,208 @@ func SortBigData[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 }
 
-// Group 对通道进行分组，返回一个chan
+// GroupBigData 对通道进行分组，返回一个chan
 // 参数:
+//   - f: 一个函数，接受两个类型为 T 的值，返回一个布尔值，表示是否满足分组条件。
 //   - ch: 一个通道，用于接收数据。数据必须是排序后的
 //
 // 返回:
 //   - 一个通道，用于接收分组后的数据。
-func GroupBigData[T any](ch chan T) chan T {
+func Group[T any](f func(x, y T) bool) func(ch chan T) chan []T {
 
-	return ch
+	return func(ch chan T) chan []T {
+
+		ch_ := make(chan []T, BufferSize)
+
+		go func() {
+			defer close(ch_)
+
+			var ts []T
+
+			prev, ok := <-ch
+
+			if !ok {
+				return
+			}
+			ts = append(ts, prev)
+
+			for v := range ch {
+
+				if !f(v, prev) && len(ts) > 0 {
+					ch_ <- ts
+					ts = []T{}
+				}
+
+				ts = append(ts, v)
+				prev = v
+			}
+
+			if len(ts) > 0 {
+				ch_ <- ts
+			}
+		}()
+
+		return ch_
+	}
+}
+
+// InnerJoin 按照某个函数进行连接
+// 参数:
+//   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个类型为 R 的值。
+//   - f1: 一个函数，用于比较大小， -1 表示小于， 0 表示相等， 1 表示大于。
+//   - ch1: 一个通道，用于接收第一个数据。 必须排序过
+//   - ch2: 一个通道，用于接收第二个数据。 必须排序过
+//
+// 返回:
+//   - 一个通道，用于接收连接后的数据。
+func InnerJoin[T any, U any, R any](f func(x T, y U) R, f1 func(x T, y U) int) func(ch1 chan T, ch2 chan U) chan R {
+
+	return func(ch1 chan T, ch2 chan U) chan R {
+		ch_ := make(chan R, BufferSize) // 使用合理的缓冲区大小
+
+		go func() {
+			defer close(ch_)
+
+			var t T
+			var u U
+			var tok, uok, ok1, ok2 = true, true, true, true
+
+			us := make([]U, 0)
+
+			for {
+
+				if tok || !ok2 {
+					t, ok1 = <-ch1
+					tok = ok1
+				}
+
+				if uok || !ok1 {
+					u, ok2 = <-ch2
+					uok = ok2
+				}
+
+				if !tok && !uok {
+					break
+				}
+
+				if tok && len(us) > 0 {
+					if f1(t, us[0]) == 0 {
+						for _, v := range us {
+							ch_ <- f(t, v)
+						}
+
+						uok = false
+						tok = true
+
+						continue
+					} else {
+						us = us[:0]
+					}
+
+				}
+
+				if !ok2 || !ok1 {
+					continue
+				}
+
+				switch f1(t, u) {
+				case -1:
+					uok = false
+					tok = true
+
+				case 1:
+					tok = false
+					uok = true
+
+				case 0:
+					tok = false
+					uok = true
+					ch_ <- f(t, u)
+					us = append(us, u)
+
+				}
+
+			}
+
+		}()
+
+		return ch_
+	}
+}
+
+// Unique 去重, 要求传入的ch必须是排序过的
+// 参数:
+//   - f: 一个函数，接受两个类型为 T 的值，返回一个布尔值，表示是否相等。
+//   - ch: 一个通道，用于接收数据。
+//
+// 返回:
+//   - 一个通道，用于接收排序后的数据。
+func Unique[T any](f func(x, y T) bool) func(ch chan T) chan T {
+	return func(ch chan T) chan T {
+		ch_ := make(chan T, BufferSize)
+
+		go func() {
+			defer close(ch_)
+
+			prev, ok := <-ch
+			if !ok {
+				return
+			}
+
+			for v := range ch {
+				if !f(prev, v) {
+					ch_ <- prev
+					prev = v
+				}
+			}
+
+			ch_ <- prev
+		}()
+
+		return ch_
+	}
+}
+
+// Subtract 返回两个通道的差集
+// 参数:
+//   - f: 一个函数，接受两个类型为 T 的值，返回一个布尔值，表示比较大小 0 相等，-1 小于，1 大于。
+//   - ch1: 一个通道，用于接收数据。必须排序
+//   - ch2: 一个通道，用于接收数据。必须排序
+//
+// 返回:
+//   - 一个通道，用于接收排序后的数据。
+func Subtract[T any](f func(x, y T) int) func(ch1 chan T, ch2 chan T) chan T {
+	return func(ch1 chan T, ch2 chan T) chan T {
+		ch_ := make(chan T, BufferSize)
+
+		go func() {
+			defer close(ch_)
+
+			var v1, v2 T
+			var ok1, ok2 bool
+
+			// Get first value from both channels
+			v1, ok1 = <-ch1
+			v2, ok2 = <-ch2
+
+			for ok1 {
+				// Compare values from ch1 and ch2
+				switch {
+				case !ok2: // ch2 is exhausted
+					ch_ <- v1
+					v1, ok1 = <-ch1
+				case f(v1, v2) < 0: // v1 < v2
+					ch_ <- v1
+					v1, ok1 = <-ch1
+				case f(v1, v2) > 0: // v1 > v2
+					v2, ok2 = <-ch2
+				default: // v1 == v2
+					v1, ok1 = <-ch1
+
+				}
+			}
+		}()
+
+		return ch_
+	}
 }
