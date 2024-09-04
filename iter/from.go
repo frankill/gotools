@@ -635,7 +635,7 @@ func FromCKStr(ck *db.CKinfo) func(query *query.SQLBuilder) (chan []string, chan
 }
 
 // FromGob 从指定的 gob 文件路径读取数据，并通过通道返回。
-func FromGob[T any](path string) (chan T, chan error) {
+func FromGob[T any](path string, del bool) (chan T, chan error) {
 	ch := make(chan T, BufferSize)
 	errs := make(chan error, 1) // 只有一个错误通道缓冲区
 
@@ -650,6 +650,11 @@ func FromGob[T any](path string) (chan T, chan error) {
 	decoder := gob.NewDecoder(file)
 
 	go func() {
+		defer func() {
+			if del {
+				os.Remove(path)
+			}
+		}()
 		defer close(ch)
 		defer close(errs)
 		for {

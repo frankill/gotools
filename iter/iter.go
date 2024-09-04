@@ -722,7 +722,7 @@ func MergeSort[T any](f func(x, y T) bool) func(cs ...chan T) chan T {
 
 	return func(cs ...chan T) chan T {
 
-		mins := make([]T, 0, len(cs))
+		mins := make([]T, len(cs))
 		sortedCh := make(chan T, BufferSize)
 
 		go func() {
@@ -803,15 +803,15 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 			array.ArraySortLocal(f, v)
 
-			p, err := os.MkdirTemp("", "frank/")
+			p, err := os.MkdirTemp("", "t-*")
 			if err != nil {
 				log.Println(err)
 				return make(chan T)
 			}
-			fn := filepath.Join(p, strconv.Itoa(num), ".gob")
+			fn := filepath.Join(p, strconv.Itoa(num)+".gob")
 			file = append(file, fn)
 
-			err = ToGob[T](fn)(FromArray[T](Identity)(v))
+			err = ToGob[T](fn, true)(FromArray[T](Identity)(v))
 			if err != nil {
 				log.Println(err)
 				return make(chan T)
@@ -821,7 +821,7 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 		fs := array.Apply(func(x string) chan T {
 
-			c, errs := FromGob[T](x)
+			c, errs := FromGob[T](x, true)
 			go ErrorCH(errs)
 
 			return c

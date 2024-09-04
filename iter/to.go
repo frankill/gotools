@@ -522,9 +522,18 @@ func ToExcel(e *ExcelField) func(ch chan []string) error {
 }
 
 // ToGob 接收一个路径和一个通道，将通道中的数据按块写入到指定路径的 gob 文件中。
-func ToGob[T any](path string) func(ch chan T) error {
+func ToGob[T any](path string, replace bool) func(ch chan T) error {
 	return func(ch chan T) error {
 		// 创建文件
+
+		//判断path是否存在，不存在则创建
+		if _, err := os.Stat(path); os.IsExist(err) {
+			if !replace {
+				return errors.New("file exists")
+			}
+			os.Remove(path)
+		}
+
 		f, err := os.Create(path)
 		if err != nil {
 			return err
