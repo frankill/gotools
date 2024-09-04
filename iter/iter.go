@@ -1,6 +1,7 @@
 package iter
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -781,6 +782,10 @@ func MergeSort[T any](f func(x, y T) bool) func(cs ...chan T) chan T {
 //
 // 返回:
 //   - 一个通道，用于接收排序后的数据。
+//
+// 示例:
+//
+//	Sort(func(x, y int) bool { return x > y })(ch)
 func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
@@ -798,18 +803,26 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 			array.ArraySortLocal(f, v)
 
-			p, _ := os.MkdirTemp("", "frank/")
+			p, err := os.MkdirTemp("", "frank/")
+			if err != nil {
+				log.Println(err)
+				return make(chan T)
+			}
 			fn := filepath.Join(p, strconv.Itoa(num), ".gob")
 			file = append(file, fn)
 
-			ToGob[T](fn)(FromArray[T](Identity)(v))
+			err = ToGob[T](fn)(FromArray[T](Identity)(v))
+			if err != nil {
+				log.Println(err)
+				return make(chan T)
+			}
 			num++
 		}
 
 		fs := array.Apply(func(x string) chan T {
 
-			c, err := FromGob[T](x)
-			defer ErrorCH(err)
+			c, errs := FromGob[T](x)
+			go ErrorCH(errs)
 
 			return c
 
