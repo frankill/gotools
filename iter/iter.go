@@ -920,18 +920,112 @@ func InnerJoin[T any, U any, R any](f func(x T, y U) R, f1 func(x T, y U) int) f
 					break
 				}
 
-				if tok && len(us) > 0 {
-					if f1(t, us[0]) == 0 {
-						for _, v := range us {
-							ch_ <- f(t, v)
+				if tok {
+					if len(us) > 0 {
+						if f1(t, us[0]) == 0 {
+							for _, v := range us {
+								ch_ <- f(t, v)
+							}
+
+							uok = false
+							tok = true
+
+							continue
+						} else {
+							us = us[:0]
 						}
 
-						uok = false
-						tok = true
+					}
 
-						continue
-					} else {
-						us = us[:0]
+				}
+
+				if !ok2 || !ok1 {
+					continue
+				}
+
+				switch f1(t, u) {
+				case -1:
+					uok = false
+					tok = true
+
+				case 1:
+					tok = false
+					uok = true
+
+				case 0:
+					tok = false
+					uok = true
+					ch_ <- f(t, u)
+					us = append(us, u)
+
+				}
+
+			}
+
+		}()
+
+		return ch_
+	}
+}
+
+// LeftJoin 按照某个函数进行连接
+// 参数:
+//   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个类型为 R 的值。
+//   - f1: 一个函数，用于比较大小， -1 表示小于， 0 表示相等， 1 表示大于。
+//   - ch1: 一个通道，用于接收第一个数据。 必须排序过
+//   - ch2: 一个通道，用于接收第二个数据。 必须排序过
+//
+// 返回:
+//   - 一个通道，用于接收连接后的数据。
+func LeftJoin[T any, U any, R any](f func(x T, y U) R, f1 func(x T, y U) int) func(ch1 chan T, ch2 chan U) chan R {
+
+	return func(ch1 chan T, ch2 chan U) chan R {
+		ch_ := make(chan R, BufferSize) // 使用合理的缓冲区大小
+
+		go func() {
+			defer close(ch_)
+
+			var t T
+			var u U
+			var tok, uok, ok1, ok2 = true, true, true, true
+
+			us := make([]U, 0)
+
+			for {
+
+				if tok || !ok2 {
+					t, ok1 = <-ch1
+					tok = ok1
+				}
+
+				if uok || !ok1 {
+					u, ok2 = <-ch2
+					uok = ok2
+				}
+
+				if !ok1 && !ok2 {
+					break
+				}
+
+				if tok {
+					if len(us) > 0 {
+						if f1(t, us[0]) == 0 {
+							for _, v := range us {
+								ch_ <- f(t, v)
+							}
+
+							uok = false
+							tok = true
+
+							continue
+						} else {
+							us = us[:0]
+						}
+
+					}
+
+					if !ok2 {
+						ch_ <- f(t, u)
 					}
 
 				}
