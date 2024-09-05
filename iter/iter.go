@@ -11,7 +11,9 @@ import (
 )
 
 var (
-	BufferSize     = 100
+	// iter函数中协程通道的缓冲区大小
+	BufferSize = 100
+	// sort外部文件排序使用到的排序窗口大小，默认为 100000，具体根据排序数据量进行调整
 	SortWindowSize = 100000
 )
 
