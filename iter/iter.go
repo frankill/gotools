@@ -916,7 +916,7 @@ func InnerJoin[T any, U any, R any](f func(x T, y U) R, f1 func(x T, y U) int) f
 					uok = ok2
 				}
 
-				if !tok && !uok {
+				if !ok1 && !ok2 {
 					break
 				}
 
