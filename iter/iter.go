@@ -948,11 +948,6 @@ func InnerJoin[T any, U any, R any](f func(x T, y U) R, f1 func(x T, y U) int) f
 					uok = false
 					tok = true
 
-					if len(us) == 0 {
-						var tmp U
-						ch_ <- f(t, tmp)
-					}
-
 				case 1:
 					tok = false
 					uok = true
