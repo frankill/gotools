@@ -987,6 +987,7 @@ func LeftJoin[T any, U any, R any](f func(x T, y U) R, f1 func(x T, y U) int) fu
 
 			var t T
 			var u U
+			var um U
 			var tok, uok, ok1, ok2 = true, true, true, true
 
 			us := make([]U, 0)
@@ -1001,6 +1002,9 @@ func LeftJoin[T any, U any, R any](f func(x T, y U) R, f1 func(x T, y U) int) fu
 				if uok || !ok1 {
 					u, ok2 = <-ch2
 					uok = ok2
+					if !ok2 && !tok && ok1 {
+						tok = true
+					}
 				}
 
 				if !ok1 && !ok2 {
@@ -1040,8 +1044,7 @@ func LeftJoin[T any, U any, R any](f func(x T, y U) R, f1 func(x T, y U) int) fu
 					tok = true
 
 					if len(us) == 0 {
-						var tmp U
-						ch_ <- f(t, tmp)
+						ch_ <- f(t, um)
 					}
 
 				case 1:
