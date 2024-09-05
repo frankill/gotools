@@ -645,7 +645,6 @@ func FromGob[T any](path string, del bool) (chan T, chan error) {
 		close(errs)
 		return ch, errs
 	}
-	defer file.Close()
 
 	decoder := gob.NewDecoder(file)
 
@@ -657,6 +656,7 @@ func FromGob[T any](path string, del bool) (chan T, chan error) {
 		}()
 		defer close(ch)
 		defer close(errs)
+		defer file.Close()
 		for {
 			var instance T
 			if err := decoder.Decode(&instance); err != nil {
