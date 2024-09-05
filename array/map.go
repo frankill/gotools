@@ -194,7 +194,7 @@ func MapApply[K comparable, V, U any](f func(K, V) U, m map[K]V) []U {
 	return applied
 }
 
-// MapFromArrays 根据两个数组创建一个映射。
+// MapFromArray 根据两个数组创建一个映射。
 // 它接受两个参数：key和value，它们分别是K和V类型的数组。
 // 函数返回一个map[T]S类型的映射，其中T和S是K和V数组元素的类型。
 // 该函数的目的是通过索引匹配将key数组的元素作为映射的键，value数组的元素作为对应的值。
@@ -225,6 +225,33 @@ func MapFromArray[K ~[]T, V ~[]S, T comparable, S any](key K, value V) map[T]S {
 
 }
 
+// MapFromArray2 根据一个函数和一个数组创建一个映射。
+// 它接受两个参数：f和value，其中f是一个函数，它接受一个S类型的参数，返回一个T类型的值。
+// 该函数的目的是通过索引匹配将value数组的元素作为映射的键，通过调用f函数将value数组的元素作为对应的值。
+// 参数:
+//
+//	f: 一个函数，它接受一个S类型的参数，返回一个T类型的值。
+//	value: 用于映射的值的数组。
+//
+// 返回值:
+//
+//	map[T]S: 一个映射，其中键来自value数组，值来自f函数的返回值。
+//
+
+func MapFromArray2[V ~[]S, T comparable, S any](f func(x S) T, value V) map[T]S {
+
+	dict := make(map[T]S, len(value))
+
+	for i := range value {
+
+		dict[f(value[i])] = value[i]
+
+	}
+
+	return dict
+
+}
+
 // MapToPairs 将一个映射(map)转换为一个由Pair组成的切片(slice)。
 // 这个函数接受一个类型为[K]V的映射作为输入，其中K和V可以是任何可比较和任意类型的值。
 // 函数返回一个由Pair[K, V]组成的切片，每个Pair包含原始映射中的一对键值对。
@@ -247,7 +274,7 @@ func MapToArrayPairs[K comparable, V any](m map[K]V) []Pair[K, V] {
 	return pairs
 }
 
-// MapFromArray2 根据提供的转换函数和数据数组，创建并返回一个映射。
+// MapFromPairs 根据提供的转换函数和数据数组，创建并返回一个映射。
 // 这个函数接受一个函数参数 fun，该函数用于将数据数组中的元素转换为映射的键，
 // 同时接受一个数据数组 data，该数组的元素类型是 Pair，其中 First 字段作为映射的键，
 // Second 字段作为映射的值。函数返回一个映射，其中键是通过 fun 函数转换得到的，
