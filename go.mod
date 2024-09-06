@@ -7,6 +7,7 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/xuri/excelize/v2 v2.8.1
+	github.com/zentures/cityhash v0.0.0-20131128155616-cdd6a94144ab
 )
 
 require (

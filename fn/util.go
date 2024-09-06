@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"hash/crc32"
 	"strconv"
+
+	"github.com/zentures/cityhash"
 )
 
 // Md5 返回一个字符串的md5
@@ -50,4 +52,8 @@ func StrToInt(str string, num int) int {
 	crc32IntRes := sToInt(Crc32(md5Res))
 
 	return crc32IntRes % num
+}
+
+func CityHash64(str string) uint64 {
+	return cityhash.CityHash64([]byte(str), uint32(len([]byte(str))))
 }
