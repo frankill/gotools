@@ -686,6 +686,7 @@ func Maps[T any, U any](fn func(ch chan T, num int) U) func(cs ...chan T) chan U
 // sort 排序通道，并返回排序后的chan
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个布尔值，表示是否满足排序条件。
+//     当 `fun(x, y)` 返回 `true`，则在排序时 `x` 应位于 `y` 之前。
 //   - ch: 一个通道，用于接收数据。
 //
 // 返回:
@@ -716,6 +717,7 @@ func SortSimple[T any](f func(x, y T) bool) func(ch chan T) chan T {
 // MergeSort 合并排序多个通道，按照func(x, y T) bool进行排序
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个布尔值，表示是否满足排序条件。
+//     当 `fun(x, y)` 返回 `true`，则在排序时 `x` 应位于 `y` 之前。
 //   - cs: 一个包含多个通道的切片。
 //
 // 返回:
@@ -780,6 +782,7 @@ func MergeSort[T any](f func(x, y T) bool) func(cs ...chan T) chan T {
 // Sort 针对数据较大的情况进行处理，使用了外部文件排序，如果内存满足请使用SortSimple
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个布尔值，表示是否满足排序条件。
+//     当 `fun(x, y)` 返回 `true`，则在排序时 `x` 应位于 `y` 之前。
 //   - ch: 一个通道，用于接收数据。
 //
 // 返回:
@@ -839,6 +842,7 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 // GroupBigData 对通道进行分组，返回一个chan
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 的值，返回一个布尔值，表示是否满足分组条件。
+//     当 `fun(x, y)` 返回 `true`，则分组是相同的
 //   - ch: 一个通道，用于接收数据。数据必须是排序后的
 //
 // 返回:
