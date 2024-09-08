@@ -2,13 +2,13 @@
 
 ## 简介
 
-`gotools` 总结了日常使用的一些数据处理逻辑，旨在为开发者提供一系列泛型高级函数，以简化数据处理流程并增强代码的表达力。本库借鉴了函数式编程理念，通过提供类型灵活的高阶函数，使数据操作更加高效和优雅。
+`gotools` 提供数据的流处理iter, array的隐式循环操作，etl的读取  
 
 ## 特性
 
 - **泛型支持**：利用 Go 1.18+ 泛型，确保函数在多种数据类型间通用。
 - **效率** ： 凑合用吧，操作简化就行
- 
+- **数据源** ： txt,csv,table,json, msyql , elasticsearch,clickhouse,gob,gzip
 
 ## 安装
 ```bash
@@ -23,48 +23,82 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
-	"github.com/frankill/gotools/array"
+	"github.com/frankill/gotools/db"
 	"github.com/frankill/gotools/iter"
 )
 
+
+func compare(x, y []string) bool {
+	xn, _ := strconv.Atoi(x[0])
+	yn, _ := strconv.Atoi(y[0])
+	return xn < yn
+}
+
+
+
 func main() {
 	
-	iter.Walk(
-		func(x int) {
-			println(x)
-		},
-	)(
-		iter.Filter(func(x int) bool {
-			for i := 5; i*i <= x; i += 6 {
-				if x%i == 0 || x%(i+2) == 0 {
-					return false
-				}
-			}
-			return true
+	data := []struct {
+		Number int
+		Label  string
+	}{
+		{2, "test"},
+		{4, "test"},
+		{6, "test"},
+		{6, "test1"},
+		{10, "test"},
+		{12, "test"},
+		{13, "test"},
+	}
+
+	iter.ToCsv("pipe.csv", false)(
+		iter.FromArray(func(x struct {
+			Number int
+			Label  string
+		}) []string {
+			return []string{strconv.Itoa(x.Number), x.Label}
+		})(data),
+	)
+
+	data = []struct {
+		Number int
+		Label  string
+	}{
+		{1, "test"},
+		{6, "test"},
+		{10, "test1"},
+		{14, "test13"},
+		{15, "test1"},
+		{17, "1"},
+	}
+
+	iter.ToCsv("pipe_1.csv", false)(
+		iter.FromArray(func(x struct {
+			Number int
+			Label  string
+		}) []string {
+			return []string{strconv.Itoa(x.Number), x.Label}
+		})(data),
+	)
+
+	ch1, _ := iter.FromCsv("pipe.csv")(false)
+	ch2, _ := iter.FromCsv("pipe_1.csv")(false)
+
+	iter.Walk(func(x []string) { fmt.Println(x) })(
+		iter.Unique(func(x, y []string) bool {
+			return x[0] == y[0]
 		})(
-			iter.Filter(func(x int) bool {
-				if x <= 1 {
-					return false
-				}
-				if x <= 3 {
-					return true
-				}
-				if x%3 == 0 {
-					return false
-				}
-				if x%2 == 0 {
-					return false
-				}
-				return true
-			})(
-				iter.FromArray(iter.Identity[int])(array.ArraySeq(1, 100, 1)),
+			iter.MergeSort(compare)(
+				iter.SortSimple(compare)(ch2),
+				iter.SortSimple(compare)(ch1),
 			),
 		),
 	)
- 
-
 }
+
+
 
 
 ```
