@@ -49,7 +49,7 @@ func Map[T any, U any](f func(x T) U) func(ch chan T) chan U {
 	}
 }
 
-// FlatMap 返回一个处理步骤函数，该函数接受一个输入通道（chan T），
+// FlatMap 返回一个函数，该函数接受一个输入通道（chan T），
 // 对通道中的每个元素应用函数 f，并将结果展平到一个新的输出通道（chan U）中。
 // 函数 f 接受类型 T 的元素并返回类型 U 的切片。函数返回的处理步骤函数创建一个新的通道
 // 用于发送展平后的结果。返回的输出通道在处理完成后会被关闭。
@@ -68,7 +68,7 @@ func FlatMap[T any, U any](f func(x T) []U) func(ch chan T) chan U {
 	}
 }
 
-// Distinct 返回一个处理步骤函数，该函数接受一个输入通道（chan T），
+// Distinct 返回一个函数，该函数接受一个输入通道（chan T），
 // 从中移除重复的元素，并将唯一的元素发送到一个新的输出通道（chan T）中。
 // 函数内部使用一个映射（map）来跟踪已经见过的元素，以确保每个元素只出现一次。
 // 返回的输出通道在处理完成后会被关闭。
@@ -114,8 +114,7 @@ func Walk[T any](f func(x T)) func(ch chan T) {
 //   - 一个通道，通道中的值是类型为 T 的数据，只包含符合函数 f 条件的数据。
 //
 // 函数功能:
-//   - 从输入通道 ch 中读取数据，对每个数据应用函数 f。如果函数 f 返回 true，则将数据写入新的通道 ch_。
-//   - 使用一个 goroutine 执行这些操作，并在完成后关闭通道 ch_。
+//   - 从输入通道 ch 中读取数据，对每个数据应用函数 f。如果函数 f 返回 true，则将数据写入新的通道 ch_
 func Filter[T any](f func(x T) bool) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
@@ -146,7 +145,6 @@ func Filter[T any](f func(x T) bool) func(ch chan T) chan T {
 //
 // 函数功能:
 //   - 从 start 开始，根据步长 step 生成整数序列，直到达到 end 为止（不包括 end）。
-//   - 使用一个 goroutine 执行这些操作，并在完成后关闭通道 ch。
 func Sequence(start, end, step int) chan int {
 
 	ch := make(chan int, BufferSize)
@@ -444,11 +442,11 @@ func DropWhile[T any](f func(x T) bool) func(ch chan T) chan T {
 	}
 }
 
-// Merge 将多个通道合并为一个通道。
+// Union 将多个通道合并为一个通道。
 //
 // 参数:
 //
-//	chs: 一个或多个需要合并的通道，这些通道的数据类型必须相同。
+//	chs: 多个需要合并的通道，这些通道的数据类型必须相同。
 //
 // 返回值:
 //
@@ -483,7 +481,7 @@ func Union[T any](chs ...chan T) chan T {
 	return out
 }
 
-// Intersection 返回两个通道的交集
+// InterSimple 返回两个通道的交集
 // 参数:
 //   - ch1: 一个通道，通道中的值是类型为 T 的数据。
 //   - ch2: 一个通道，通道中的值是类型为 T 的数据。
@@ -516,7 +514,7 @@ func InterSimple[T comparable](ch1 chan T, ch2 chan T) chan T {
 
 }
 
-// Subtract 返回两个通道的差集
+// SubSimple 返回两个通道的差集
 // 参数:
 //   - ch1: 一个通道，通道中的值是类型为 T 的数据。
 //   - ch2: 一个通道，通道中的值是类型为 T 的数据。
@@ -559,9 +557,9 @@ func SubSimple[T comparable](ch1 chan T, ch2 chan T) chan T {
 // 注意:
 // 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
 // 如果第二个通道数据很多，要考虑内存占用问题。
-func Cartesian[T any](ch1 chan T, ch2 chan T) chan array.Pair[T, T] {
+func Cartesian[T, U any](ch1 chan T, ch2 chan U) chan array.Pair[T, U] {
 
-	ch := make(chan array.Pair[T, T], BufferSize)
+	ch := make(chan array.Pair[T, U], BufferSize)
 
 	dd := Collect(ch2)
 
@@ -595,28 +593,31 @@ func Cartesian[T any](ch1 chan T, ch2 chan T) chan array.Pair[T, T] {
 //
 // 返回:
 //   - 输出通道，其中包含滚动窗口的数据切片。
-func Window[T any](windowSize int, ch chan T) chan []T {
-	window := make([]T, 0, windowSize)
-	out := make(chan []T, BufferSize)
+func Window[T any](ch chan T) func(windowSize int) chan []T {
 
-	go func() {
-		defer close(out)
-		for v := range ch {
-			window = append(window, v)
-			if len(window) == windowSize {
-				// 发送当前窗口的副本到通道
-				out <- window
-				// 重新创建窗口切片
-				window = make([]T, 0, windowSize)
+	return func(windowSize int) chan []T {
+		window := make([]T, 0, windowSize)
+		out := make(chan []T, BufferSize)
+
+		go func() {
+			defer close(out)
+			for v := range ch {
+				window = append(window, v)
+				if len(window) == windowSize {
+					// 发送当前窗口的副本到通道
+					out <- window
+					// 重新创建窗口切片
+					window = make([]T, 0, windowSize)
+				}
 			}
-		}
-		// 处理剩余的窗口数据
-		if len(window) > 0 {
-			out <- window
-		}
-	}()
+			// 处理剩余的窗口数据
+			if len(window) > 0 {
+				out <- window
+			}
+		}()
 
-	return out
+		return out
+	}
 }
 
 // Split 将通道中的数据分组
@@ -794,7 +795,7 @@ func MergeSort[T any](f func(x, y T) bool) func(cs ...chan T) chan T {
 func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
-		ch_ := Window(SortWindowSize, ch)
+		ch_ := Window(ch)(SortWindowSize)
 		num := 0
 		file := []string{}
 
@@ -839,7 +840,7 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 }
 
-// GroupBigData 对通道进行分组，返回一个chan
+// Group 对通道进行分组，返回一个chan
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 的值，返回一个布尔值，表示是否满足分组条件。
 //     当 `fun(x, y)` 返回 `true`，则分组是相同的
