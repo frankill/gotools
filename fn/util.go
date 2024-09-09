@@ -57,3 +57,7 @@ func StrToInt(str string, num int) int {
 func CityHash64(str string) uint64 {
 	return cityhash.CityHash64([]byte(str), uint32(len([]byte(str))))
 }
+
+func CityHash32(str string) uint32 {
+	return cityhash.CityHash32([]byte(str), uint32(len([]byte(str))))
+}
