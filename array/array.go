@@ -980,6 +980,38 @@ func ArrayMap[S ~[]T, T any, U any](fun func(x ...T) U, arr ...S) []U {
 	return result
 }
 
+// ArrayFlatMap 对多个同结构切片（S，类型为 T 的切片）应用一个函数，将每个切片的对应元素作为参数传递：
+// 并收集返回值形成一个新的 U 类型切片序列。
+//
+// 参数:
+// - fun: 一个函数，接受 T 类型的变长参数，并返回 U 类型的结果。
+// - arr: 变长参数，每个元素为类型为 S 的切片，所有切片长度需一致。
+//
+// 返回值:
+//   - 一个 U 类型的切片，其元素为对输入切片每相同索引位置的元素应用 `fun` 函数后的结果。
+//     若输入为空或首切片为空，则返回空切片。
+//
+// 注意:
+// - 所有输入切片的长度必须相等，否则函数的行为未定义。
+func ArrayFlatMap[S ~[]T, T any, U any](fun func(x ...T) []U, arr ...S) []U {
+
+	if len(arr) == 0 || len(arr[0]) == 0 {
+		return []U{}
+	}
+	l := len(arr[0])
+	f := len(arr)
+	param := make([]T, f)
+	result := make([]U, 0)
+
+	for i := 0; i < l; i++ {
+		for j := 0; j < f; j++ {
+			param[j] = arr[j][i]
+		}
+		result = append(result, fun(param...)...)
+	}
+	return result
+}
+
 // ArrayZip 将多个同长度的切片 S（类型为 T 的切片）按索引位置组合成新的切片 S 序列。
 // 每个新切片包含的是原始切片在该索引位置上的元素。
 //
@@ -1718,11 +1750,6 @@ func ArrayToMap[K comparable](arr []K) map[K]struct{} {
 		m[v] = struct{}{}
 	}
 	return m
-}
-
-func ArrayFlatten[S ~[]T, T any](arr ...S) []T {
-
-	return ArrayConcat(arr...)
 }
 
 func ArrayUnique[S ~[]T, T comparable](arr ...S) []T {

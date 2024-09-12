@@ -1148,3 +1148,28 @@ func Subtract[T any](f func(x, y T) int) func(ch1 chan T, ch2 chan T) chan T {
 		return ch_
 	}
 }
+
+// Flatten 接收一个通道，该通道发送包含元素 T 的切片 S。
+// 它将所有切片中的元素展平并发送到新的通道中。
+//
+// 参数:
+//   - ch: 一个通道，发送元素为类型 S 的切片，其中 S 是类型 T 的切片。
+//
+// 返回:
+//   - 返回一个新的通道，该通道发送类型为 T 的元素，这些元素是展平后的切片元素。
+func Flatten[S ~[]T, T any](ch chan S) chan T {
+
+	ch_ := make(chan T, BufferSize)
+
+	go func() {
+		defer close(ch_)
+
+		for v := range ch {
+			for _, vv := range v {
+				ch_ <- vv
+			}
+		}
+	}()
+
+	return ch_
+}
