@@ -715,7 +715,7 @@ func SortSimple[T any](f func(x, y T) bool) func(ch chan T) chan T {
 	}
 }
 
-// MergeSort 合并排序多个通道，按照func(x, y T) bool进行排序
+// Merge 合并排序多个通道，按照func(x, y T) bool进行排序
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个布尔值，表示是否满足排序条件。
 //     当 `fun(x, y)` 返回 `true`，则在排序时 `x` 应位于 `y` 之前。
@@ -723,7 +723,7 @@ func SortSimple[T any](f func(x, y T) bool) func(ch chan T) chan T {
 //
 // 返回:
 //   - 一个通道，用于接收排序后的数据。
-func MergeSort[T any](f func(x, y T) bool) func(cs ...chan T) chan T {
+func Merge[T any](f func(x, y T) bool) func(cs ...chan T) chan T {
 
 	return func(cs ...chan T) chan T {
 
@@ -834,7 +834,7 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 		}, file)
 
-		return MergeSort(f)(fs...)
+		return Merge(f)(fs...)
 
 	}
 

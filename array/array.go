@@ -1752,6 +1752,12 @@ func ArrayToMap[K comparable](arr []K) map[K]struct{} {
 	return m
 }
 
+// ArrayUnique 去重数组元素
+// 参数:
+//   - arr: 一个切片，表示要进行去重的切片。
+//
+// 返回:
+//   - []T: 一个新的切片，表示去重后的切片。
 func ArrayUnique[S ~[]T, T comparable](arr ...S) []T {
 	seen := make(map[T]struct{})
 	var result []T
@@ -1763,6 +1769,66 @@ func ArrayUnique[S ~[]T, T comparable](arr ...S) []T {
 				result = append(result, v)
 			}
 		}
+	}
+
+	return result
+}
+
+// ArrayMerge 通过比较函数对两个切片进行合并，返回一个新的切片
+// 参数:
+//   - f: 一个函数，接受两个类型为 T 的值，返回一个布尔值
+//     当 `fun(x, y)` 返回 `true`，则在排序时 `x` 应位于 `y` 之前。
+//   - arr: 一个切片，表示要进行合并的切片。
+//
+// 返回:
+//   - []T: 一个新的切片，表示合并后的切片。
+func ArrayMerge[S ~[]T, T any](f func(x T, y T) bool, arr ...S) []T {
+
+	length := ArrayReduce(func(x int, y S) int {
+		return x + len(y)
+	}, 0, arr)
+
+	result := make([]T, 0, length)
+
+	mins := make([]T, len(arr))
+	index := make([]int, len(arr))
+
+	for i := 0; i < len(arr); i++ {
+		mins[i] = arr[i][0]
+		index[i] = 0
+	}
+
+	for {
+
+		minIndex := -1
+
+		for i := range mins {
+
+			if minIndex == -1 {
+				minIndex = i
+			}
+
+			if !f(mins[minIndex], mins[i]) {
+				minIndex = i
+			}
+		}
+
+		if minIndex == -1 {
+			break
+		}
+
+		result = append(result, mins[minIndex])
+
+		index[minIndex] = index[minIndex] + 1
+
+		if len(arr[minIndex]) > index[minIndex] {
+			mins[minIndex] = arr[minIndex][index[minIndex]]
+		} else {
+			mins = append(mins[:minIndex], mins[minIndex+1:]...)
+			arr = append(arr[:minIndex], arr[minIndex+1:]...)
+			index = append(index[:minIndex], index[minIndex+1:]...)
+		}
+
 	}
 
 	return result
