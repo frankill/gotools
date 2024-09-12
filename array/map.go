@@ -1,5 +1,45 @@
 package array
 
+// MapOfIndex 从给定的数据中创建一个映射，其中键是函数 f 的返回值，值是每个元素在数据中的位置。
+// 该函数允许泛型使用，确保键类型K是可比较的，值类型V可以是任何类型。
+// 参数:
+//   - f: 一个函数，它接受每个元素作为输入，返回一个可比较的键。
+//   - data: 一个切片，它包含要处理的数据。
+//
+// 返回值:
+//   - 一个映射，其中键是函数 f 的返回值，值是每个元素在数据中的位置。
+func MapOfIndex[K comparable, V any](f func(V) K, data []V) map[K][]int {
+
+	result := map[K][]int{}
+
+	for i := range data {
+		result[f(data[i])] = append(result[f(data[i])], i)
+	}
+
+	return result
+
+}
+
+// MapOfCount 从给定的数据中创建一个映射，其中键是函数 f 的返回值，值是每个元素在数据中出现的次数。
+// 该函数允许泛型使用，确保键类型K是可比较的，值类型V可以是任何类型。
+// 参数:
+//   - f: 一个函数，它接受每个元素作为输入，返回一个可比较的键。
+//   - data: 一个切片，它包含要处理的数据。
+//
+// 返回值:
+//   - 一个映射，其中键是函数 f 的返回值，值是每个元素在数据中出现的次数。
+func MapOfCount[K comparable, V any](f func(V) K, data []V) map[K]int {
+
+	result := map[K]int{}
+
+	for i := range data {
+		result[f(data[i])]++
+	}
+
+	return result
+
+}
+
 // MapKeys 返回给定映射的所有键的切片。
 // 该函数允许泛型使用，确保键类型K是可比较的，值类型V可以是任何类型。
 // 参数:
