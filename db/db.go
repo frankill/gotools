@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/frankill/gotools/array"
+	"github.com/frankill/gotools/maps"
 	"github.com/frankill/gotools/query"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -32,7 +33,7 @@ func CountQuery(baseQuery string) string {
 }
 
 var (
-	ModifyFunTemp = array.ArrayToAny[[]string]
+	ModifyFunTemp = array.ToAny[[]string]
 )
 
 // MysqlDB 定义了一个与MySQL数据库交互的结构体。
@@ -169,7 +170,7 @@ func (m *DB) QueryOne(query *query.SQLBuilder) func() ([]string, error) {
 			dict[tmp] = struct{}{}
 		}
 
-		return array.MapApply(func(k sql.NullString, v struct{}) string { return k.String }, dict), nil
+		return maps.Apply(func(k sql.NullString, v struct{}) string { return k.String }, dict), nil
 
 	}
 
@@ -213,7 +214,7 @@ func (m *DB) QueryTwo(query *query.SQLBuilder) func() (map[string]string, error)
 			data[one] = two
 		}
 
-		return array.MapApplyBoth(func(k sql.NullString, v sql.NullString) (string, string) { return k.String, v.String }, data), nil
+		return maps.ApplyBoth(func(k sql.NullString, v sql.NullString) (string, string) { return k.String, v.String }, data), nil
 
 	}
 
@@ -267,7 +268,7 @@ func (m *DB) QueryAny(query *query.SQLBuilder) func() ([][]string, error) {
 				log.Fatalln(err)
 			}
 
-			tmpRow := array.ArrayMap(func(x ...sql.NullString) string { return x[0].String }, row)
+			tmpRow := array.Map(func(x ...sql.NullString) string { return x[0].String }, row)
 			rawResult = append(rawResult, tmpRow)
 
 		}
@@ -325,7 +326,7 @@ func (m *DB) QueryAnyIter(query *query.SQLBuilder) func() (chan []string, chan e
 					return
 				}
 
-				ch <- array.ArrayMap(func(i ...sql.NullString) string {
+				ch <- array.Map(func(i ...sql.NullString) string {
 					return i[0].String
 				}, row)
 			}

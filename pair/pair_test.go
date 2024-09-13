@@ -1,10 +1,10 @@
-package array_test
+package pair_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/frankill/gotools/array"
+	"github.com/frankill/gotools/pair"
 )
 
 // TestPairFromMap 测试 PairFromMap 函数的正确性。
@@ -13,7 +13,7 @@ func TestPairFromMap(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    map[int]string
-		expected []array.Pair[int, string]
+		expected []pair.Pair[int, string]
 	}{
 		{
 			name: "Basic Case",
@@ -22,7 +22,7 @@ func TestPairFromMap(t *testing.T) {
 				2: "two",
 				3: "three",
 			},
-			expected: []array.Pair[int, string]{
+			expected: []pair.Pair[int, string]{
 				{First: 1, Second: "one"},
 				{First: 2, Second: "two"},
 				{First: 3, Second: "three"},
@@ -31,14 +31,14 @@ func TestPairFromMap(t *testing.T) {
 		{
 			name:     "Empty Map",
 			input:    map[int]string{},
-			expected: []array.Pair[int, string]{}, // 空映射返回空切片
+			expected: []pair.Pair[int, string]{}, // 空映射返回空切片
 		},
 		{
 			name: "Single Element",
 			input: map[int]string{
 				42: "answer",
 			},
-			expected: []array.Pair[int, string]{
+			expected: []pair.Pair[int, string]{
 				{First: 42, Second: "answer"},
 			},
 		},
@@ -51,7 +51,7 @@ func TestPairFromMap(t *testing.T) {
 				4: "four",
 				5: "five",
 			},
-			expected: []array.Pair[int, string]{
+			expected: []pair.Pair[int, string]{
 				{First: 1, Second: "one"},
 				{First: 2, Second: "two"},
 				{First: 3, Second: "three"},
@@ -64,7 +64,7 @@ func TestPairFromMap(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// 使用 PairFromMap 函数
-			result := array.PairFromMap(tt.input)
+			result := pair.FromMap(tt.input)
 
 			// 比较结果和期望结果
 			if !reflect.DeepEqual(result, tt.expected) {
@@ -79,25 +79,25 @@ func TestPairFromArray(t *testing.T) {
 		name     string
 		first    []int
 		second   []string
-		expected []array.Pair[int, string]
+		expected []pair.Pair[int, string]
 	}{
 		{
 			name:     "Empty slices",
 			first:    []int{},
 			second:   []string{},
-			expected: []array.Pair[int, string]{},
+			expected: []pair.Pair[int, string]{},
 		},
 		{
 			name:     "Equal length slices",
 			first:    []int{1, 2, 3},
 			second:   []string{"a", "b", "c"},
-			expected: []array.Pair[int, string]{array.PairOf(1, "a"), array.PairOf(2, "b"), array.PairOf(3, "c")},
+			expected: []pair.Pair[int, string]{pair.Of(1, "a"), pair.Of(2, "b"), pair.Of(3, "c")},
 		},
 		{
 			name:     "Different length slices",
 			first:    []int{1, 2},
 			second:   []string{"a", "b", "c"},
-			expected: []array.Pair[int, string]{array.PairOf(1, "a"), array.PairOf(2, "b")},
+			expected: []pair.Pair[int, string]{pair.Of(1, "a"), pair.Of(2, "b")},
 		},
 	}
 
@@ -105,7 +105,7 @@ func TestPairFromArray(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call the function under test
-			result := array.PairFromArray(tt.first, tt.second)
+			result := pair.FromArray(tt.first, tt.second)
 
 			// Check if the result matches the expected value
 			if len(result) != len(tt.expected) {
@@ -113,7 +113,7 @@ func TestPairFromArray(t *testing.T) {
 			}
 			for i := range result {
 				if result[i] != tt.expected[i] {
-					t.Errorf("Expected array.Pair[%d] to be %v, but got %v", i, tt.expected[i], result[i])
+					t.Errorf("Expected pair.Pair[%d] to be %v, but got %v", i, tt.expected[i], result[i])
 				}
 			}
 		})
@@ -123,30 +123,30 @@ func TestPairFromArray(t *testing.T) {
 func TestPairFirsts(t *testing.T) {
 	tests := []struct {
 		name string
-		data []array.Pair[int, string]
+		data []pair.Pair[int, string]
 		want []int
 	}{
 		{
 			name: "Empty slice",
-			data: []array.Pair[int, string]{},
+			data: []pair.Pair[int, string]{},
 			want: []int{},
 		},
 		{
 			name: "Single element",
-			data: []array.Pair[int, string]{array.PairOf(1, "one")},
+			data: []pair.Pair[int, string]{pair.Of(1, "one")},
 			want: []int{1},
 		},
 		{
 			name: "Multiple elements",
-			data: []array.Pair[int, string]{array.PairOf(1, "one"), array.PairOf(2, "two"), array.PairOf(3, "three")},
+			data: []pair.Pair[int, string]{pair.Of(1, "one"), pair.Of(2, "two"), pair.Of(3, "three")},
 			want: []int{1, 2, 3},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := array.PairFirsts(tt.data); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("array.PairFirsts() = %v, want %v", got, tt.want)
+			if got := pair.Firsts(tt.data); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("pair.PairFirsts() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -155,30 +155,30 @@ func TestPairFirsts(t *testing.T) {
 func TestPairSeconds(t *testing.T) {
 	tests := []struct {
 		name string
-		data []array.Pair[int, string]
+		data []pair.Pair[int, string]
 		want []string
 	}{
 		{
 			name: "Empty slice",
-			data: []array.Pair[int, string]{},
+			data: []pair.Pair[int, string]{},
 			want: []string{},
 		},
 		{
 			name: "Single element",
-			data: []array.Pair[int, string]{array.PairOf(1, "one")},
+			data: []pair.Pair[int, string]{pair.Of(1, "one")},
 			want: []string{"one"},
 		},
 		{
 			name: "Multiple elements",
-			data: []array.Pair[int, string]{array.PairOf(1, "one"), array.PairOf(2, "two"), array.PairOf(3, "three")},
+			data: []pair.Pair[int, string]{pair.Of(1, "one"), pair.Of(2, "two"), pair.Of(3, "three")},
 			want: []string{"one", "two", "three"},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := array.PairSeconds(tt.data); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("array.PairSeconds() = %v, want %v", got, tt.want)
+			if got := pair.Seconds(tt.data); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("pair.PairSeconds() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/frankill/gotools/array"
+	"github.com/frankill/gotools/pair"
 )
 
 var (
@@ -498,7 +499,7 @@ func InterSimple[T comparable](ch1 chan T, ch2 chan T) chan T {
 
 	go func() {
 
-		m := array.ArrayToMap(Collect(ch2))
+		m := array.ToMap(Collect(ch2))
 
 		for v := range ch1 {
 
@@ -531,7 +532,7 @@ func SubSimple[T comparable](ch1 chan T, ch2 chan T) chan T {
 
 	go func() {
 
-		m := array.ArrayToMap(Collect(ch2))
+		m := array.ToMap(Collect(ch2))
 
 		for v := range ch1 {
 
@@ -557,9 +558,9 @@ func SubSimple[T comparable](ch1 chan T, ch2 chan T) chan T {
 // 注意:
 // 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
 // 如果第二个通道数据很多，要考虑内存占用问题。
-func Cartesian[T, U any](ch1 chan T, ch2 chan U) chan array.Pair[T, U] {
+func Cartesian[T, U any](ch1 chan T, ch2 chan U) chan pair.Pair[T, U] {
 
-	ch := make(chan array.Pair[T, U], BufferSize)
+	ch := make(chan pair.Pair[T, U], BufferSize)
 
 	dd := Collect(ch2)
 
@@ -571,7 +572,7 @@ func Cartesian[T, U any](ch1 chan T, ch2 chan U) chan array.Pair[T, U] {
 			defer wg.Done()
 			for v1 := range ch1 {
 				for _, v2 := range dd {
-					ch <- array.PairOf(v1, v2)
+					ch <- pair.Of(v1, v2)
 				}
 			}
 		}()
@@ -703,7 +704,7 @@ func SortSimple[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 			// TODO: 优化
 			data := Collect(ch)
-			array.ArraySortLocal(f, data)
+			array.SortLocal(f, data)
 
 			for _, v := range data {
 				ch_ <- v
@@ -807,7 +808,7 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 		for v := range ch_ {
 
-			array.ArraySortLocal(f, v)
+			array.SortLocal(f, v)
 
 			p, err := os.MkdirTemp("", "t-*")
 			if err != nil {

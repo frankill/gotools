@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/frankill/gotools/array"
+	"github.com/frankill/gotools/operation"
 	"github.com/frankill/gotools/structure"
 )
 
@@ -13,9 +14,9 @@ func TestListOperations(t *testing.T) {
 
 	// 测试 Push 方法
 
-	num := array.ArraySeq(1, 101, 1)
+	num := array.Seq(1, 101, 1)
 
-	array.ForEach(func(x ...int) {
+	operation.ForEach(func(x ...int) {
 		list.Push(x[0])
 	}, num)
 

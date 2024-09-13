@@ -1,6 +1,11 @@
-package array
+package agg
 
-import "cmp"
+import (
+	"cmp"
+
+	"github.com/frankill/gotools"
+	"github.com/frankill/gotools/array"
+)
 
 // Asccumulate 是一个高阶函数，用于对切片的元素进行累积计算。
 // 它接受一个函数 fun 作为累积规则，一个默认值 default_v 作为累积的初始值，
@@ -20,8 +25,8 @@ import "cmp"
 // 使用示例:
 //
 //	func main() {
-//	    numbers := [][]int{{1, 2, 3}, {4, 5, 6}}
-//	    sum := AsccumulateMap(func(x, y int) int { return x + y }, 0, numbers)
+//	    gotools.Numbers := [][]int{{1, 2, 3}, {4, 5, 6}}
+//	    sum := AsccumulateMap(func(x, y int) int { return x + y }, 0, gotools.Numbers)
 //	    fmt.Println(sum) // 输出: 21，因为 0 + 1 + 2 + 3 + 4 + 5 + 6 = 21
 //	}
 func Asccumulate[S ~[]T, T, U any](fun func(x U, y T) U, default_v U, arr ...S) U {
@@ -64,27 +69,27 @@ func AsccumulateEach[S ~[]T, T, U any](fun func(x U, y ...T) U, default_v U, arr
 }
 
 // ASum 计算多个切片中所有子切片元素的和。
-// 该函数接受一个变长参数 slice，其中每个元素是一个切片，切片的元素类型必须实现 Number 接口。
+// 该函数接受一个变长参数 slice，其中每个元素是一个切片，切片的元素类型必须实现 gotools.Number 接口。
 // 函数返回所有子切片元素的总和。
 // 使用 ArrayMap 和 ArraySum 函数进行嵌套操作，首先对每个子切片求和，然后对所有子切片的和求和。
 // 参数:
 //
-//	slice ...[]T: 变长参数，其中每个元素是一个切片，切片的元素类型实现了 Number 接口。
+//	slice ...[]T: 变长参数，其中每个元素是一个切片，切片的元素类型实现了 gotools.Number 接口。
 //
 // 返回值:
 //
 //	T: 所有子切片元素的总和，类型与切片的元素类型相同。
-func ASum[S ~[]T, T Number](slice ...S) T {
+func ASum[S ~[]T, T gotools.Number](slice ...S) T {
 
 	return Asccumulate(func(x, y T) T { return x + y }, T(0), slice...)
 }
 
 func Acount[S ~[]T, T any](slice ...S) int {
-	return ArraySum(ArrayMap(func(x ...S) int { return len(x[0]) }, slice))
+	return array.Sum(array.Map(func(x ...S) int { return len(x[0]) }, slice))
 }
 
 func ADistinct[S ~[]T, T comparable](slice ...S) int {
-	return len(ArrayUnique(slice...))
+	return len(array.Unique(slice...))
 }
 
 // AMin 寻找多个切片中的最小元素。
@@ -99,7 +104,7 @@ func ADistinct[S ~[]T, T comparable](slice ...S) int {
 //
 //	T: 所有切片中的最小元素。
 func AMin[S ~[]T, T cmp.Ordered](slice ...S) T {
-	return ArrayMin(ArrayMap(func(x ...S) T { return ArrayMin(x[0]) }, slice))
+	return array.Min(array.Map(func(x ...S) T { return array.Min(x[0]) }, slice))
 }
 
 // AMax 函数接收多个切片的切片作为输入，返回这些切片中的最大值。
@@ -113,7 +118,7 @@ func AMin[S ~[]T, T cmp.Ordered](slice ...S) T {
 //
 //	T: 所有输入切片中的最大值。
 func AMax[S ~[]T, T cmp.Ordered](slice ...S) T {
-	return ArrayMax(ArrayMap(func(x ...S) T { return ArrayMax(x[0]) }, slice))
+	return array.Max(array.Map(func(x ...S) T { return array.Max(x[0]) }, slice))
 }
 
 /*
@@ -130,7 +135,7 @@ AConcat 函数用于拼接多个切片。
 */
 func AConcat[S ~[]T, T any](slice ...S) []T {
 
-	return ArrayConcat(slice...)
+	return array.Concat(slice...)
 
 }
 
@@ -144,7 +149,7 @@ func AConcat[S ~[]T, T any](slice ...S) []T {
 // - T: 满足条件的所有输入切片元素中的最大值。
 func AMaxif[S ~[]T, T cmp.Ordered](fun func(x ...T) bool, slice ...S) T {
 
-	a := ArrayMap(func(x ...S) S { return ArrayFilter(fun, x[0]) }, slice)
+	a := array.Map(func(x ...S) S { return array.Filter(fun, x[0]) }, slice)
 
 	return AMax(a...)
 }
@@ -165,7 +170,7 @@ func AMaxif[S ~[]T, T cmp.Ordered](fun func(x ...T) bool, slice ...S) T {
 //	返回满足条件的最小元素，类型为 T。
 func AMinif[S ~[]T, T cmp.Ordered](fun func(x ...T) bool, slice ...S) T {
 
-	a := ArrayMap(func(x ...S) S { return ArrayFilter(fun, x[0]) }, slice)
+	a := array.Map(func(x ...S) S { return array.Filter(fun, x[0]) }, slice)
 
 	return AMin(a...)
 }
@@ -195,7 +200,7 @@ func AargMax[D ~[]U, S ~[]T, T cmp.Ordered, U any](arg D, val S) U {
 		val = val[0:len(arg)]
 	}
 
-	index := ArrayFindMax(val)
+	index := array.FindMax(val)
 
 	if index == -1 {
 		return res
@@ -233,7 +238,7 @@ func AargMin[D ~[]U, S ~[]T, T cmp.Ordered, U any](arg D, val S) U {
 		val = val[0:len(arg)]
 	}
 
-	index := ArrayFindMin(val)
+	index := array.FindMin(val)
 
 	if index == -1 {
 		return res

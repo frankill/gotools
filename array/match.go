@@ -15,8 +15,8 @@ import (
 //	一个整数切片，表示在 'lookup_array' 中找到的每个 'lookup_value' 元素的第一个匹配项的索引，如果没有找到匹配项则返回 -1。
 func MatchZero[A ~[]T, T comparable](lookup_value A, lookup_array A) []int {
 
-	return ArrayMap(func(x ...T) int {
-		return ArrayFindFirst(func(y ...T) bool {
+	return Map(func(x ...T) int {
+		return FindFirst(func(y ...T) bool {
 			return y[0] == x[0]
 		}, lookup_array)
 	}, lookup_value)
@@ -37,10 +37,10 @@ func MatchOne[A ~[]T, T cmp.Ordered](lookup_value A, lookup_array A) []int {
 	ll := len(lookup_value)
 	la := len(lookup_array)
 
-	id := ArraySeq(0, la, 1)
-	res := Rep(-1, ll)
+	id := Seq(0, la, 1)
+	res := ARep(-1, ll)
 
-	id, lookup_array = ArraySortBy(func(x, y T) bool {
+	id, lookup_array = SortBy(func(x, y T) bool {
 		return x < y
 	}, id, lookup_array)
 
@@ -77,10 +77,10 @@ func MatchMinusOne[A ~[]T, T cmp.Ordered](lookup_value A, lookup_array A) []int 
 	ll := len(lookup_value)
 	la := len(lookup_array)
 
-	id := ArraySeq(0, la, 1)
-	res := Rep(-1, ll)
+	id := Seq(0, la, 1)
+	res := ARep(-1, ll)
 
-	id, lookup_array = ArraySortBy(func(x, y T) bool {
+	id, lookup_array = SortBy(func(x, y T) bool {
 		return x > y
 	}, id, lookup_array)
 
@@ -121,6 +121,6 @@ func Xlookup[S ~[]T, T comparable, R ~[]U, U any](lookup_value S, lookup_array S
 
 	index := MatchZero(lookup_value, lookup_array)
 
-	return ArrayChoose(index, lookup_result)
+	return Choose(index, lookup_result)
 
 }

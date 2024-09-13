@@ -53,7 +53,7 @@ func (fw *FuncWrapper) Partial(args ...any) *FuncWrapper {
 // Call 调用函数，将所有已部分应用的参数与新传入的参数一起传递给函数，返回函数的结果。
 func (fw *FuncWrapper) Call(args ...any) any {
 	// 创建参数列表
-	callArgs := append(fw.params, array.ArrayMap(func(x ...any) reflect.Value {
+	callArgs := append(fw.params, array.Map(func(x ...any) reflect.Value {
 		return reflect.ValueOf(x[0])
 	}, args)...)
 
@@ -79,5 +79,3 @@ func (fw *FuncWrapper) Call(args ...any) any {
 func (fw *FuncWrapper) Clone() *FuncWrapper {
 	return &FuncWrapper{fun: fw.fun, params: fw.params}
 }
-
-

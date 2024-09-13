@@ -1,7 +1,5 @@
 package array
 
-import "cmp"
-
 var (
 	LETTERS = []string{
 		"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
@@ -11,36 +9,6 @@ var (
 		"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
 	}
 )
-
-// Max 返回两个可比较类型 T 的较大值。
-//
-// 参数:
-// - x: 第一个比较值。
-// - y: 第二个比较值。
-//
-// 返回值:
-// - 如果 `x` 大于 `y`，则返回 `x`；否则返回 `y`。
-func Max[T cmp.Ordered](x, y T) T {
-	if x > y {
-		return x
-	}
-	return y
-}
-
-// Min 返回两个可比较类型 T 的较小值。
-//
-// 参数:
-// - x: 第一个比较值。
-// - y: 第二个比较值。
-//
-// 返回值:
-// - 如果 `x` 小于 `y`，则返回 `x`；否则返回 `y`
-func Min[T cmp.Ordered](x, y T) T {
-	if x < y {
-		return x
-	}
-	return y
-}
 
 // Which 函数根据提供的判断函数fun，遍历多个切片数组arr的对应位置元素，判断这些元素是否满足fun定义的条件，
 // 并记录满足条件的位置（以1表示）和不满足条件的位置（以0表示）到结果切片中返回。
@@ -85,7 +53,7 @@ func Which[T any](fun func(x ...T) bool, arr ...[]T) []int {
 	return result
 }
 
-func ArrayToint(arr []bool) []int {
+func Toint(arr []bool) []int {
 
 	result := make([]int, len(arr))
 
@@ -99,7 +67,7 @@ func ArrayToint(arr []bool) []int {
 	return result
 }
 
-func ArrayToGeneric[T any](arr []any) []T {
+func ToGeneric[T any](arr []any) []T {
 	result := make([]T, len(arr))
 
 	for i, v := range arr {
@@ -116,7 +84,7 @@ func ArrayToGeneric[T any](arr []any) []T {
 //
 // 返回值:
 // - 返回一个新的 []any 类型切片，包含输入的所有元素，保持原有的顺序。
-func ArrayToAny[S ~[]T, T any](arr S) []any {
+func ToAny[S ~[]T, T any](arr S) []any {
 
 	res := make([]any, 0, len(arr))
 
@@ -135,8 +103,8 @@ func ArrayToAny[S ~[]T, T any](arr S) []any {
 // 返回:
 //
 //	一个新的切片，它是输入切片的副本。
-func ArrayCopy[T any](arr []T) []T {
-	return ArrayCopyWithNum(arr, len(arr))
+func Copy[T any](arr []T) []T {
+	return CopyWithNum(arr, len(arr))
 }
 
 // ArrayCopyWithNum 复制给定切片并创建一个新的切片，新切片的长度为 num。
@@ -149,7 +117,7 @@ func ArrayCopy[T any](arr []T) []T {
 // 返回:
 //
 //	一个新的切片，其长度为 num，且元素为 arr 的重复。
-func ArrayCopyWithNum[T any](arr []T, num int) []T {
+func CopyWithNum[T any](arr []T, num int) []T {
 
 	res := make([]T, num)
 	copy(res, arr)
@@ -213,7 +181,7 @@ func Transform[S ~[]F, D ~[]T, F comparable, T any](x S, array_from S, array_to 
 
 	res := make([]T, la)
 
-	dict := MapFromArray(array_from, array_to)
+	dict := ToMas(array_from, array_to)
 
 	for i := 0; i < la; i++ {
 		res[i] = default_value
@@ -222,6 +190,37 @@ func Transform[S ~[]F, D ~[]T, F comparable, T any](x S, array_from S, array_to 
 		}
 	}
 	return res
+
+}
+
+// ToMas 根据两个数组创建一个映射。
+// 它接受两个参数：key和value，它们分别是K和V类型的数组。
+// 函数返回一个map[T]S类型的映射，其中T和S是K和V数组元素的类型。
+// 该函数的目的是通过索引匹配将key数组的元素作为映射的键，value数组的元素作为对应的值。
+// 参数:
+//
+//	key K: 用于映射的键的数组。
+//	value V: 与键对应的值的数组。
+//
+// 返回值:
+//
+//	map[T]S: 一个映射，其中键来自key数组，值来自value数组。
+//
+// 注意:
+//
+//	K和V的类型参数必须是数组类型，且K的元素类型必须是可比较的。
+//	这个函数假设key和value数组的长度是相同的，以便进行索引匹配。
+func ToMas[K ~[]T, V ~[]S, T comparable, S any](key K, value V) map[T]S {
+
+	dict := make(map[T]S, len(key))
+
+	for i := range key {
+
+		dict[key[i]] = value[i]
+
+	}
+
+	return dict
 
 }
 
@@ -347,7 +346,7 @@ func HasIncreaseMaxCount[S ~[]T, T comparable](source, match S) int {
 // 返回值:
 //
 //	一个类型为 []T 的切片，长度为 n，其中所有元素都等于 x。
-func Rep[T any](x T, n int) []T {
+func ARep[T any](x T, n int) []T {
 	result := make([]T, n)
 	for i := 0; i < n; i++ {
 		result[i] = x

@@ -228,7 +228,7 @@ func (es *ElasticSearchClient[U]) QueryAnyIter(index string, q any) (chan Elasti
 
 		num, _ := strconv.Atoi(slice[index].Settings["index"].(map[string]interface{})["number_of_shards"].(string))
 
-		shardIDs := array.ArraySeq(0, num, 1)
+		shardIDs := array.Seq(0, num, 1)
 
 		for _, shardID := range shardIDs {
 			wg.Add(1)

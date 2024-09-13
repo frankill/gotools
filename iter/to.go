@@ -502,12 +502,12 @@ func ToExcel(e *ExcelField) func(ch chan []string) error {
 		}
 
 		if len(e.Header) > 0 {
-			data := array.ArrayToAny(e.Header)
+			data := array.ToAny(e.Header)
 			f.SetSheetRow(e.Sheet, fmt.Sprintf("A%d", startRow), &data)
 			startRow++
 		}
 		for strSlice := range ch {
-			data := array.ArrayToAny(strSlice)
+			data := array.ToAny(strSlice)
 			f.SetSheetRow(e.Sheet, fmt.Sprintf("A%d", startRow), &data)
 			startRow++
 		}

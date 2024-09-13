@@ -6,6 +6,8 @@ import (
 	"math"
 	"math/rand"
 	"time"
+
+	"github.com/frankill/gotools"
 )
 
 var (
@@ -21,7 +23,7 @@ func DESCGeneric[T cmp.Ordered](x, y T) bool {
 	return x > y
 }
 
-// ArrayFromAny函数接受任意类型的输入参数，并将它们转换为切片。
+// FromAny函数接受任意类型的输入参数，并将它们转换为切片。
 //
 // 参数:
 //
@@ -30,11 +32,11 @@ func DESCGeneric[T cmp.Ordered](x, y T) bool {
 // 返回:
 //
 //	一个包含输入值的切片
-func ArrayFromAny[T any](input ...T) []T {
+func FromAny[T any](input ...T) []T {
 	return input
 }
 
-// ArrayRep 生成一个新的切片，该切片由输入切片 `x` 的元素重复 `n` 次组成。
+// Rep 生成一个新的切片，该切片由输入切片 `x` 的元素重复 `n` 次组成。
 //
 // 参数:
 // - x: 类型为 `S` 的输入切片，包含类型为 `T` 的元素。
@@ -43,7 +45,7 @@ func ArrayFromAny[T any](input ...T) []T {
 //
 // 返回:
 // - 一个类型为 `[]T` 的新切片，包含重复的 `x` 元素。
-func ArrayRep[S ~[]T, T any](x S, n int, sort bool) []T {
+func Rep[S ~[]T, T any](x S, n int, sort bool) []T {
 	// Create an empty slice with a capacity equal to `n` times the length of `x`.
 	result := make([]T, 0, n*len(x))
 
@@ -65,7 +67,7 @@ func ArrayRep[S ~[]T, T any](x S, n int, sort bool) []T {
 	return result
 }
 
-// ArrayRepeated 创建一个包含相同重复切片的切片，该切片的长度等于n*len(x)。
+// Repeated 创建一个包含相同重复切片的切片，该切片的长度等于n*len(x)。
 //
 // 参数:
 //
@@ -75,7 +77,7 @@ func ArrayRep[S ~[]T, T any](x S, n int, sort bool) []T {
 // 返回值:
 //
 //	一个类型为 []T 的切片，长度为 n*len(x)，其中每个元素都是 `x` 的副本。
-func ArrayRepeated[S ~[]T, T any](x S, n int) []T {
+func Repeated[S ~[]T, T any](x S, n int) []T {
 	result := make([]T, 0, n*len(x))
 	for i := 0; i < n; i++ {
 		result = append(result, x...)
@@ -83,7 +85,7 @@ func ArrayRepeated[S ~[]T, T any](x S, n int) []T {
 	return result
 }
 
-// ArraySeq 创建一个整数数组，该数组基于起始值、结束值和步长。
+// Seq 创建一个整数数组，该数组基于起始值、结束值和步长。
 // 它返回一个包含从start到end（但不包括end）的整数的切片，每个相邻元素之间的差值为step。
 // 如果step为0，表示没有有效的步长，返回一个空切片。
 // 如果step为正数且start大于end，或者step为负数且start小于end，也返回一个空切片，因为在这种情况下无法生成有效的序列。
@@ -96,7 +98,7 @@ func ArrayRepeated[S ~[]T, T any](x S, n int) []T {
 // 返回值:
 //
 //	一个整数切片，包含从start到end（但不包括end）的整数，每个相邻元素之间的差值为step
-func ArraySeq(start, end, step int) []int {
+func Seq(start, end, step int) []int {
 	if step == 0 {
 		return []int{}
 	}
@@ -111,7 +113,7 @@ func ArraySeq(start, end, step int) []int {
 	return result
 }
 
-// ArrayRandomSample 从输入切片 S（类型为 T）中随机抽取指定数量的元素，返回一个新的切片 S。
+// RandomSample 从输入切片 S（类型为 T）中随机抽取指定数量的元素，返回一个新的切片 S。
 //
 // 参数:
 // - input: 类型为 S 的切片，从中进行随机抽样。
@@ -122,7 +124,7 @@ func ArraySeq(start, end, step int) []int {
 //     如果 `samples` 大于等于输入切片的长度，则直接返回原切片。
 //
 // 此函数使用当前时间作为随机数生成器的种子，确保每次调用都能得到不同的随机结果。
-func ArrayRandomSample[S ~[]T, T any](input S, samples int, replace bool) S {
+func RandomSample[S ~[]T, T any](input S, samples int, replace bool) S {
 
 	li := len(input)
 
@@ -159,7 +161,7 @@ func ArrayRandomSample[S ~[]T, T any](input S, samples int, replace bool) S {
 	return result
 }
 
-// ArrayShif 对输入的切片 S（类型为 T）进行循环移位操作。
+// Shif 对输入的切片 S（类型为 T）进行循环移位操作。
 //
 // 参数:
 // - arr: 类型为 S 的切片，将被移位。
@@ -169,7 +171,7 @@ func ArrayRandomSample[S ~[]T, T any](input S, samples int, replace bool) S {
 //   - 新的 T 类型切片，为移位操作后得到的结果。
 //     如果输入切片为空，则直接返回原切片。
 
-func ArrayShif[S ~[]T, T any](arr S, n int) []T {
+func Shif[S ~[]T, T any](arr S, n int) []T {
 
 	la := len(arr)
 
@@ -192,7 +194,7 @@ func ArrayShif[S ~[]T, T any](arr S, n int) []T {
 
 }
 
-// ArrayRotate 对输入的切片 S（类型为 T）进行循环旋转操作。
+// Rotate 对输入的切片 S（类型为 T）进行循环旋转操作。
 //
 // 参数:
 // - arr: 类型为 S 的切片，需要进行旋转操作。
@@ -201,7 +203,7 @@ func ArrayShif[S ~[]T, T any](arr S, n int) []T {
 // 返回值:
 //   - 新的 T 类型切片，为旋转操作后得到的结果。
 //     如果输入切片为空，则直接返回原切片。
-func ArrayRotate[S ~[]T, T any](arr S, n int) []T {
+func Rotate[S ~[]T, T any](arr S, n int) []T {
 
 	la := len(arr)
 
@@ -220,15 +222,15 @@ func ArrayRotate[S ~[]T, T any](arr S, n int) []T {
 	return append(arr[la-2:], arr[0:la-2]...)
 }
 
-// ArrayProduct 计算类型为 S（元素为 Number 类型）的切片的所有元素的乘积，并返回结果为 float64 类型。
+// Product 计算类型为 S（元素为 gotools.Number 类型）的切片的所有元素的乘积，并返回结果为 float64 类型。
 //
 // 参数:
-// - arr: 类型为 S 的切片，其元素需要实现 Number 接口（通常包括 int、float32、float64 等数字类型）。
+// - arr: 类型为 S 的切片，其元素需要实现 gotools.Number 接口（通常包括 int、float32、float64 等数字类型）。
 //
 // 返回值:
 //   - 所有切片元素相乘的结果，转换为 float64 类型返回。
 //     如果切片为空，则返回 1.0，遵循数学中乘积的空集定义。
-func ArrayProduct[S ~[]T, T Number](arr S) float64 {
+func Product[S ~[]T, T gotools.Number](arr S) float64 {
 	var result float64 = 1.0
 	for _, v := range arr {
 		result *= float64(v)
@@ -236,10 +238,10 @@ func ArrayProduct[S ~[]T, T Number](arr S) float64 {
 	return result
 }
 
-// ArrayCumFun 对类型为 S（元素为 Number 类型）的切片应用累计函数，并返回累计结果的新切片 S。
+// CumFun 对类型为 S（元素为 gotools.Number 类型）的切片应用累计函数，并返回累计结果的新切片 S。
 //
 // 参数:
-// - arr: 类型为 S 的切片，元素应支持加减乘除等操作（实现 Number 接口）。
+// - arr: 类型为 S 的切片，元素应支持加减乘除等操作（实现 gotools.Number 接口）。
 // - fun: 一个二元函数，接受两个 T 类型的参数并返回一个 T 类型的结果，用于定义累积操作的方式（如加法、乘法等）。
 //
 // 返回值:
@@ -249,7 +251,7 @@ func ArrayProduct[S ~[]T, T Number](arr S) float64 {
 // 示例用途:
 // - 使用加法函数时，可计算累积和。
 // - 使用乘法函数时，可计算累积积。
-func ArrayCumFun[S ~[]T, T Number](fun func(T, T) T, arr S) S {
+func CumFun[S ~[]T, T gotools.Number](fun func(T, T) T, arr S) S {
 	la := len(arr)
 	result := make(S, la)
 	result[0] = arr[0]
@@ -259,20 +261,20 @@ func ArrayCumFun[S ~[]T, T Number](fun func(T, T) T, arr S) S {
 	return result
 }
 
-// ArrayCumSum 计算类型为 S（元素为 Number 类型）的切片的累积和，并返回结果为同类型的新切片 S。
+// CumSum 计算类型为 S（元素为 gotools.Number 类型）的切片的累积和，并返回结果为同类型的新切片 S。
 //
 // 参数:
-// - arr: 类型为 S 的切片，元素应为可以相加的数字（实现 Number 接口）。
+// - arr: 类型为 S 的切片，元素应为可以相加的数字（实现 gotools.Number 接口）。
 //
 // 返回值:
 //   - 一个新的切片 S，其中每个元素是从原切片开始到当前位置的所有元素的和。
 //     例如，给定切片 [1, 2, 3, 4]，返回的累积和切片将是 [1, 3, 6, 10]。
-func ArrayCumSum[S ~[]T, T Number](arr S) S {
-	return ArrayCumFun(func(a, b T) T { return a + b }, arr)
+func CumSum[S ~[]T, T gotools.Number](arr S) S {
+	return CumFun(func(a, b T) T { return a + b }, arr)
 }
 
-// ArrayCumDiff 计算类型为 S（元素类型为 T）的切片中元素的累积差分，并返回一个新的切片。
-// 要求 T 类型实现 Number 接口，支持减法运算。
+// CumDiff 计算类型为 S（元素类型为 T）的切片中元素的累积差分，并返回一个新的切片。
+// 要求 T 类型实现 gotools.Number 接口，支持减法运算。
 //
 // 参数:
 // - arr: 输入的切片 S，元素为可以进行减法运算的数值类型。
@@ -280,68 +282,68 @@ func ArrayCumSum[S ~[]T, T Number](arr S) S {
 // 返回值:
 //   - 返回一个新的 S 类型切片，其中第 i 个元素是原切片中从第 0 项到第 i 项的累积差分值。
 //     即新切片的第 i 项等于原切片第 i 项减去第 i-1 项的结果，首项特殊处理（通常为原切片的首项）。
-func ArrayCumDiff[S ~[]T, T Number](arr S) S {
-	return ArrayCumFun(func(a, b T) T { return b - a }, arr)
+func CumDiff[S ~[]T, T gotools.Number](arr S) S {
+	return CumFun(func(a, b T) T { return b - a }, arr)
 }
 
-// ArrayCumProd 计算类型为 S（元素类型为 T）的切片中累积乘积序列。
+// CumProd 计算类型为 S（元素类型为 T）的切片中累积乘积序列。
 //
 // 参数:
-// - arr: 类型为 S 的切片，元素应为支持乘法运算的数字类型（实现 Number 接口）。
+// - arr: 类型为 S 的切片，元素应为支持乘法运算的数字类型（实现 gotools.Number 接口）。
 //
 // 返回值:
 // - 一个新的 S 类型切片，其中每个元素是原始切片中从开始到当前位置（含当前位置）的所有元素的累积乘积。
-func ArrayCumProd[S ~[]T, T Number](arr S) S {
-	return ArrayCumFun(func(a, b T) T { return a * b }, arr)
+func CumProd[S ~[]T, T gotools.Number](arr S) S {
+	return CumFun(func(a, b T) T { return a * b }, arr)
 }
 
-// ArrayCumMax 计算类型为 S（元素类型为 T）的切片中累积最大值序列。
+// CumMax 计算类型为 S（元素类型为 T）的切片中累积最大值序列。
 //
 // 参数:
-// - arr: 类型为 S 的切片，元素应为数字类型（实现 Number 接口）。
+// - arr: 类型为 S 的切片，元素应为数字类型（实现 gotools.Number 接口）。
 //
 // 返回值:
 // - 一个新的 S 类型切片，其中每个元素是原始切片中从开始到当前位置（含当前位置）的所有元素的累积最大值。
-func ArrayCumMax[S ~[]T, T Number](arr S) S {
-	return ArrayCumFun(func(a, b T) T { return Max(a, b) }, arr)
+func CumMax[S ~[]T, T gotools.Number](arr S) S {
+	return CumFun(func(a, b T) T { return max(a, b) }, arr)
 }
 
-// ArrayCumMin 计算类型为 S（元素类型为 T）的切片中累积最小值序列。
+// CumMin 计算类型为 S（元素类型为 T）的切片中累积最小值序列。
 //
 // 参数:
-// - arr: 类型为 S 的切片，元素应为数字类型（实现 Number 接口）。
+// - arr: 类型为 S 的切片，元素应为数字类型（实现 gotools.Number 接口）。
 //
 // 返回值:
 // - 一个新的 S 类型切片，其中每个元素是原始切片中从开始到当前位置（含当前位置）的所有元素的累积最小值。
-func ArrayCumMin[S ~[]T, T Number](arr S) S {
-	return ArrayCumFun(func(a, b T) T { return Min(a, b) }, arr)
+func CumMin[S ~[]T, T gotools.Number](arr S) S {
+	return CumFun(func(a, b T) T { return min(a, b) }, arr)
 }
 
-// ArrayAvg 计算类型为 S（元素类型为 T）的切片中所有元素的平均值。
+// Avg 计算类型为 S（元素类型为 T）的切片中所有元素的平均值。
 //
 // 参数:
-// - arr: 类型为 S 的切片，元素应为可以相加和除法运算的数字类型（实现 Number 接口）。
+// - arr: 类型为 S 的切片，元素应为可以相加和除法运算的数字类型（实现 gotools.Number 接口）。
 //
 // 返回值:
 // - 切片中所有元素的平均值。
-func ArrayAvg[S ~[]T, T Number](arr S) T {
+func Avg[S ~[]T, T gotools.Number](arr S) T {
 	la := len(arr)
 
 	if la == 0 {
 		return T(0)
 	}
-	return ArraySum(arr) / T(la)
+	return Sum(arr) / T(la)
 }
 
-// ArraySum 计算类型为 S（元素类型为 T）的切片中所有元素的总和。
+// Sum 计算类型为 S（元素类型为 T）的切片中所有元素的总和。
 //
 // 参数:
-// - arr: 类型为 S 的切片，元素应为可以相加的数字类型（实现 Number 接口）。
+// - arr: 类型为 S 的切片，元素应为可以相加的数字类型（实现 gotools.Number 接口）。
 //
 // 返回值:
 //   - 切片中所有元素的和。
 //     如果切片为空，则返回 T 类型的零值（对于数值类型通常是 0）。
-func ArraySum[S ~[]T, T Number](arr ...S) T {
+func Sum[S ~[]T, T gotools.Number](arr ...S) T {
 	var result T
 	for _, v := range arr {
 		for _, vv := range v {
@@ -351,7 +353,7 @@ func ArraySum[S ~[]T, T Number](arr ...S) T {
 	return result
 }
 
-// ArrayMax 返回类型为 S（元素类型为 T）的切片中的最大元素。
+// Max 返回类型为 S（元素类型为 T）的切片中的最大元素。
 //
 // 参数:
 // - arr: 类型为 S 的切片，元素需要可比较（实现 cmp.Ordered 接口）。
@@ -359,7 +361,7 @@ func ArraySum[S ~[]T, T Number](arr ...S) T {
 // 返回值:
 //   - 切片中的最大元素。
 //     如果切片为空，则返回 T 类型的默认值（这可能是未定义的行为，具体取决于 T 的类型）。
-func ArrayMax[S ~[]T, T cmp.Ordered](arr ...S) T {
+func Max[S ~[]T, T cmp.Ordered](arr ...S) T {
 	var result T
 	if len(arr) == 0 {
 		return result
@@ -371,13 +373,13 @@ func ArrayMax[S ~[]T, T cmp.Ordered](arr ...S) T {
 	result = arr[0][0]
 	for _, v := range arr {
 		for _, vv := range v {
-			result = Max(result, vv)
+			result = max(result, vv)
 		}
 	}
 	return result
 }
 
-// ArrayMin 返回类型为 S（元素类型为 T）的切片中的最小元素。
+// Min 返回类型为 S（元素类型为 T）的切片中的最小元素。
 //
 // 参数:
 // - arr: 类型为 S 的切片，元素需要可比较（实现 cmp.Ordered 接口）。
@@ -385,7 +387,7 @@ func ArrayMax[S ~[]T, T cmp.Ordered](arr ...S) T {
 // 返回值:
 //   - 切片中的最小元素。
 //     如果切片为空，则返回 T 类型的默认值（这可能是未定义的行为，具体取决于 T 的类型）。
-func ArrayMin[S ~[]T, T cmp.Ordered](arr ...S) T {
+func Min[S ~[]T, T cmp.Ordered](arr ...S) T {
 	var result T
 	if len(arr) == 0 {
 		return result
@@ -397,20 +399,20 @@ func ArrayMin[S ~[]T, T cmp.Ordered](arr ...S) T {
 	result = arr[0][0]
 	for _, v := range arr {
 		for _, vv := range v {
-			result = Min(result, vv)
+			result = min(result, vv)
 		}
 	}
 	return result
 }
 
-// ArrayFindMin 查找类型为 S（元素类型为 T）的切片中最小元素的索引位置。
+// FindMin 查找类型为 S（元素类型为 T）的切片中最小元素的索引位置。
 //
 // 参数:
 // - arr: 类型为 S 的切片，元素必须是可比较的（实现 cmp.Ordered 接口）。
 //
 // 返回值:
 // - 返回切片中最小元素的索引。如果切片为空，则行为未定义（可能返回 0，具体取决于编译器和运行环境）。
-func ArrayFindMin[S ~[]T, T cmp.Ordered](arr S) int {
+func FindMin[S ~[]T, T cmp.Ordered](arr S) int {
 
 	if len(arr) == 0 {
 		return -1
@@ -430,7 +432,7 @@ func ArrayFindMin[S ~[]T, T cmp.Ordered](arr S) int {
 	return index
 }
 
-// ArrayFindMax 查找类型为 S（元素类型为 T）的切片中最大元素的索引位置。
+// FindMax 查找类型为 S（元素类型为 T）的切片中最大元素的索引位置。
 //
 // 参数:
 // - arr: 类型为 S 的切片，元素必须是可比较的（实现 cmp.Ordered 接口）。
@@ -439,7 +441,7 @@ func ArrayFindMin[S ~[]T, T cmp.Ordered](arr S) int {
 // - 返回切片中最大元素的索引。如果切片为空，则行为未定义（可能返回 0，具体取决于编译器和运行环境）。
 //
 // 注意: 此函数假定切片非空，并且切片中的元素能够相互比较以确定大小关系。
-func ArrayFindMax[S ~[]T, T cmp.Ordered](arr S) int {
+func FindMax[S ~[]T, T cmp.Ordered](arr S) int {
 
 	if len(arr) == 0 {
 		return -1
@@ -463,7 +465,7 @@ func ArrayFindMax[S ~[]T, T cmp.Ordered](arr S) int {
 	return index
 }
 
-// ArrayFindLast 查找类型为 S（元素类型为 T）的切片数组中最后一个使条件函数 `fun` 返回 true 的元素组合所在的索引位置。
+// FindLast 查找类型为 S（元素类型为 T）的切片数组中最后一个使条件函数 `fun` 返回 true 的元素组合所在的索引位置。
 //
 // 参数:
 // - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
@@ -476,7 +478,7 @@ func ArrayFindMax[S ~[]T, T cmp.Ordered](arr S) int {
 //
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayFindLast[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
+func FindLast[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 
 	result := -1
 
@@ -499,7 +501,7 @@ func ArrayFindLast[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 	return result
 }
 
-// ArrayFindFirst 查找类型为 S（元素类型为 T）的切片数组中第一个使条件函数 `fun` 返回 true 的元素组合所在的索引位置。
+// FindFirst 查找类型为 S（元素类型为 T）的切片数组中第一个使条件函数 `fun` 返回 true 的元素组合所在的索引位置。
 //
 // 参数:
 // - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
@@ -512,7 +514,7 @@ func ArrayFindLast[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 //
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayFindFirst[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
+func FindFirst[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 
 	result := -1
 
@@ -536,7 +538,7 @@ func ArrayFindFirst[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 	return result
 }
 
-// ArrayLast 查找类型为 S（元素类型为 T）的切片数组中最后一个使条件函数 `fun` 返回 true 的元素组合，并返回该组合的第一个元素。
+// Last 查找类型为 S（元素类型为 T）的切片数组中最后一个使条件函数 `fun` 返回 true 的元素组合，并返回该组合的第一个元素。
 //
 // 参数:
 // - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
@@ -549,7 +551,7 @@ func ArrayFindFirst[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 //
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayLast[S ~[]T, T any](fun func(x ...T) bool, arr ...S) T {
+func Last[S ~[]T, T any](fun func(x ...T) bool, arr ...S) T {
 
 	var result T
 
@@ -572,7 +574,7 @@ func ArrayLast[S ~[]T, T any](fun func(x ...T) bool, arr ...S) T {
 	return result
 }
 
-// ArrayFirst 查找类型为 S（元素类型为 T）的切片数组中第一个使条件函数 `fun` 返回 true 的元素组合，并返回该组合的第一个元素。
+// First 查找类型为 S（元素类型为 T）的切片数组中第一个使条件函数 `fun` 返回 true 的元素组合，并返回该组合的第一个元素。
 //
 // 参数:
 // - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
@@ -585,7 +587,7 @@ func ArrayLast[S ~[]T, T any](fun func(x ...T) bool, arr ...S) T {
 //
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayFirst[S ~[]T, T any](fun func(x ...T) bool, arr ...S) T {
+func First[S ~[]T, T any](fun func(x ...T) bool, arr ...S) T {
 
 	var result T
 
@@ -609,7 +611,7 @@ func ArrayFirst[S ~[]T, T any](fun func(x ...T) bool, arr ...S) T {
 	return result
 }
 
-// ArrayAll 检查类型为 S（元素类型为 T）的切片数组中所有元素组合是否都满足提供的条件函数。
+// All 检查类型为 S（元素类型为 T）的切片数组中所有元素组合是否都满足提供的条件函数。
 //
 // 参数:
 // - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
@@ -621,7 +623,7 @@ func ArrayFirst[S ~[]T, T any](fun func(x ...T) bool, arr ...S) T {
 //
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayAll[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
+func All[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
 
 	if len(arr) == 0 {
 		return false
@@ -644,7 +646,7 @@ func ArrayAll[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
 
 }
 
-// ArrayAny 检查类型为 S（元素类型为 T）的切片数组中是否有任一元素组合满足提供的条件函数。
+// Any 检查类型为 S（元素类型为 T）的切片数组中是否有任一元素组合满足提供的条件函数。
 //
 // 参数:
 // - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
@@ -656,7 +658,7 @@ func ArrayAll[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
 //
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayAny[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
+func Any[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
 
 	if len(arr) == 0 {
 		return false
@@ -679,7 +681,7 @@ func ArrayAny[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
 
 }
 
-// ArrayReverseSplit 根据提供的条件函数反向地将输入切片 S（类型为 T）分割成多个子切片，并返回这些子切片组成的切片。
+// ReverseSplit 根据提供的条件函数反向地将输入切片 S（类型为 T）分割成多个子切片，并返回这些子切片组成的切片。
 // 与 `ArraySplit` 不同，此函数在条件满足的位置进行切割，并且包含切割点的元素在下一个子切片中。
 //
 // 参数:
@@ -694,7 +696,7 @@ func ArrayAny[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
 // - 数组将在元素的右侧进行拆分。
-func ArrayReverseSplit[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []S {
+func ReverseSplit[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []S {
 
 	if len(arr) == 0 || len(arr[0]) == 0 {
 		return []S{}
@@ -724,7 +726,7 @@ func ArrayReverseSplit[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []S {
 	return result
 }
 
-// ArraySplit 根据提供的条件函数将输入切片 S（类型为 T）分割成多个子切片，并返回这些子切片组成的切片。
+// Split 根据提供的条件函数将输入切片 S（类型为 T）分割成多个子切片，并返回这些子切片组成的切片。
 // 条件函数 `fun` 应用于输入切片的每个元素，当 `fun` 返回 true 时，会在该位置切割切片。
 //
 // 参数:
@@ -739,7 +741,7 @@ func ArrayReverseSplit[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []S {
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
 // - 数组将在元素的左侧进行拆分。
 // - 数组不会在第一个元素之前被分割。
-func ArraySplit[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []S {
+func Split[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []S {
 	if len(arr) == 0 || len(arr[0]) == 0 {
 		return []S{}
 	}
@@ -768,7 +770,7 @@ func ArraySplit[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []S {
 	return result
 }
 
-// ArrayReverseFill 根据提供的条件函数反向填充新切片。它从最后一个元素开始向前遍历，
+// ReverseFill 根据提供的条件函数反向填充新切片。它从最后一个元素开始向前遍历，
 // 对于每个索引位置，使用条件函数 `fun` 应用于对应位置的元素，决定该位置的值。
 // 如果 `fun` 返回 false，则新切片中的该位置元素取自后一个索引的值（即更靠近末尾的值）；
 // 如果 `fun` 返回 true，则取自当前索引的值。
@@ -783,7 +785,7 @@ func ArraySplit[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []S {
 //
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayReverseFill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) S {
+func ReverseFill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) S {
 
 	if len(arr) == 0 || len(arr[0]) == 0 {
 		return S{}
@@ -814,7 +816,7 @@ func ArrayReverseFill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) S {
 	return result
 }
 
-// ArrayFill 根据提供的条件函数填充新切片。对于每个索引位置，如果条件函数应用于对应位置的元素返回 false，
+// Fill 根据提供的条件函数填充新切片。对于每个索引位置，如果条件函数应用于对应位置的元素返回 false，
 // 则新切片中的该位置元素取自前一个索引位置的首个切片的元素；否则，取自当前索引位置的首个切片的元素。
 //
 // 参数:
@@ -827,7 +829,7 @@ func ArrayReverseFill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) S {
 //
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayFill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) S {
+func Fill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) S {
 	if len(arr) == 0 || len(arr[0]) == 0 {
 		return []T{}
 	}
@@ -856,7 +858,7 @@ func ArrayFill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) S {
 	return result
 }
 
-// ArrayFilter 根据提供的函数过滤多个同结构切片（类型为 T 的切片）的元素。
+// Filter 根据提供的函数过滤多个同结构切片（类型为 T 的切片）的元素。
 // 它将每个切片的对应元素作为参数传递给函数 `fun`，并仅保留 `fun` 返回真值时的首个切片中的元素。
 //
 // 参数:
@@ -867,7 +869,7 @@ func ArrayFill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) S {
 // - 一个新的切片 S，包含根据 `fun` 筛选后的元素。若输入为空或首切片为空，则返回空切片 S。
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayFilter[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []T {
+func Filter[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []T {
 	if len(arr) == 0 || len(arr[0]) == 0 {
 		return S{}
 	}
@@ -887,7 +889,7 @@ func ArrayFilter[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []T {
 	return result
 }
 
-// ArrayFilter2 根据提供的函数过滤多个同结构切片（类型为 T 的切片）的元素。
+// Filter2 根据提供的函数过滤多个同结构切片（类型为 T 的切片）的元素。
 // 它将每个切片的对应元素作为参数传递给函数 `fun`，并仅保留 `fun`的结果切片 。
 //
 // 参数:
@@ -898,9 +900,9 @@ func ArrayFilter[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []T {
 // - 一个新的切片 S，包含根据 `fun` 执行后的结果。若输入为空或首切片为空，则返回空切片 []bool。
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayFilter2[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []bool {
+func Filter2[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []bool {
 
-	return ArrayMap(fun, arr...)
+	return Map(fun, arr...)
 	// if len(arr) == 0 || len(arr[0]) == 0 {
 	// 	return make([]bool, 0)
 	// }
@@ -918,7 +920,7 @@ func ArrayFilter2[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []bool {
 	// return result
 }
 
-// ArrayFilterIndex 根据提供的函数过滤多个同结构切片（类型为 T 的切片）的元素。
+// FilterIndex 根据提供的函数过滤多个同结构切片（类型为 T 的切片）的元素。
 // 它将每个切片的对应元素作为参数传递给函数 `fun`，并仅保留 `fun` 返回真值时的位置索引。
 //
 // 参数:
@@ -929,7 +931,7 @@ func ArrayFilter2[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []bool {
 // - 一个新的切片 S，包含根据 `fun` 筛选后的元素的索引。若输入为空或首切片为空，则返回空切片 []int。
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayFilterIndex[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []int {
+func FilterIndex[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []int {
 	if len(arr) == 0 || len(arr[0]) == 0 {
 		return []int{}
 	}
@@ -949,7 +951,7 @@ func ArrayFilterIndex[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []int {
 	return result
 }
 
-// ArrayMap 对多个同结构切片（S，类型为 T 的切片）应用一个函数，将每个切片的对应元素作为参数传递，
+// Map 对多个同结构切片（S，类型为 T 的切片）应用一个函数，将每个切片的对应元素作为参数传递，
 // 并收集返回值形成一个新的 U 类型切片序列。
 //
 // 参数:
@@ -962,7 +964,7 @@ func ArrayFilterIndex[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []int {
 //
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayMap[S ~[]T, T any, U any](fun func(x ...T) U, arr ...S) []U {
+func Map[S ~[]T, T any, U any](fun func(x ...T) U, arr ...S) []U {
 	if len(arr) == 0 || len(arr[0]) == 0 {
 		return []U{}
 	}
@@ -980,7 +982,7 @@ func ArrayMap[S ~[]T, T any, U any](fun func(x ...T) U, arr ...S) []U {
 	return result
 }
 
-// ArrayFlatMap 对多个同结构切片（S，类型为 T 的切片）应用一个函数，将每个切片的对应元素作为参数传递：
+// FlatMap 对多个同结构切片（S，类型为 T 的切片）应用一个函数，将每个切片的对应元素作为参数传递：
 // 并收集返回值形成一个新的 U 类型切片序列。
 //
 // 参数:
@@ -993,7 +995,7 @@ func ArrayMap[S ~[]T, T any, U any](fun func(x ...T) U, arr ...S) []U {
 //
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayFlatMap[S ~[]T, T any, U any](fun func(x ...T) []U, arr ...S) []U {
+func FlatMap[S ~[]T, T any, U any](fun func(x ...T) []U, arr ...S) []U {
 
 	if len(arr) == 0 || len(arr[0]) == 0 {
 		return []U{}
@@ -1012,7 +1014,7 @@ func ArrayFlatMap[S ~[]T, T any, U any](fun func(x ...T) []U, arr ...S) []U {
 	return result
 }
 
-// ArrayZip 将多个同长度的切片 S（类型为 T 的切片）按索引位置组合成新的切片 S 序列。
+// Zip 将多个同长度的切片 S（类型为 T 的切片）按索引位置组合成新的切片 S 序列。
 // 每个新切片包含的是原始切片在该索引位置上的元素。
 //
 // 参数:
@@ -1024,7 +1026,7 @@ func ArrayFlatMap[S ~[]T, T any, U any](fun func(x ...T) []U, arr ...S) []U {
 //
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayZip[S ~[]T, T any](arr ...S) [][]T {
+func Zip[S ~[]T, T any](arr ...S) [][]T {
 	if len(arr) == 0 || len(arr[0]) == 0 {
 		return [][]T{}
 	}
@@ -1043,7 +1045,7 @@ func ArrayZip[S ~[]T, T any](arr ...S) [][]T {
 	return result
 }
 
-// ArrayCompact 移除给定切片 S 中连续重复的元素，其中 S 是泛型类型 T 的切片，且 T 必须实现了 cmp.Ordered 接口。
+// Compact 移除给定切片 S 中连续重复的元素，其中 S 是泛型类型 T 的切片，且 T 必须实现了 cmp.Ordered 接口。
 //
 // 参数:
 // - arr: 类型为 S 的切片，可能包含连续重复的元素。
@@ -1053,7 +1055,7 @@ func ArrayZip[S ~[]T, T any](arr ...S) [][]T {
 //
 // 此函数遍历输入切片，仅将与前一个元素不同的元素添加到结果切片中，
 // 从而实现连续重复元素的紧凑化处理。如果输入切片为空，则返回同类型的空切片。
-func ArrayCompact[S ~[]T, T comparable](arr S) S {
+func Compact[S ~[]T, T comparable](arr S) S {
 	if len(arr) == 0 {
 		return S{}
 	}
@@ -1070,7 +1072,7 @@ func ArrayCompact[S ~[]T, T comparable](arr S) S {
 	return result
 }
 
-// ArrayCompact 移除给定切片 S 中连续重复的元素，其中 S 是泛型类型 T 的切片 ，且 T 为任意类型。
+// Compact 移除给定切片 S 中连续重复的元素，其中 S 是泛型类型 T 的切片 ，且 T 为任意类型。
 //
 // 参数:
 // - arr: 类型为 S 的切片，可能包含连续重复的元素。
@@ -1081,7 +1083,7 @@ func ArrayCompact[S ~[]T, T comparable](arr S) S {
 //
 // 此函数遍历输入切片，仅将与前一个元素不同的元素添加到结果切片中，
 // 从而实现连续重复元素的紧凑化处理。如果输入切片为空，则返回同类型的空切片。
-func ArrayCompactAny[S ~[]T, T any](fun func(x, y T) bool, arr S) S {
+func CompactAny[S ~[]T, T any](fun func(x, y T) bool, arr S) S {
 	if len(arr) == 0 {
 		return S{}
 	}
@@ -1098,7 +1100,7 @@ func ArrayCompactAny[S ~[]T, T any](fun func(x, y T) bool, arr S) S {
 	return result
 }
 
-// ArrayReverse 反转给定的切片 S，其中 S 是泛型类型 T 的切片。
+// Reverse 反转给定的切片 S，其中 S 是泛型类型 T 的切片。
 //
 // 参数:
 // - arr: 类型为 S 的切片，需要被反转。
@@ -1108,7 +1110,7 @@ func ArrayCompactAny[S ~[]T, T any](fun func(x, y T) bool, arr S) S {
 //
 // 此函数通过双指针技巧实现切片元素的原地交换，达到反转的目的。
 // 当输入切片为空时，会直接返回同类型的空切片。
-func ArrayReverse[S ~[]T, T any](arr S) S {
+func Reverse[S ~[]T, T any](arr S) S {
 
 	la := len(arr)
 	if la == 0 {
@@ -1130,7 +1132,7 @@ func ArrayReverse[S ~[]T, T any](arr S) S {
 	return res
 }
 
-// ArrayFold 对类型为 S 的多维数组（其中 S 是 T 类型的切片）执行折叠操作，生成一个 U 类型的结果切片。
+// Fold 对类型为 S 的多维数组（其中 S 是 T 类型的切片）执行折叠操作，生成一个 U 类型的结果切片。
 // 它接收三个参数：
 // - fun：一个函数，接受变长参数 T 的切片并返回一个 U 类型的值，用于单个维度的聚合操作。
 // - acc：一个累积函数，接受两个 U 类型的参数并返回一个 U 类型的值，用于将相邻结果累积。
@@ -1143,7 +1145,7 @@ func ArrayReverse[S ~[]T, T any](arr S) S {
 // 可以用来计算多维数组中各维度对应位置的元素经过特定运算后的序列，如多序列的逐元素加法、乘法等。
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayFold[S ~[]T, T, U any](fun func(x ...T) U, acc func(x, y U) U, arr ...S) []U {
+func Fold[S ~[]T, T, U any](fun func(x ...T) U, acc func(x, y U) U, arr ...S) []U {
 	if len(arr) == 0 || len(arr[0]) == 0 {
 		return []U{}
 	}
@@ -1168,7 +1170,7 @@ func ArrayFold[S ~[]T, T, U any](fun func(x ...T) U, acc func(x, y U) U, arr ...
 	return result
 }
 
-// ArrayReduce 对切片中的元素应用一个累积函数，并返回该函数处理后的结果。
+// Reduce 对切片中的元素应用一个累积函数，并返回该函数处理后的结果。
 // 此函数泛型，适用于任何类型的切片和累积函数，只要累积函数的输入输出类型与切片元素类型兼容。
 //
 // Parameters:
@@ -1186,7 +1188,7 @@ func ArrayFold[S ~[]T, T, U any](fun func(x ...T) U, acc func(x, y U) U, arr ...
 // 注意事项:
 // - 累积函数 `fun` 应确保对于所有可能的输入都是正确的，并且应当处理好任何潜在的边界条件或错误情况。
 // - 若 `result` 是引用类型（如切片、map），其初始零值可能影响结果的预期。确保理解并适当处理此类情况。
-func ArrayReduce[S ~[]T, T, U any](fun func(x U, y T) U, dvalue U, arr S) U {
+func Reduce[S ~[]T, T, U any](fun func(x U, y T) U, dvalue U, arr S) U {
 
 	result := dvalue
 
@@ -1201,7 +1203,7 @@ func ArrayReduce[S ~[]T, T, U any](fun func(x U, y T) U, dvalue U, arr S) U {
 	return result
 }
 
-// ArrayIntersect 计算多个切片（类型为 []T，元素类型 T 可比较）的交集。
+// Intersect 计算多个切片（类型为 []T，元素类型 T 可比较）的交集。
 //
 // 参数:
 // - arr: 变长参数，每个参数为一个待求交集的切片。
@@ -1211,7 +1213,7 @@ func ArrayReduce[S ~[]T, T, U any](fun func(x U, y T) U, dvalue U, arr S) U {
 //     如果没有交集或输入为空，则返回一个空切片。
 //
 // 注意: T 必须实现 comparable 接口，允许元素之间的比较操作。
-func ArrayIntersect[S ~[]T, T comparable](arr ...S) []T {
+func Intersect[S ~[]T, T comparable](arr ...S) []T {
 	if len(arr) == 0 {
 		return make([]T, 0)
 	}
@@ -1221,9 +1223,9 @@ func ArrayIntersect[S ~[]T, T comparable](arr ...S) []T {
 		return arr[0]
 	}
 
-	nums := ArrayMap(func(x ...S) int { return len(x[0]) }, arr)
+	nums := Map(func(x ...S) int { return len(x[0]) }, arr)
 
-	index := ArrayFindMin(nums)
+	index := FindMin(nums)
 
 	// 使用第一个切片作为基数来收集交集元素
 	intersectionMap := make(map[T][]int, len(arr[index]))
@@ -1246,12 +1248,41 @@ func ArrayIntersect[S ~[]T, T comparable](arr ...S) []T {
 
 	}
 
-	result := MapFilter(func(k T, v []int) bool { return len(ArrayDistinct(v)) == len(arr) }, intersectionMap)
+	result := mapfitler(func(k T, v []int) bool { return len(Distinct(v)) == len(arr) }, intersectionMap)
 
-	return MapKeys(result)
+	return mapKeys(result)
 }
 
-// ArrayEnumerateDense 为输入的数组中每个元素生成一个索引列表，其中的值对应该元素在数组中首次出现的位置。
+func mapKeys[K comparable, V any](m ...map[K]V) []K {
+
+	if len(m) == 0 {
+		return make([]K, 0)
+	}
+
+	num := Sum(Map(func(x ...map[K]V) int { return len(x[0]) }, m))
+
+	keys := make([]K, 0, num)
+
+	for _, v := range m {
+		for k := range v {
+			keys = append(keys, k)
+		}
+	}
+
+	return keys
+}
+
+func mapfitler[K comparable, V any](f func(K, V) bool, m map[K]V) map[K]V {
+	filtered := make(map[K]V)
+	for k, v := range m {
+		if f(k, v) {
+			filtered[k] = v
+		}
+	}
+	return filtered
+}
+
+// EnumerateDense 为输入的数组中每个元素生成一个索引列表，其中的值对应该元素在数组中首次出现的位置。
 // 参数:
 //
 //	arr: 类型为 S 的数组，S 必须是类似切片的类型且其元素类型 T 可比较。
@@ -1259,7 +1290,7 @@ func ArrayIntersect[S ~[]T, T comparable](arr ...S) []T {
 // 返回值:
 //
 //	一个整数切片，长度与输入数组相同，其中的值表示对应元素在数组中首次出现的索引。
-func ArrayEnumerateDense[S ~[]T, T comparable](arr S) []int {
+func EnumerateDense[S ~[]T, T comparable](arr S) []int {
 
 	la := len(arr)
 	firstIndexMap := make(map[T]int, la)
@@ -1278,18 +1309,18 @@ func ArrayEnumerateDense[S ~[]T, T comparable](arr S) []int {
 	return result
 }
 
-// func ArraySortByQ[D ~[]U, S ~[]T, T any, U cmp.Ordered](arr S, order D) (S, D) {
+// func SortByQ[D ~[]U, S ~[]T, T any, U cmp.Ordered](arr S, order D) (S, D) {
 
 // 	return ArraySortBy(func(x, y U) bool { return x < y }, arr, order)
 
 // }
 
-// ArraySortTwo 通过自定义比较函数和排序顺序对数组进行排序。
+// SortTwo 通过自定义比较函数和排序顺序对数组进行排序。
 // 参数 fun 是用于比较两个元素大小的函数，返回 true 表示第一个元素小于第二个元素。
 // 参数 arr 是需要被排序的数组。
 // 参数 order 是排序顺序数组，用于定义排序规则。
 // 返回值是排序后的数组。
-func ArraySortBy[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D) (S, D) {
+func SortBy[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D) (S, D) {
 
 	la := len(arr)
 	if la == 0 {
@@ -1324,11 +1355,11 @@ func ArraySortBy[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D
 	return res, tmp
 }
 
-// func ArraySortByLQ[D ~[]U, S ~[]T, T any, U cmp.Ordered](arr S, order D) {
+// func SortByLQ[D ~[]U, S ~[]T, T any, U cmp.Ordered](arr S, order D) {
 // 	ArraySortByL(func(current, before U) bool { return current < before }, arr, order)
 // }
 
-// ArraySortTwoLocal 是一个泛型排序函数，用于对两个关联数组进行排序。
+// SortTwoLocal 是一个泛型排序函数，用于对两个关联数组进行排序。
 // 它接受一个比较函数、一个需要排序的数组和一个与之相关的数组，
 // 根据比较函数的规则对相关数组进行排序。
 // 比较函数接收两个元素并返回一个布尔值，表示第一个元素是否应排在第二个元素之前。
@@ -1341,7 +1372,7 @@ func ArraySortBy[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D
 //
 // 返回:
 //   - 无返回值，直接修改输入的 arr 和 order 数组。
-func ArraySortByL[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D) {
+func SortByL[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D) {
 	la := len(arr)
 	if la == 0 {
 		return
@@ -1369,7 +1400,7 @@ func ArraySortByL[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order 
 
 }
 
-// ArraySort 对类型为 S（元素类型为 T）的切片进行自定义排序。
+// Sort 对类型为 S（元素类型为 T）的切片进行自定义排序。
 //
 // 参数:
 //   - fun: 一个比较函数，接受两个 T 类型的参数并返回一个布尔值，指示是否需要交换这两个参数的位置。
@@ -1378,7 +1409,7 @@ func ArraySortByL[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order 
 //
 // 返回值:
 // - 返回一个新的 S 类型切片，其中的元素根据提供的比较函数 `fun` 进行排序。
-func ArraySort[S ~[]T, T any](fun func(x, y T) bool, arr S) S {
+func Sort[S ~[]T, T any](fun func(x, y T) bool, arr S) S {
 
 	la := len(arr)
 	if la == 0 {
@@ -1411,24 +1442,24 @@ func ArraySort[S ~[]T, T any](fun func(x, y T) bool, arr S) S {
 
 }
 
-// ArraySortQuick 使用快速排序的思路（尽管实现并不完全正确）尝试对类型为 S（元素类型为 T）的切片进行原地排序。
+// SortQuick 使用快速排序的思路（尽管实现并不完全正确）尝试对类型为 S（元素类型为 T）的切片进行原地排序。
 // 注意：当前实现并非标准快速排序算法，更像是简化冒泡排序变种。
 //
 // 参数:
 // - arr: 要排序的切片 S，其中元素类型 T 必须是可比较的（实现 cmp.Ordered 接口）。
-// func ArraySortQuick[S ~[]T, T cmp.Ordered](arr S) S {
+// func SortQuick[S ~[]T, T cmp.Ordered](arr S) S {
 
 // 	return ArraySort(func(x, y T) bool { return x < y }, arr)
 
 // }
 
-// ArraySortLocal 对类型为 S（元素类型为 T）的切片进行原地排序，依据提供的比较函数 `fun`。
+// SortLocal 对类型为 S（元素类型为 T）的切片进行原地排序，依据提供的比较函数 `fun`。
 //
 // 参数:
 //   - fun: 自定义比较函数，接受两个 T 类型的参数并返回一个布尔值。
 //     当 `fun(x, y)` 返回 `true`，则在排序时 `x` 应位于 `y` 之前。
 //   - arr: 要排序的本地切片 S，函数会直接修改传入的切片。
-func ArraySortLocal[S ~[]T, T any](fun func(x, y T) bool, arr S) {
+func SortLocal[S ~[]T, T any](fun func(x, y T) bool, arr S) {
 	la := len(arr)
 	if la == 0 {
 		return
@@ -1455,7 +1486,7 @@ func ArraySortLocal[S ~[]T, T any](fun func(x, y T) bool, arr S) {
 
 }
 
-// ArrayChoose 根据提供的索引数组重新排列给定的泛型数组元素。
+// Choose 根据提供的索引数组重新排列给定的泛型数组元素。
 // 参数:
 //
 //	arr: 需要被重新排序的原数组，类型为泛型数组 S。
@@ -1468,9 +1499,9 @@ func ArraySortLocal[S ~[]T, T any](fun func(x, y T) bool, arr S) {
 // 注意:
 
 // 索引数组中的 -1 值会被跳过，不会影响结果数组的构建。
-func ArrayChoose[S ~[]T, T any](index []int, arr S) []T {
+func Choose[S ~[]T, T any](index []int, arr S) []T {
 
-	if len(arr) < ArrayMax(index) {
+	if len(arr) < Max(index) {
 		log.Println("index length not equal arr length return arr ")
 		return arr
 	}
@@ -1488,7 +1519,7 @@ func ArrayChoose[S ~[]T, T any](index []int, arr S) []T {
 
 }
 
-// ArrayDistinct 移除类型为 S（元素类型为 T）的切片中的重复元素，并返回一个新的无重复元素的切片。
+// Distinct 移除类型为 S（元素类型为 T）的切片中的重复元素，并返回一个新的无重复元素的切片。
 // 要求 T 类型实现 cmp.Ordered 接口，以便进行比较操作。
 //
 // 参数:
@@ -1496,7 +1527,7 @@ func ArrayChoose[S ~[]T, T any](index []int, arr S) []T {
 //
 // 返回值:
 // - 返回一个新的 S 类型切片，其中重复的元素已被移除，剩余元素按升序排列。
-func ArrayDistinct[S ~[]T, T cmp.Ordered](arr S) S {
+func Distinct[S ~[]T, T cmp.Ordered](arr S) S {
 
 	if len(arr) == 0 {
 		return S{}
@@ -1505,13 +1536,13 @@ func ArrayDistinct[S ~[]T, T cmp.Ordered](arr S) S {
 		return arr
 	}
 
-	res := ArraySort(func(x, y T) bool { return x < y }, arr)
+	res := Sort(func(x, y T) bool { return x < y }, arr)
 
-	return ArrayCompact(res)
+	return Compact(res)
 }
 
-// ArrayDifference 计算类型为 S（元素类型为 T）的切片中相邻元素的差值，并返回一个新的切片。
-// 要求 T 类型实现 Number 接口，支持减法运算。
+// Difference 计算类型为 S（元素类型为 T）的切片中相邻元素的差值，并返回一个新的切片。
+// 要求 T 类型实现 gotools.Number 接口，支持减法运算。
 //
 // 参数:
 // - arr: 输入的切片 S，元素为可以进行减法运算的数值类型，且长度至少为 1。
@@ -1524,7 +1555,7 @@ func ArrayDistinct[S ~[]T, T cmp.Ordered](arr S) S {
 //
 //	输入: []int{5, 2, 9, 1}
 //	输出: []int{5, -3, 7, -8}
-func ArrayDifference[S ~[]T, T Number](arr S) S {
+func Difference[S ~[]T, T gotools.Number](arr S) S {
 
 	la := len(arr)
 	if la == 0 {
@@ -1541,7 +1572,7 @@ func ArrayDifference[S ~[]T, T Number](arr S) S {
 	return res
 }
 
-// ArrayCount 计算满足特定条件的元素数量，这些元素来自多个具有相同长度的切片。
+// Count 计算满足特定条件的元素数量，这些元素来自多个具有相同长度的切片。
 // 条件由提供的函数 `fun` 定义，该函数接受与输入切片数量相等的参数并返回一个布尔值。
 //
 // 参数:
@@ -1557,7 +1588,7 @@ func ArrayDifference[S ~[]T, T Number](arr S) S {
 // - 如果没有切片被提供，或者提供的切片为空，则函数返回 0。
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ArrayCount[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
+func Count[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 
 	if len(arr) == 0 {
 		return 0
@@ -1583,7 +1614,7 @@ func ArrayCount[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 	return num
 }
 
-// ArrayHas 检查类型为 S（元素类型为 T）的切片中是否包含指定的元素。
+// Has 检查类型为 S（元素类型为 T）的切片中是否包含指定的元素。
 // 要求 T 类型实现 comparable 接口，以便进行相等性比较。
 //
 // 参数:
@@ -1592,7 +1623,7 @@ func ArrayCount[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 //
 // 返回值:
 // - 如果切片 `arr` 包含元素 `elem`，则返回 `true`；否则返回 `false`。
-func ArrayHas[S ~[]T, T comparable](arr S, elem T) bool {
+func Has[S ~[]T, T comparable](arr S, elem T) bool {
 
 	la := len(arr)
 	if la == 0 {
@@ -1607,7 +1638,7 @@ func ArrayHas[S ~[]T, T comparable](arr S, elem T) bool {
 	return false
 }
 
-// ArrayHasAny 检查类型为 S（元素类型为 T）的切片是否包含至少一个指定的元素。
+// HasAny 检查类型为 S（元素类型为 T）的切片是否包含至少一个指定的元素。
 // 要求 T 类型实现 comparable 接口，允许元素之间的相等性比较。
 //
 // 参数:
@@ -1616,15 +1647,15 @@ func ArrayHas[S ~[]T, T comparable](arr S, elem T) bool {
 //
 // 返回值:
 // - 如果切片 `arr` 中包含 `elems` 中的至少一个元素，则返回 `true`；否则返回 `false`。
-func ArrayHasAny[S ~[]T, T comparable](arr S, elems ...T) bool {
+func HasAny[S ~[]T, T comparable](arr S, elems ...T) bool {
 	if len(arr) == 0 || len(elems) == 0 {
 		return false
 	}
 
-	return len(ArrayIntersect(arr, elems)) > 0
+	return len(Intersect(arr, elems)) > 0
 }
 
-// ArrayHasAll 检查类型为 S（元素类型为 T）的切片是否包含指定的所有元素。
+// HasAll 检查类型为 S（元素类型为 T）的切片是否包含指定的所有元素。
 // 要求 T 类型实现 comparable 接口，允许元素之间的相等性比较。
 //
 // 参数:
@@ -1633,32 +1664,32 @@ func ArrayHasAny[S ~[]T, T comparable](arr S, elems ...T) bool {
 //
 // 返回值:
 // - 如果切片 `arr` 包含 `elems` 中的所有元素，则返回 `true`；否则返回 `false`。
-func ArrayHasAll[S ~[]T, T comparable](arr S, elems ...T) bool {
+func HasAll[S ~[]T, T comparable](arr S, elems ...T) bool {
 	if len(arr) == 0 || len(elems) == 0 {
 		return false
 	}
 
-	res := ArrayIntersect(arr, elems)
+	res := Intersect(arr, elems)
 
-	return len(res) == len(ArrayToMap(elems))
+	return len(res) == len(ToMap(elems))
 }
 
-// ArrayConcat 合并任意数量的同类型切片为一个新的切片。
+// Concat 合并任意数量的同类型切片为一个新的切片。
 //
 // 参数:
 // - arr: 可变数量的参数，每个参数为一个类型为 T 的切片，所有切片将被连接。
 //
 // 返回值:
 // - 返回一个新的 []T 类型切片，包含输入的所有切片中的元素，保持原有的顺序。
-func ArrayConcat[S ~[]T, T any](arr ...S) []T {
+func Concat[S ~[]T, T any](arr ...S) []T {
 
 	if len(arr) == 0 {
 		return []T{}
 	}
 
-	num := ArrayMap(func(x ...S) int { return len(x[0]) }, arr)
+	num := Map(func(x ...S) int { return len(x[0]) }, arr)
 
-	res := make([]T, 0, ArraySum(num))
+	res := make([]T, 0, Sum(num))
 
 	for i := 0; i < len(num); i++ {
 		res = append(res, arr[i]...)
@@ -1679,7 +1710,7 @@ ArrayHasSequence 检查数组arr1中是否包含数组arr2作为连续子序列�
 此函数利用类型约束[A ~[]T, T comparable]确保传入的参数为切片类型且元素可比较。
 通过遍历arr1并逐一比对arr2的所有元素来判断子序列是否存在。
 */
-func ArrayHasSequence[A ~[]T, T comparable](arr1 A, arr2 A) (bool, int) {
+func HasSequence[A ~[]T, T comparable](arr1 A, arr2 A) (bool, int) {
 
 	l1 := len(arr1)
 	l2 := len(arr2)
@@ -1702,7 +1733,7 @@ func ArrayHasSequence[A ~[]T, T comparable](arr1 A, arr2 A) (bool, int) {
 }
 
 /*
-ArraySequenceCount 计算一个数组中特定序列出现的次数。
+SequenceCount 计算一个数组中特定序列出现的次数。
 
 参数:
 - arr1[A]: 被搜索的数组，A 类型为切片，元素类型为 T。
@@ -1714,13 +1745,13 @@ ArraySequenceCount 计算一个数组中特定序列出现的次数。
 注意:
 - A 和 T 使用类型参数，要求 T 类型的元素可比较。
 */
-func ArraySequenceCount[A ~[]T, T comparable](arr1 A, arr2 A) int {
+func ArrSequenceCount[A ~[]T, T comparable](arr1 A, arr2 A) int {
 
 	count := 0
 	num := len(arr1) - len(arr2) + 1
 	for i := 0; i < num; i++ {
 
-		if ok, index := ArrayHasSequence(arr1, arr2); ok {
+		if ok, index := HasSequence(arr1, arr2); ok {
 			count++
 			arr1 = arr1[index+1:]
 		}
@@ -1730,7 +1761,7 @@ func ArraySequenceCount[A ~[]T, T comparable](arr1 A, arr2 A) int {
 
 }
 
-// ArrayToMap 将一个切片转换为一个映射(map)，其中切片中的每个元素作为键(key)，
+// ToMap 将一个切片转换为一个映射(map)，其中切片中的每个元素作为键(key)，
 // 值(value)是一个空结构体(struct{})。这个函数的目的是为了创建一个唯一的键集合，
 // 由于结构体不占用存储空间，因此这种方式可以有效地表示一个集合。
 // 参数:
@@ -1745,7 +1776,7 @@ func ArraySequenceCount[A ~[]T, T comparable](arr1 A, arr2 A) int {
 //
 //	当需要从切片中快速查找某个元素是否存在时，可以将切片转换为映射，利用映射的O(1)查找复杂度。
 //	该函数非常有用，因为它可以快速地创建一个唯一的键集合，从而节省内存空间。
-func ArrayToMap[K comparable](arr []K) map[K]struct{} {
+func ToMap[K comparable](arr []K) map[K]struct{} {
 	m := make(map[K]struct{}, len(arr))
 	for _, v := range arr {
 		m[v] = struct{}{}
@@ -1753,13 +1784,13 @@ func ArrayToMap[K comparable](arr []K) map[K]struct{} {
 	return m
 }
 
-// ArrayUnique 去重数组元素
+// Unique 去重数组元素
 // 参数:
 //   - arr: 一个切片，表示要进行去重的切片。
 //
 // 返回:
 //   - []T: 一个新的切片，表示去重后的切片。
-func ArrayUnique[S ~[]T, T comparable](arr ...S) []T {
+func Unique[S ~[]T, T comparable](arr ...S) []T {
 	seen := make(map[T]struct{})
 	var result []T
 
@@ -1775,7 +1806,7 @@ func ArrayUnique[S ~[]T, T comparable](arr ...S) []T {
 	return result
 }
 
-// ArrayMerge 通过比较函数对两个切片进行合并，返回一个新的切片
+// Merge 通过比较函数对两个切片进行合并，返回一个新的切片
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 的值，返回一个布尔值
 //     当 `fun(x, y)` 返回 `true`，则在排序时 `x` 应位于 `y` 之前。
@@ -1783,9 +1814,9 @@ func ArrayUnique[S ~[]T, T comparable](arr ...S) []T {
 //
 // 返回:
 //   - []T: 一个新的切片，表示合并后的切片。
-func ArrayMerge[S ~[]T, T any](f func(x T, y T) bool, arr ...S) []T {
+func Merge[S ~[]T, T any](f func(x T, y T) bool, arr ...S) []T {
 
-	length := ArrayReduce(func(x int, y S) int {
+	length := Reduce(func(x int, y S) int {
 		return x + len(y)
 	}, 0, arr)
 
@@ -1835,7 +1866,7 @@ func ArrayMerge[S ~[]T, T any](f func(x T, y T) bool, arr ...S) []T {
 	return result
 }
 
-// ArrayChunk 切片分片
+// Chunk 切片分片
 // 参数:
 //   - size: 一个整数，表示每个切片的大小。
 //   - arr: 一个切片，表示要进行分片的切片。
@@ -1844,7 +1875,7 @@ func ArrayMerge[S ~[]T, T any](f func(x T, y T) bool, arr ...S) []T {
 //   - [][]T: 一个二维切片，表示分片后的切片。
 //
 // 例如：ArrayChunk(2, [1, 2, 3, 4, 5, 6, 7, 8, 9])) // => [[1, 2], [3, 4], [5, 6], [7, 8], [9]]
-func ArrayChunk[S ~[]T, T any](size int, arr S) [][]T {
+func Chunk[S ~[]T, T any](size int, arr S) [][]T {
 
 	if size <= 0 {
 		return [][]T{}
