@@ -111,27 +111,64 @@ func Operator[S ~[]T, T, U any](fun func(x ...T) U, arr ...S) []U {
 //
 // 函数返回类型为`[][]T`的切片，表示输入切片的笛卡尔积。
 // 例如:Cartesian([][]int{{1, 2}, {3, 4}}) = [][]int{{1, 3}, {1, 4}, {2, 3}, {2, 4}}
-func Cartesian[S []T, T any](arr ...S) [][]T {
+func Cartesians[S []T, T any](arr ...S) [][]T {
 	if len(arr) == 0 {
 		return [][]T{}
 	}
 
-	colNum := len(arr)
-	rowNum := int(array.Product(array.Map(func(x ...S) int { return len(x[0]) }, arr)))
-
-	res := make([][]T, colNum)
-	res[0] = arr[0]
-
-	for i := 1; i < colNum; i++ {
-		res[i] = array.Rep(arr[i], len(res[i-1]), true)
+	rowNum := 1
+	for _, a := range arr {
+		rowNum *= len(a)
 	}
 
-	for i := 0; i < colNum; i++ {
-		if n := rowNum / len(res[i]); n > 1 {
-			res[i] = array.Rep(res[i], n, false)
+	res := make([][]T, rowNum)
+	indices := make([]int, len(arr))
+
+	for i := range res {
+		row := make([]T, len(arr))
+		for j, a := range arr {
+			row[j] = a[indices[j]]
 		}
-
+		res[i] = row
+		// 增加索引
+		for j := len(arr) - 1; j >= 0; j-- {
+			indices[j]++
+			if indices[j] < len(arr[j]) {
+				break
+			}
+			indices[j] = 0
+		}
 	}
 
-	return array.Zip(res...)
+	return res
 }
+
+// func Cartesian[S []T, T any](arr ...S) [][]T {
+// 	if len(arr) == 0 {
+// 		return [][]T{}
+// 	}
+
+// 	colNum := len(arr)
+// 	rowNum := int(array.Product(array.Map(func(x ...S) int { return len(x[0]) }, arr)))
+
+// 	res := make([][]T, colNum)
+
+// 	for i := 0; i < colNum; i++ {
+// 		res[i] = make([]T, rowNum)
+// 	}
+
+// 	res[0] = arr[0]
+
+// 	for i := 1; i < colNum; i++ {
+// 		copy(res[i], array.Rep(arr[i], len(res[i-1]), true))
+// 	}
+
+// 	for i := 0; i < colNum; i++ {
+// 		if n := rowNum / len(res[i]); n > 1 {
+// 			copy(res[i], array.Rep(res[i], n, false))
+// 		}
+
+// 	}
+
+// 	return array.Zip(res...)
+// }
