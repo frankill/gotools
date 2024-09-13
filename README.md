@@ -102,39 +102,6 @@ func main() {
 
 
 ```
+ 
 
-```go
-
-package main
-
-import (
-	"fmt"
-	"strconv"
-
-	"github.com/frankill/gotools/array"
-	"github.com/frankill/gotools/iter"
-)
-
-func main() {
-
-	input := iter.FromArray(func(x int) []string { return []string{fmt.Sprintf("%d", x)} })(array.ArraySeq(1, 100, 1))
-
-	pipe := iter.NewPipeline[[]string]()
-
-	pipe.SetStart(func() chan []string { return input })
-
-	pipe.SetEnd( func ( ch chan []string) {iter.ToCsv("pipe.csv",false)(ch)} )
-
-	pipe.AddStep(iter.Map(func(x []string) []string { return append(x, "test") }))
-
-	pipe.AddStep(iter.Filter(func(x []string) bool {
-		tmp, _ := strconv.Atoi(x[0])
-		return tmp%2 == 0
-	}))
-
-	pipe.Run()
-
-}
-
-
-```
+ 
