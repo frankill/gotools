@@ -1174,6 +1174,7 @@ func ArrayFold[S ~[]T, T, U any](fun func(x ...T) U, acc func(x, y U) U, arr ...
 // Parameters:
 // arr - 需要被归约处理的切片。类型为 S，其中 S 是 T 类型元素的切片。
 // fun - 累积函数，接收两个参数：累积结果（类型为 U）和切片中的当前元素（类型为 T），
+// dvalue - 初始累积值，类型为 U。
 //
 //	并返回一个新的累积结果（同样为 U 类型）。此函数定义了如何将单个元素累积到整体结果中。
 //
@@ -1831,5 +1832,27 @@ func ArrayMerge[S ~[]T, T any](f func(x T, y T) bool, arr ...S) []T {
 
 	}
 
+	return result
+}
+
+// ArrayChunk 切片分片
+// 参数:
+//   - size: 一个整数，表示每个切片的大小。
+//   - arr: 一个切片，表示要进行分片的切片。
+//
+// 返回:
+//   - [][]T: 一个二维切片，表示分片后的切片。
+//
+// 例如：ArrayChunk(2, [1, 2, 3, 4, 5, 6, 7, 8, 9])) // => [[1, 2], [3, 4], [5, 6], [7, 8], [9]]
+func ArrayChunk[S ~[]T, T any](size int, arr S) [][]T {
+
+	if size <= 0 {
+		return [][]T{}
+	}
+
+	result := make([][]T, 0, len(arr)/size+1)
+	for i := 0; i < len(arr); i += size {
+		result = append(result, arr[i:i+size])
+	}
 	return result
 }
