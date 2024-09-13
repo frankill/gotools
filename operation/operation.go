@@ -1,166 +1,44 @@
 package operation
 
 import (
-	"cmp"
-
 	"github.com/frankill/gotools/array"
 )
 
-// And 对多个布尔值进行逻辑与运算。
+// All 逐元素执行函数。
 // 参数:
 //
-//	arr: 变长参数列表，每个参数都是布尔类型。
+//	fun: 用于逐元素执行的函数。
+//	arr: 变长参数列表，每个参数都是一个切片。
 //
 // 返回:
 //
-//	如果所有参数都为 true，则返回 true；否则返回 false。
-func And[T bool](arr ...T) T {
-
-	if len(arr) == 0 {
-		return false
-	}
+//	如果所有元素都满足条件，则返回 true，否则返回 false。
+func All[T any](f func(T) bool, arr []T) bool {
 
 	for _, v := range arr {
-
-		if !v {
+		if !f(v) {
 			return false
 		}
-
 	}
 	return true
-
 }
 
-// Or 对多个布尔值进行逻辑或运算。
+// Any 逐元素执行函数。
 // 参数:
 //
-//	arr: 变长参数列表，每个参数都是布尔类型。
+//	fun: 用于逐元素执行的函数。
+//	arr: 变长参数列表，每个参数都是一个切片。
 //
 // 返回:
 //
-//	如果至少有一个参数为 true，则返回 true；否则返回 false。
-func Or[T bool](arr ...T) T {
-	if len(arr) == 0 {
-		return false
-	}
+//	如果至少有一个元素满足条件，则返回 true，否则返回 false。
+func Any[T any](f func(T) bool, arr []T) bool {
 	for _, v := range arr {
-		if v {
+		if f(v) {
 			return true
 		}
 	}
 	return false
-}
-
-// Not 对单个布尔值进行逻辑非运算。
-// 参数:
-//
-//	v: 布尔类型值。
-//
-// 返回:
-//
-//	如果 v 为 true，则返回 false；否则返回 true。
-func Not[T bool](v T) T {
-	return !v
-}
-
-// GT 检查有序类型参数列表是否满足严格递减顺序。
-// 参数:
-//
-//	arr: 变长参数列表，每个参数都实现了 cmp.Ordered 接口。
-//
-// 返回:
-//
-//	如果参数列表满足严格递减顺序，则返回 true；否则返回 false。
-func GT[T cmp.Ordered](arr ...T) bool {
-
-	la := len(arr)
-	if la == 0 {
-		return true
-	}
-
-	for i := 1; i < la; i++ {
-		if arr[i-1] < arr[i] {
-			return false
-		}
-	}
-
-	return true
-
-}
-
-// GTE 检查有序类型参数列表是否满足非严格递减顺序。
-// 参数:
-//
-//	arr: 变长参数列表，每个参数都实现了 cmp.Ordered 接口。
-//
-// 返回:
-//
-//	如果参数列表满足非严格递减顺序，则返回 true；否则返回 false。
-func GTE[T cmp.Ordered](arr ...T) bool {
-
-	la := len(arr)
-	if la == 0 {
-		return true
-	}
-
-	for i := 1; i < la; i++ {
-		if arr[i-1] <= arr[i] {
-			return false
-		}
-	}
-
-	return true
-
-}
-
-// LT 检查有序类型参数列表是否满足严格递增顺序。
-// 参数:
-//
-//	arr: 变长参数列表，每个参数都实现了 cmp.Ordered 接口。
-//
-// 返回:
-//
-//	如果参数列表满足严格递增顺序，则返回 true；否则返回 false。
-func LT[T cmp.Ordered](arr ...T) bool {
-
-	la := len(arr)
-	if la == 0 {
-		return true
-	}
-
-	for i := 1; i < la; i++ {
-		if arr[i-1] > arr[i] {
-			return false
-		}
-	}
-
-	return true
-
-}
-
-// LTE 检查有序类型参数列表是否满足非严格递增顺序。
-// 参数:
-//
-//	arr: 变长参数列表，每个参数都实现了 cmp.Ordered 接口。
-//
-// 返回:
-//
-//	如果参数列表满足非严格递增顺序，则返回 true；否则返回 false。
-func LTE[T cmp.Ordered](arr ...T) bool {
-
-	la := len(arr)
-	if la == 0 {
-		return true
-	}
-
-	for i := 1; i < la; i++ {
-		if arr[i-1] >= arr[i] {
-			return false
-		}
-	}
-
-	return true
-
 }
 
 // ForEach 逐元素执行函数。
