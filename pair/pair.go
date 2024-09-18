@@ -1,5 +1,7 @@
 package pair
 
+import "github.com/frankill/gotools"
+
 type Pair[T, U any] struct {
 	First  T
 	Second U
@@ -36,7 +38,7 @@ func Of[T, U any](first T, second U) Pair[T, U] {
 // 函数功能:
 //   - 遍历映射 data，将每个键值对转换为 Pair[K, V] 类型，并将其添加到切片 pairs 中。
 //   - 返回包含所有键值对的切片 pairs。
-func FromMap[K comparable, V any](data map[K]V) []Pair[K, V] {
+func FromMap[K gotools.Comparable, V any](data map[K]V) []Pair[K, V] {
 	pairs := make([]Pair[K, V], 0, len(data))
 	for k, v := range data {
 		pairs = append(pairs, Pair[K, V]{First: k, Second: v})
@@ -116,7 +118,7 @@ func Seconds[D ~[]Pair[K, V], K any, V any](data D) []V {
 	return res
 }
 
-func ToMap[D ~[]Pair[K, V], K comparable, V any](data D) map[K][]V {
+func ToMap[D ~[]Pair[K, V], K gotools.Comparable, V any](data D) map[K][]V {
 	res := make(map[K][]V, len(data))
 	for _, p := range data {
 		if res[p.First] == nil {

@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/maps"
 	"github.com/frankill/gotools/pair"
 )
@@ -255,7 +256,7 @@ func TestMapApplyKey(t *testing.T) {
 }
 
 // Helper function to check if two maps are equal
-func mapsEqual[K, V comparable](m1, m2 map[K]V) bool {
+func mapsEqual[K, V gotools.Comparable](m1, m2 map[K]V) bool {
 	if len(m1) != len(m2) {
 		return false
 	}

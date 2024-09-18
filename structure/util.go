@@ -1,11 +1,11 @@
 package structure
 
-import "cmp"
+import "github.com/frankill/gotools"
 
-func Compare[T cmp.Ordered](a, b T) bool {
+func Compare[T gotools.Ordered](a, b T) bool {
 	return a < b
 }
 
-func CompareDesc[T cmp.Ordered](a, b T) bool {
+func CompareDesc[T gotools.Ordered](a, b T) bool {
 	return a > b
 }

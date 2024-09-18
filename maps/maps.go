@@ -15,7 +15,7 @@ import (
 //
 // 返回值:
 //   - 一个映射，其中键是函数 f 的返回值，值是每个元素在数据中的位置。
-func OfIndex[K comparable, V any](f func(V) K, data []V) map[K][]int {
+func OfIndex[K gotools.Comparable, V any](f func(V) K, data []V) map[K][]int {
 
 	result := map[K][]int{}
 
@@ -35,7 +35,7 @@ func OfIndex[K comparable, V any](f func(V) K, data []V) map[K][]int {
 //
 // 返回值:
 //   - 一个映射，其中键是函数 f 的返回值，值是每个元素在数据中出现的次数。
-func OfCount[K comparable, V any](f func(V) K, data []V) map[K]int {
+func OfCount[K gotools.Comparable, V any](f func(V) K, data []V) map[K]int {
 
 	result := map[K]int{}
 
@@ -60,7 +60,7 @@ func OfCount[K comparable, V any](f func(V) K, data []V) map[K]int {
 // 使用场景:
 //
 //	当需要单独处理或传递映射的键集合时，此函数非常有用。
-func Keys[K comparable, V any](m ...map[K]V) []K {
+func Keys[K gotools.Comparable, V any](m ...map[K]V) []K {
 
 	if len(m) == 0 {
 		return make([]K, 0)
@@ -80,8 +80,8 @@ func Keys[K comparable, V any](m ...map[K]V) []K {
 }
 
 // MpaValues 将map的值转换为切片返回。
-// 该函数接受一个类型为[K comparable, V any]的map作为参数，
-// 其中K代表map的键类型，必须实现comparable接口，
+// 该函数接受一个类型为[K gotools.Comparable, V any]的map作为参数，
+// 其中K代表map的键类型，必须实现gotools.Comparable接口，
 // V代表map的值类型，可以是任何类型。
 // 函数返回一个类型为[]V的切片，包含了map中所有值的副本。
 // 这个函数的存在是为了在不改变原map值的情况下，
@@ -94,7 +94,7 @@ func Keys[K comparable, V any](m ...map[K]V) []K {
 // 返回值:
 //
 //	一个类型为[]V的切片，包含了map m中所有值的副本。
-func Values[K comparable, V any](m ...map[K]V) []V {
+func Values[K gotools.Comparable, V any](m ...map[K]V) []V {
 
 	if len(m) == 0 {
 		return make([]V, 0)
@@ -117,8 +117,8 @@ func Values[K comparable, V any](m ...map[K]V) []V {
 // 参数 f 是一个函数，用于测试每个键值对是否满足条件。如果满足，则返回 true，否则返回 false。
 // 参数 m 是要过滤的映射。
 // 返回值是一个新的映射，仅包含满足条件的键值对。
-// Filter 的类型参数 K 和 V 分别表示映射的键类型和值类型，其中 K 必须实现 comparable 接口，以支持作为映射的键。
-func Filter[K comparable, V any](f func(K, V) bool, m map[K]V) map[K]V {
+// Filter 的类型参数 K 和 V 分别表示映射的键类型和值类型，其中 K 必须实现 gotools.Comparable 接口，以支持作为映射的键。
+func Filter[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) map[K]V {
 	filtered := make(map[K]V)
 	for k, v := range m {
 		if f(k, v) {
@@ -138,7 +138,7 @@ func Filter[K comparable, V any](f func(K, V) bool, m map[K]V) map[K]V {
 //
 //	一个新的映射，其中键都是在 arr 中存在的键，
 
-func FilterArr[S ~[]K, K comparable, V any](m map[K]V, arr S) map[K]V {
+func FilterArr[S ~[]K, K gotools.Comparable, V any](m map[K]V, arr S) map[K]V {
 	filtered := make(map[K]V)
 	for k, v := range m {
 
@@ -166,7 +166,7 @@ func FilterArr[S ~[]K, K comparable, V any](m map[K]V, arr S) map[K]V {
 //
 //	当需要对映射中的所有值进行某种转换时，此函数非常有用。
 //	它允许在不改变原始映射的情况下，创建一个包含转换后值的新映射。
-func ApplyValue[K comparable, V, U any](f func(K, V) U, m map[K]V) map[K]U {
+func ApplyValue[K gotools.Comparable, V, U any](f func(K, V) U, m map[K]V) map[K]U {
 	applied := make(map[K]U, len(m))
 
 	for k, v := range m {
@@ -190,7 +190,7 @@ func ApplyValue[K comparable, V, U any](f func(K, V) U, m map[K]V) map[K]U {
 // 使用场景:
 //
 //	当需要根据原始映射的键和值计算出新的键，并保持值不变时，可以使用这个函数。
-func ApplyKey[K, U comparable, V any](f func(K, V) U, m map[K]V) map[U]V {
+func ApplyKey[K, U gotools.Comparable, V any](f func(K, V) U, m map[K]V) map[U]V {
 	applied := make(map[U]V, len(m))
 
 	for k, v := range m {
@@ -210,7 +210,7 @@ func ApplyKey[K, U comparable, V any](f func(K, V) U, m map[K]V) map[U]V {
 // 返回值:
 //
 //	一个新的映射，其中键是原映射的键和值通过函数处理后的结果，值是原映射的值通过函数处理后的结果。
-func ApplyBoth[K, U comparable, V, S any](f func(K, V) (U, S), m map[K]V) map[U]S {
+func ApplyBoth[K, U gotools.Comparable, V, S any](f func(K, V) (U, S), m map[K]V) map[U]S {
 	applied := make(map[U]S, len(m))
 
 	for k, v := range m {
@@ -231,7 +231,7 @@ func ApplyBoth[K, U comparable, V, S any](f func(K, V) (U, S), m map[K]V) map[U]
 //	一个切片，包含对 map 中每个键值对应用函数 f 后的结果。
 //
 // Apply 的目的是提供一个通用的方式，来对 map 的所有元素执行某种操作，而无需直接修改原 map。
-func Apply[K comparable, V, U any](f func(K, V) U, m map[K]V) []U {
+func Apply[K gotools.Comparable, V, U any](f func(K, V) U, m map[K]V) []U {
 
 	applied := make([]U, 0, len(m))
 	for k, v := range m {
@@ -254,7 +254,7 @@ func Apply[K comparable, V, U any](f func(K, V) U, m map[K]V) []U {
 //	map[T]S: 一个映射，其中键来自value数组，值来自f函数的返回值。
 //
 
-func FromArray2[V ~[]S, T comparable, S any](f func(x S) T, value V) map[T]S {
+func FromArray2[V ~[]S, T gotools.Comparable, S any](f func(x S) T, value V) map[T]S {
 
 	dict := make(map[T]S, len(value))
 
@@ -279,7 +279,7 @@ func FromArray2[V ~[]S, T comparable, S any](f func(x S) T, value V) map[T]S {
 // 返回值:
 //
 //	一个由Pair[K, V]组成的切片(slice)，每个Pair包含映射中的一对键值对。
-func ToArrayPairs[K comparable, V any](m map[K]V) []pair.Pair[K, V] {
+func ToArrayPairs[K gotools.Comparable, V any](m map[K]V) []pair.Pair[K, V] {
 
 	pairs := make([]pair.Pair[K, V], 0, len(m))
 
@@ -303,7 +303,7 @@ func ToArrayPairs[K comparable, V any](m map[K]V) []pair.Pair[K, V] {
 // 返回值:
 //
 //	一个映射，其中键是通过 fun 函数转换得到的，值是对应 Pair 中的 Second 字段。
-func FromPairs[K ~[]pair.Pair[V, S], T comparable, V, S any](fun func(V) T, data K) map[T]S {
+func FromPairs[K ~[]pair.Pair[V, S], T gotools.Comparable, V, S any](fun func(V) T, data K) map[T]S {
 
 	dict := make(map[T]S, len(data))
 
@@ -333,7 +333,7 @@ func FromPairs[K ~[]pair.Pair[V, S], T comparable, V, S any](fun func(V) T, data
 //
 //	K和V的类型参数必须是数组类型，而T必须是可比较的类型，S可以是任何类型。
 //	这个函数假设key和value数组的长度是相同的，以便在生成映射时保持键-值对的一致性。
-func FromArrayWithFun[A ~[]K, B ~[]V, T comparable, K, V any](fun func(K) T, key A, value B) map[T]V {
+func FromArrayWithFun[A ~[]K, B ~[]V, T gotools.Comparable, K, V any](fun func(K) T, key A, value B) map[T]V {
 
 	dict := make(map[T]V, len(key))
 
@@ -399,7 +399,7 @@ func PopulateSeries[K ~[]T, V ~[]S, T gotools.Number, S any](key K, value V, max
 //
 //	一个切片，包含所有指定键在map中的对应值。
 //	如果某个键不存在于map中，则对应位置的值为提供的默认值。
-func Contains[M map[K]V, A []V, K comparable, V any](m M, default_value V, key ...K) A {
+func Contains[M map[K]V, A []V, K gotools.Comparable, V any](m M, default_value V, key ...K) A {
 
 	lk := len(key)
 	res := make(A, 0, lk)
@@ -433,7 +433,7 @@ func Contains[M map[K]V, A []V, K comparable, V any](m M, default_value V, key .
 //	V: 映射中值的类型。
 //	m: 要操作的映射。
 //	key: 要移除的键的切片。可以同时移除多个键。
-func Remove[M map[K]V, K comparable, V any](m M, key ...K) {
+func Remove[M map[K]V, K gotools.Comparable, V any](m M, key ...K) {
 
 	for i := range key {
 
@@ -448,7 +448,7 @@ func Remove[M map[K]V, K comparable, V any](m M, key ...K) {
 // 参数 m1 是一个变长参数，表示要合并的映射表序列。
 // 返回值是一个映射表，包含了所有输入映射表的键值对。
 // 如果没有提供任何映射表作为参数，函数将返回 空map
-func Concat[K comparable, V any](m1 ...map[K]V) map[K]V {
+func Concat[K gotools.Comparable, V any](m1 ...map[K]V) map[K]V {
 
 	if len(m1) == 0 {
 		return make(map[K]V)
@@ -473,7 +473,7 @@ func Concat[K comparable, V any](m1 ...map[K]V) map[K]V {
 // 参数 m 是要检查的映射。
 // 返回值表示是否找到满足条件的键值对。
 // Exists 的泛型设计允许它适用于任何类型的映射，只要键是可比较的。
-func Exists[K comparable, V any](f func(K, V) bool, m map[K]V) bool {
+func Exists[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) bool {
 
 	for k, v := range m {
 		if f(k, v) {
@@ -495,7 +495,7 @@ func Exists[K comparable, V any](f func(K, V) bool, m map[K]V) bool {
 //
 //	如果函数 f 对映射中的所有键值对都返回 true，则返回 true；
 //	如果函数 f 对任何键值对返回 false，则返回 false。
-func All[K comparable, V any](f func(K, V) bool, m map[K]V) bool {
+func All[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) bool {
 	for k, v := range m {
 		if !f(k, v) {
 			return false
@@ -516,7 +516,7 @@ func All[K comparable, V any](f func(K, V) bool, m map[K]V) bool {
 // 返回:
 //
 //	Pair[[]K, []V]: 包含两个切片的 Pair 结构体，First 切片包含映射表的所有键，Second 切片包含映射表的所有值。
-func ToPairsArray2[K comparable, S ~[]V, V any](m map[K]S) pair.Pair[[]K, []V] {
+func ToPairsArray2[K gotools.Comparable, S ~[]V, V any](m map[K]S) pair.Pair[[]K, []V] {
 
 	pairs := pair.Pair[[]K, []V]{}
 
@@ -549,7 +549,7 @@ func ToPairsArray2[K comparable, S ~[]V, V any](m map[K]S) pair.Pair[[]K, []V] {
 // 返回:
 //
 //	Pair[[]K, []V]: 包含两个切片的 Pair 结构体，First 切片包含映射表的所有键，Second 切片包含映射表的所有值。
-func ToPairsArray[K comparable, V any](m map[K]V) pair.Pair[[]K, []V] {
+func ToPairsArray[K gotools.Comparable, V any](m map[K]V) pair.Pair[[]K, []V] {
 
 	pairs := pair.Pair[[]K, []V]{}
 
@@ -570,7 +570,7 @@ func ToPairsArray[K comparable, V any](m map[K]V) pair.Pair[[]K, []V] {
 // V: 映射表的值的类型。
 // 参数 data 是一个变长参数，包含多个映射表。
 // 返回值是一个新的映射表，包含所有输入映射表的键值对，相同的键只会出现一次。
-func Merge[K comparable, V any](data ...map[K]V) map[K]V {
+func Merge[K gotools.Comparable, V any](data ...map[K]V) map[K]V {
 
 	if len(data) == 0 {
 		return make(map[K]V)
@@ -630,7 +630,7 @@ func Merge[K comparable, V any](data ...map[K]V) map[K]V {
 //	//   [7],
 //	//   [8, 9],
 //	// ]
-func Intersect[V []U, K, U comparable](data ...map[K]V) pair.Pair[[][]K, []V] {
+func Intersect[V []U, K, U gotools.Comparable](data ...map[K]V) pair.Pair[[][]K, []V] {
 
 	if len(data) == 0 {
 		return pair.Pair[[][]K, []V]{}

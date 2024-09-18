@@ -15,6 +15,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/db"
 	"github.com/frankill/gotools/file"
 	"github.com/frankill/gotools/pair"
@@ -231,7 +232,7 @@ func FromArray[T any, U any](f func(x T) U) func(a []T) chan U {
 //   - 遍历映射 m，将每个键值对包装在一个切片中，然后将这些切片逐个发送到通道 ch 中。
 //   - 每个通道中的元素都是一个包含单个键值对的切片。
 //   - 当所有键值对都被发送到通道后，关闭通道。
-func FromMap[K comparable, V any](m map[K]V) func() chan pair.Pair[K, V] {
+func FromMap[K gotools.Comparable, V any](m map[K]V) func() chan pair.Pair[K, V] {
 
 	return func() chan pair.Pair[K, V] {
 		ch := make(chan pair.Pair[K, V], BufferSize)

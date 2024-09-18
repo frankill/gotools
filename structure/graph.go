@@ -3,9 +3,11 @@ package structure
 import (
 	"fmt"
 	"strings"
+
+	"github.com/frankill/gotools"
 )
 
-type Graph[T any, U comparable] struct {
+type Graph[T any, U gotools.Comparable] struct {
 	ednum     int
 	vernum    int
 	vertexs   []*Vertex[T]
@@ -145,7 +147,7 @@ func newVertex[T any](data T) *Vertex[T] {
 	return &Vertex[T]{data: data, e: nil}
 }
 
-func NewGraph[T any, U comparable](fn func(v, d T) bool, size int, index func(v T) U) *Graph[T, U] {
+func NewGraph[T any, U gotools.Comparable](fn func(v, d T) bool, size int, index func(v T) U) *Graph[T, U] {
 
 	r := new(Graph[T, U])
 	r.match = fn

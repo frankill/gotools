@@ -1,7 +1,9 @@
 package operation
 
 import (
+	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/array"
+	"github.com/frankill/gotools/fn"
 )
 
 // All 逐元素执行函数。
@@ -67,6 +69,26 @@ func ForEach[S ~[]T, T any](fun func(x ...T), arr ...S) {
 		fun(parm...)
 	}
 
+}
+
+func Add[S ~[]T, T gotools.Number](a, b S) []T {
+	return fn.Lapply2(func(x, y T) T { return x + y }, a, b)
+}
+
+func Sub[S ~[]T, T gotools.Number](a, b S) []T {
+	return fn.Lapply2(func(x, y T) T { return x - y }, a, b)
+}
+
+func Mul[S ~[]T, T gotools.Number](a, b S) []T {
+	return fn.Lapply2(func(x, y T) T { return x * y }, a, b)
+}
+
+func Div[S ~[]T, T gotools.Number, R float64](a, b S) []R {
+	return fn.Lapply2(func(x, y T) R { return R(x / y) }, a, b)
+}
+
+func Mod[S ~[]T, T gotools.Integer](a, b S) []int {
+	return fn.Lapply2(func(x, y T) int { return int(x % y) }, a, b)
 }
 
 // Operator 对一组切片应用指定的函数，每个切片元素按位置组合后作为函数的参数。

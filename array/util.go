@@ -1,5 +1,7 @@
 package array
 
+import "github.com/frankill/gotools"
+
 var (
 	LETTERS = []string{
 		"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
@@ -137,24 +139,6 @@ func CopyWithNum[T any](arr []T, num int) []T {
 	return res
 }
 
-// Ifelse 根据给定的布尔条件 condition，选择返回 trueVal 或 falseVal。
-// 如果 condition 为 true，则返回 trueVal；否则返回 falseVal。
-// 参数:
-//
-//	condition - 用于判断的布尔条件。
-//	trueVal - 当 condition 为 true 时返回的值。
-//	falseVal - 当 condition 为 false 时返回的值。
-//
-// 返回:
-//
-//	根据 condition 的结果返回 trueVal 或 falseVal。
-func Ifelse[T any](condition bool, trueVal T, falseVal T) T {
-	if condition {
-		return trueVal
-	}
-	return falseVal
-}
-
 // Transform 将切片 x 中的元素根据 array_from 和 array_to 的映射关系转换为新的类型 T，
 // 并返回转换后的切片。如果 x 中的元素在映射中不存在，则使用 default_value 填充。
 // 参数:
@@ -167,7 +151,7 @@ func Ifelse[T any](condition bool, trueVal T, falseVal T) T {
 // 返回:
 //
 //	一个新切片，其中元素为转换后的值。
-func Transform[S ~[]F, D ~[]T, F comparable, T any](x S, array_from S, array_to D, default_value T) []T {
+func Transform[S ~[]F, D ~[]T, F gotools.Comparable, T any](x S, array_from S, array_to D, default_value T) []T {
 
 	if len(x) == 0 {
 		return []T{}
@@ -210,7 +194,7 @@ func Transform[S ~[]F, D ~[]T, F comparable, T any](x S, array_from S, array_to 
 //
 //	K和V的类型参数必须是数组类型，且K的元素类型必须是可比较的。
 //	这个函数假设key和value数组的长度是相同的，以便进行索引匹配。
-func ToMas[K ~[]T, V ~[]S, T comparable, S any](key K, value V) map[T]S {
+func ToMas[K ~[]T, V ~[]S, T gotools.Comparable, S any](key K, value V) map[T]S {
 
 	dict := make(map[T]S, len(key))
 
@@ -237,7 +221,7 @@ func ToMas[K ~[]T, V ~[]S, T comparable, S any](key K, value V) map[T]S {
 // 返回值:
 //
 //	返回一个整数，表示 source 中与 match 顺序一致的最长连续子序列的长度。
-func HasOrderMaxCount[S ~[]T, T comparable](source, match S, exist map[T]struct{}) int {
+func HasOrderMaxCount[S ~[]T, T gotools.Comparable](source, match S, exist map[T]struct{}) int {
 
 	count := 0
 	j := 0 // 用于追踪 b 切片中的当前元素位置
@@ -277,7 +261,7 @@ func HasOrderMaxCount[S ~[]T, T comparable](source, match S, exist map[T]struct{
 //
 //	返回源切片中与 match 中元素相等的元素个数。
 //	如果在计数过程中发现源切片中有重复元素，则提前终止并返回当前计数值。
-func HasDupMaxCount[S ~[]T, T comparable](source, match S) int {
+func HasDupMaxCount[S ~[]T, T gotools.Comparable](source, match S) int {
 	count := 0
 	j := 0 // 用于追踪 b 切片中的当前元素位置
 
@@ -316,7 +300,7 @@ func HasDupMaxCount[S ~[]T, T comparable](source, match S) int {
 //
 //	返回源切片中与 match 中元素相等的连续元素个数。
 //	当 match 中的所有元素都已在 source 中找到匹配或 source 中不再有匹配元素时，停止计数并返回结果。
-func HasIncreaseMaxCount[S ~[]T, T comparable](source, match S) int {
+func HasIncreaseMaxCount[S ~[]T, T gotools.Comparable](source, match S) int {
 	count := 0
 	j := 0 // 用于追踪 b 切片中的当前元素位置
 

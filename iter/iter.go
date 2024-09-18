@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/array"
 	"github.com/frankill/gotools/pair"
 )
@@ -73,7 +74,7 @@ func FlatMap[T any, U any](f func(x T) []U) func(ch chan T) chan U {
 // 从中移除重复的元素，并将唯一的元素发送到一个新的输出通道（chan T）中。
 // 函数内部使用一个映射（map）来跟踪已经见过的元素，以确保每个元素只出现一次。
 // 返回的输出通道在处理完成后会被关闭。
-func Distinct[T comparable](ch chan T) chan T {
+func Distinct[T gotools.Comparable](ch chan T) chan T {
 	ch_ := make(chan T, BufferSize)
 	set := make(map[T]struct{})
 	go func() {
@@ -358,7 +359,7 @@ func Collect[T any](ch chan T) []T {
 	return result
 }
 
-func CollectFun[T any, U comparable](f func(x T) U) func(ch chan T) []U {
+func CollectFun[T any, U gotools.Comparable](f func(x T) U) func(ch chan T) []U {
 
 	return func(ch chan T) []U {
 
@@ -493,7 +494,7 @@ func Union[T any](chs ...chan T) chan T {
 // 注意:
 // 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
 // 如果第二个通道数据很多，要考虑内存占用问题。
-func InterSimple[T comparable](ch1 chan T, ch2 chan T) chan T {
+func InterSimple[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
 
 	ch := make(chan T, BufferSize)
 
@@ -526,7 +527,7 @@ func InterSimple[T comparable](ch1 chan T, ch2 chan T) chan T {
 // 注意:
 // 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
 // 如果第二个通道数据很多，要考虑内存占用问题。
-func SubSimple[T comparable](ch1 chan T, ch2 chan T) chan T {
+func SubSimple[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
 
 	ch := make(chan T, BufferSize)
 

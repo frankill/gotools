@@ -61,3 +61,55 @@ func CityHash64(str string) uint64 {
 func CityHash32(str string) uint32 {
 	return cityhash.CityHash32([]byte(str), uint32(len([]byte(str))))
 }
+
+func Println[T any](data T) {
+	fmt.Println(data)
+}
+
+// Lapply 用于将一个函数应用于一个切片的每个元素。
+// 参数:
+//
+//		f - 一个函数，接受一个类型为 T 的参数，返回一个类型为 U 的值。
+//	 s - 一个包含 T 类型元素的切片。
+//
+// 返回:
+//
+//	一个包含 U 类型元素的切片。
+func Lapply[S ~[]T, T any, U any](f func(x T) U, s S) []U {
+	res := make([]U, len(s))
+
+	for i := 0; i < len(s); i++ {
+		res[i] = f(s[i])
+	}
+
+	return res
+}
+
+func Lapply2[S ~[]T, T any, U ~[]V, V any, R any](f func(x T, y V) R, s S, v U) []R {
+
+	res := make([]R, len(s))
+
+	for i := 0; i < len(s); i++ {
+		res[i] = f(s[i], v[i])
+	}
+
+	return res
+}
+
+// Ifelse 根据给定的布尔条件 condition，选择返回 trueVal 或 falseVal。
+// 如果 condition 为 true，则返回 trueVal；否则返回 falseVal。
+// 参数:
+//
+//	condition - 用于判断的布尔条件。
+//	trueVal - 当 condition 为 true 时返回的值。
+//	falseVal - 当 condition 为 false 时返回的值。
+//
+// 返回:
+//
+//	根据 condition 的结果返回 trueVal 或 falseVal。
+func Ifelse[T any](condition bool, trueVal T, falseVal T) T {
+	if condition {
+		return trueVal
+	}
+	return falseVal
+}

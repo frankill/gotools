@@ -1,15 +1,19 @@
 package structure
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/frankill/gotools"
+)
 
 type (
-	Set[T comparable] struct {
+	Set[T gotools.Comparable] struct {
 		m     map[T]struct{}
 		mutex sync.RWMutex
 	}
 )
 
-func NewSet[T comparable](data ...T) Set[T] {
+func NewSet[T gotools.Comparable](data ...T) Set[T] {
 	res := make(map[T]struct{}, len(data))
 
 	for _, v := range data {

@@ -1,7 +1,7 @@
 package array
 
 import (
-	"cmp"
+	"github.com/frankill/gotools"
 )
 
 // MatchZero 执行精确匹配，在 'lookup_array' 中查找与 'lookup_value' 相同的元素。
@@ -13,7 +13,7 @@ import (
 // 返回:
 //
 //	一个整数切片，表示在 'lookup_array' 中找到的每个 'lookup_value' 元素的第一个匹配项的索引，如果没有找到匹配项则返回 -1。
-func MatchZero[A ~[]T, T comparable](lookup_value A, lookup_array A) []int {
+func MatchZero[A ~[]T, T gotools.Comparable](lookup_value A, lookup_array A) []int {
 
 	return Map(func(x ...T) int {
 		return FindFirst(func(y ...T) bool {
@@ -32,7 +32,7 @@ func MatchZero[A ~[]T, T comparable](lookup_value A, lookup_array A) []int {
 // 返回:
 //
 //	一个整数切片，表示在 'lookup_array' 中找到的每个 'lookup_value' 元素的匹配项的索引，如果没有找到匹配项则返回 -1。
-func MatchOne[A ~[]T, T cmp.Ordered](lookup_value A, lookup_array A) []int {
+func MatchOne[A ~[]T, T gotools.Ordered](lookup_value A, lookup_array A) []int {
 
 	ll := len(lookup_value)
 	la := len(lookup_array)
@@ -72,7 +72,7 @@ func MatchOne[A ~[]T, T cmp.Ordered](lookup_value A, lookup_array A) []int {
 // 返回:
 //
 //	一个整数切片，表示在 'lookup_array' 中找到的每个 'lookup_value' 元素的匹配项的索引，如果没有找到匹配项则返回 -1。
-func MatchMinusOne[A ~[]T, T cmp.Ordered](lookup_value A, lookup_array A) []int {
+func MatchMinusOne[A ~[]T, T gotools.Ordered](lookup_value A, lookup_array A) []int {
 
 	ll := len(lookup_value)
 	la := len(lookup_array)
@@ -105,7 +105,7 @@ func MatchMinusOne[A ~[]T, T cmp.Ordered](lookup_value A, lookup_array A) []int 
 }
 
 // Xlookup 根据 lookup_value 在 lookup_array 中查找匹配项，并返回对应在 lookup_result 中的元素。
-// 该函数利用泛型实现了类型安全的查找操作，适用于任何实现了 comparable 接口的类型。
+// 该函数利用泛型实现了类型安全的查找操作，适用于任何实现了 gotools.Comparable 接口的类型。
 // 参数:
 //
 //	lookup_value - 需要查找的值。
@@ -117,7 +117,7 @@ func MatchMinusOne[A ~[]T, T cmp.Ordered](lookup_value A, lookup_array A) []int 
 //	返回一个数组，包含与 lookup_value 在 lookup_array 中找到的元素相对应的值。
 //
 // 使用泛型允许函数适用于多种类型，提高了代码的复用性和灵活性。
-func Xlookup[S ~[]T, T comparable, R ~[]U, U any](lookup_value S, lookup_array S, lookup_result R) []U {
+func Xlookup[S ~[]T, T gotools.Comparable, R ~[]U, U any](lookup_value S, lookup_array S, lookup_result R) []U {
 
 	index := MatchZero(lookup_value, lookup_array)
 

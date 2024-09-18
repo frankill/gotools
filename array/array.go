@@ -1,7 +1,6 @@
 package array
 
 import (
-	"cmp"
 	"log"
 	"math"
 	"math/rand"
@@ -15,11 +14,11 @@ var (
 	DESCInt = func(x, y int) bool { return x < y }
 )
 
-func ASCGeneric[T cmp.Ordered](x, y T) bool {
+func ASCGeneric[T gotools.Ordered](x, y T) bool {
 	return x < y
 }
 
-func DESCGeneric[T cmp.Ordered](x, y T) bool {
+func DESCGeneric[T gotools.Ordered](x, y T) bool {
 	return x > y
 }
 
@@ -356,12 +355,12 @@ func Sum[S ~[]T, T gotools.Number](arr ...S) T {
 // Max 返回类型为 S（元素类型为 T）的切片中的最大元素。
 //
 // 参数:
-// - arr: 类型为 S 的切片，元素需要可比较（实现 cmp.Ordered 接口）。
+// - arr: 类型为 S 的切片，元素需要可比较（实现 gotools.Ordered 接口）。
 //
 // 返回值:
 //   - 切片中的最大元素。
 //     如果切片为空，则返回 T 类型的默认值（这可能是未定义的行为，具体取决于 T 的类型）。
-func Max[S ~[]T, T cmp.Ordered](arr ...S) T {
+func Max[S ~[]T, T gotools.Ordered](arr ...S) T {
 	var result T
 	if len(arr) == 0 {
 		return result
@@ -382,12 +381,12 @@ func Max[S ~[]T, T cmp.Ordered](arr ...S) T {
 // Min 返回类型为 S（元素类型为 T）的切片中的最小元素。
 //
 // 参数:
-// - arr: 类型为 S 的切片，元素需要可比较（实现 cmp.Ordered 接口）。
+// - arr: 类型为 S 的切片，元素需要可比较（实现 gotools.Ordered 接口）。
 //
 // 返回值:
 //   - 切片中的最小元素。
 //     如果切片为空，则返回 T 类型的默认值（这可能是未定义的行为，具体取决于 T 的类型）。
-func Min[S ~[]T, T cmp.Ordered](arr ...S) T {
+func Min[S ~[]T, T gotools.Ordered](arr ...S) T {
 	var result T
 	if len(arr) == 0 {
 		return result
@@ -408,11 +407,11 @@ func Min[S ~[]T, T cmp.Ordered](arr ...S) T {
 // FindMin 查找类型为 S（元素类型为 T）的切片中最小元素的索引位置。
 //
 // 参数:
-// - arr: 类型为 S 的切片，元素必须是可比较的（实现 cmp.Ordered 接口）。
+// - arr: 类型为 S 的切片，元素必须是可比较的（实现 gotools.Ordered 接口）。
 //
 // 返回值:
 // - 返回切片中最小元素的索引。如果切片为空，则行为未定义（可能返回 0，具体取决于编译器和运行环境）。
-func FindMin[S ~[]T, T cmp.Ordered](arr S) int {
+func FindMin[S ~[]T, T gotools.Ordered](arr S) int {
 
 	if len(arr) == 0 {
 		return -1
@@ -435,13 +434,13 @@ func FindMin[S ~[]T, T cmp.Ordered](arr S) int {
 // FindMax 查找类型为 S（元素类型为 T）的切片中最大元素的索引位置。
 //
 // 参数:
-// - arr: 类型为 S 的切片，元素必须是可比较的（实现 cmp.Ordered 接口）。
+// - arr: 类型为 S 的切片，元素必须是可比较的（实现 gotools.Ordered 接口）。
 //
 // 返回值:
 // - 返回切片中最大元素的索引。如果切片为空，则行为未定义（可能返回 0，具体取决于编译器和运行环境）。
 //
 // 注意: 此函数假定切片非空，并且切片中的元素能够相互比较以确定大小关系。
-func FindMax[S ~[]T, T cmp.Ordered](arr S) int {
+func FindMax[S ~[]T, T gotools.Ordered](arr S) int {
 
 	if len(arr) == 0 {
 		return -1
@@ -1045,7 +1044,7 @@ func Zip[S ~[]T, T any](arr ...S) [][]T {
 	return result
 }
 
-// Compact 移除给定切片 S 中连续重复的元素，其中 S 是泛型类型 T 的切片，且 T 必须实现了 cmp.Ordered 接口。
+// Compact 移除给定切片 S 中连续重复的元素，其中 S 是泛型类型 T 的切片，且 T 必须实现了 gotools.Ordered 接口。
 //
 // 参数:
 // - arr: 类型为 S 的切片，可能包含连续重复的元素。
@@ -1055,7 +1054,7 @@ func Zip[S ~[]T, T any](arr ...S) [][]T {
 //
 // 此函数遍历输入切片，仅将与前一个元素不同的元素添加到结果切片中，
 // 从而实现连续重复元素的紧凑化处理。如果输入切片为空，则返回同类型的空切片。
-func Compact[S ~[]T, T comparable](arr S) S {
+func Compact[S ~[]T, T gotools.Comparable](arr S) S {
 	if len(arr) == 0 {
 		return S{}
 	}
@@ -1212,8 +1211,8 @@ func Reduce[S ~[]T, T, U any](fun func(x U, y T) U, dvalue U, arr S) U {
 //   - 一个新的 []T 类型的切片，包含所有输入切片中共有的元素，且元素顺序与它们在第一个切片中出现的顺序一致。
 //     如果没有交集或输入为空，则返回一个空切片。
 //
-// 注意: T 必须实现 comparable 接口，允许元素之间的比较操作。
-func Intersect[S ~[]T, T comparable](arr ...S) []T {
+// 注意: T 必须实现 gotools.Comparable 接口，允许元素之间的比较操作。
+func Intersect[S ~[]T, T gotools.Comparable](arr ...S) []T {
 	if len(arr) == 0 {
 		return make([]T, 0)
 	}
@@ -1253,7 +1252,7 @@ func Intersect[S ~[]T, T comparable](arr ...S) []T {
 	return mapKeys(result)
 }
 
-func mapKeys[K comparable, V any](m ...map[K]V) []K {
+func mapKeys[K gotools.Comparable, V any](m ...map[K]V) []K {
 
 	if len(m) == 0 {
 		return make([]K, 0)
@@ -1272,7 +1271,7 @@ func mapKeys[K comparable, V any](m ...map[K]V) []K {
 	return keys
 }
 
-func mapfitler[K comparable, V any](f func(K, V) bool, m map[K]V) map[K]V {
+func mapfitler[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) map[K]V {
 	filtered := make(map[K]V)
 	for k, v := range m {
 		if f(k, v) {
@@ -1290,7 +1289,7 @@ func mapfitler[K comparable, V any](f func(K, V) bool, m map[K]V) map[K]V {
 // 返回值:
 //
 //	一个整数切片，长度与输入数组相同，其中的值表示对应元素在数组中首次出现的索引。
-func EnumerateDense[S ~[]T, T comparable](arr S) []int {
+func EnumerateDense[S ~[]T, T gotools.Comparable](arr S) []int {
 
 	la := len(arr)
 	firstIndexMap := make(map[T]int, la)
@@ -1309,7 +1308,7 @@ func EnumerateDense[S ~[]T, T comparable](arr S) []int {
 	return result
 }
 
-// func SortByQ[D ~[]U, S ~[]T, T any, U cmp.Ordered](arr S, order D) (S, D) {
+// func SortByQ[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D) (S, D) {
 
 // 	return ArraySortBy(func(x, y U) bool { return x < y }, arr, order)
 
@@ -1355,7 +1354,7 @@ func SortBy[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D) (S,
 	return res, tmp
 }
 
-// func SortByLQ[D ~[]U, S ~[]T, T any, U cmp.Ordered](arr S, order D) {
+// func SortByLQ[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D) {
 // 	ArraySortByL(func(current, before U) bool { return current < before }, arr, order)
 // }
 
@@ -1446,8 +1445,8 @@ func Sort[S ~[]T, T any](fun func(x, y T) bool, arr S) S {
 // 注意：当前实现并非标准快速排序算法，更像是简化冒泡排序变种。
 //
 // 参数:
-// - arr: 要排序的切片 S，其中元素类型 T 必须是可比较的（实现 cmp.Ordered 接口）。
-// func SortQuick[S ~[]T, T cmp.Ordered](arr S) S {
+// - arr: 要排序的切片 S，其中元素类型 T 必须是可比较的（实现 gotools.Ordered 接口）。
+// func SortQuick[S ~[]T, T gotools.Ordered](arr S) S {
 
 // 	return ArraySort(func(x, y T) bool { return x < y }, arr)
 
@@ -1520,14 +1519,14 @@ func Choose[S ~[]T, T any](index []int, arr S) []T {
 }
 
 // Distinct 移除类型为 S（元素类型为 T）的切片中的重复元素，并返回一个新的无重复元素的切片。
-// 要求 T 类型实现 cmp.Ordered 接口，以便进行比较操作。
+// 要求 T 类型实现 gotools.Ordered 接口，以便进行比较操作。
 //
 // 参数:
 // - arr: 输入的切片 S，可能包含重复元素。
 //
 // 返回值:
 // - 返回一个新的 S 类型切片，其中重复的元素已被移除，剩余元素按升序排列。
-func Distinct[S ~[]T, T cmp.Ordered](arr S) S {
+func Distinct[S ~[]T, T gotools.Ordered](arr S) S {
 
 	if len(arr) == 0 {
 		return S{}
@@ -1615,7 +1614,7 @@ func Count[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 }
 
 // Has 检查类型为 S（元素类型为 T）的切片中是否包含指定的元素。
-// 要求 T 类型实现 comparable 接口，以便进行相等性比较。
+// 要求 T 类型实现 gotools.Comparable 接口，以便进行相等性比较。
 //
 // 参数:
 // - arr: 要检查的切片 S。
@@ -1623,7 +1622,7 @@ func Count[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 //
 // 返回值:
 // - 如果切片 `arr` 包含元素 `elem`，则返回 `true`；否则返回 `false`。
-func Has[S ~[]T, T comparable](arr S, elem T) bool {
+func Has[S ~[]T, T gotools.Comparable](arr S, elem T) bool {
 
 	la := len(arr)
 	if la == 0 {
@@ -1639,7 +1638,7 @@ func Has[S ~[]T, T comparable](arr S, elem T) bool {
 }
 
 // HasAny 检查类型为 S（元素类型为 T）的切片是否包含至少一个指定的元素。
-// 要求 T 类型实现 comparable 接口，允许元素之间的相等性比较。
+// 要求 T 类型实现 gotools.Comparable 接口，允许元素之间的相等性比较。
 //
 // 参数:
 // - arr: 要检查的切片 S。
@@ -1647,7 +1646,7 @@ func Has[S ~[]T, T comparable](arr S, elem T) bool {
 //
 // 返回值:
 // - 如果切片 `arr` 中包含 `elems` 中的至少一个元素，则返回 `true`；否则返回 `false`。
-func HasAny[S ~[]T, T comparable](arr S, elems ...T) bool {
+func HasAny[S ~[]T, T gotools.Comparable](arr S, elems ...T) bool {
 	if len(arr) == 0 || len(elems) == 0 {
 		return false
 	}
@@ -1656,7 +1655,7 @@ func HasAny[S ~[]T, T comparable](arr S, elems ...T) bool {
 }
 
 // HasAll 检查类型为 S（元素类型为 T）的切片是否包含指定的所有元素。
-// 要求 T 类型实现 comparable 接口，允许元素之间的相等性比较。
+// 要求 T 类型实现 gotools.Comparable 接口，允许元素之间的相等性比较。
 //
 // 参数:
 // - arr: 要检查的切片 S。
@@ -1664,7 +1663,7 @@ func HasAny[S ~[]T, T comparable](arr S, elems ...T) bool {
 //
 // 返回值:
 // - 如果切片 `arr` 包含 `elems` 中的所有元素，则返回 `true`；否则返回 `false`。
-func HasAll[S ~[]T, T comparable](arr S, elems ...T) bool {
+func HasAll[S ~[]T, T gotools.Comparable](arr S, elems ...T) bool {
 	if len(arr) == 0 || len(elems) == 0 {
 		return false
 	}
@@ -1707,10 +1706,10 @@ ArrayHasSequence 检查数组arr1中是否包含数组arr2作为连续子序列�
 返回值：
 - bool: 如果arr2是arr1中的一个连续子序列，则返回true，否则返回false。
 
-此函数利用类型约束[A ~[]T, T comparable]确保传入的参数为切片类型且元素可比较。
+此函数利用类型约束[A ~[]T, T gotools.Comparable]确保传入的参数为切片类型且元素可比较。
 通过遍历arr1并逐一比对arr2的所有元素来判断子序列是否存在。
 */
-func HasSequence[A ~[]T, T comparable](arr1 A, arr2 A) (bool, int) {
+func HasSequence[A ~[]T, T gotools.Comparable](arr1 A, arr2 A) (bool, int) {
 
 	l1 := len(arr1)
 	l2 := len(arr2)
@@ -1745,7 +1744,7 @@ SequenceCount 计算一个数组中特定序列出现的次数。
 注意:
 - A 和 T 使用类型参数，要求 T 类型的元素可比较。
 */
-func ArrSequenceCount[A ~[]T, T comparable](arr1 A, arr2 A) int {
+func ArrSequenceCount[A ~[]T, T gotools.Comparable](arr1 A, arr2 A) int {
 
 	count := 0
 	num := len(arr1) - len(arr2) + 1
@@ -1776,7 +1775,7 @@ func ArrSequenceCount[A ~[]T, T comparable](arr1 A, arr2 A) int {
 //
 //	当需要从切片中快速查找某个元素是否存在时，可以将切片转换为映射，利用映射的O(1)查找复杂度。
 //	该函数非常有用，因为它可以快速地创建一个唯一的键集合，从而节省内存空间。
-func ToMap[K comparable](arr []K) map[K]struct{} {
+func ToMap[K gotools.Comparable](arr []K) map[K]struct{} {
 	m := make(map[K]struct{}, len(arr))
 	for _, v := range arr {
 		m[v] = struct{}{}
@@ -1790,7 +1789,7 @@ func ToMap[K comparable](arr []K) map[K]struct{} {
 //
 // 返回:
 //   - []T: 一个新的切片，表示去重后的切片。
-func Unique[S ~[]T, T comparable](arr ...S) []T {
+func Unique[S ~[]T, T gotools.Comparable](arr ...S) []T {
 	seen := make(map[T]struct{})
 	var result []T
 
@@ -1806,7 +1805,7 @@ func Unique[S ~[]T, T comparable](arr ...S) []T {
 	return result
 }
 
-// Merge 通过比较函数对两个切片进行合并，返回一个新的切片
+// Merge 通过比较函数对两个切片进行合并，返回一个新的切片, 要求传入切片必须排序
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 的值，返回一个布尔值
 //     当 `fun(x, y)` 返回 `true`，则在排序时 `x` 应位于 `y` 之前。

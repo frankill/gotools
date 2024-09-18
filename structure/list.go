@@ -4,25 +4,27 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/frankill/gotools"
 )
 
 // skip list
 type (
-	List[T comparable] struct {
+	List[T gotools.Comparable] struct {
 		root *skipnode[T]
 		num  int
 		gen  *rand.Rand
 		pre  float64
 		fun  Slf[T]
 	}
-	skipnode[T comparable] struct {
+	skipnode[T gotools.Comparable] struct {
 		value T
 		next  []*skipnode[T]
 	}
-	Slf[T comparable] func(a, b T) bool
+	Slf[T gotools.Comparable] func(a, b T) bool
 )
 
-func NewList[T comparable](pre float64, fun Slf[T]) *List[T] {
+func NewList[T gotools.Comparable](pre float64, fun Slf[T]) *List[T] {
 	gen := rand.New(rand.NewSource(time.Now().UnixNano()))
 	var a T
 	// 初始化根节点为类型零值
@@ -71,7 +73,7 @@ func (s *List[T]) Foreach(value T) {
 			cur = cur.next[i]
 		}
 	}
-	fmt.Println("comparable times", count)
+	fmt.Println("gotools.Comparable times", count)
 	fmt.Println("search node data", data)
 }
 

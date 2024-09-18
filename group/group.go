@@ -1,8 +1,6 @@
 package group
 
 import (
-	"cmp"
-
 	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/array"
 	"github.com/frankill/gotools/maps"
@@ -23,7 +21,7 @@ type Retentionfun[T any] func(x []T) bool
 //     by: 一个分类标识的切片，用于区分数据集中的不同组。
 //     data: 数据集切片，与分类标识一一对应，用于条件检查。
 //   - 闭包函数返回一个映射，除第一个条件外，条件成对应用：如果第一个和第二个为真，则第二个结果为真，如果第一个和第三个为真，则第三个结果为真，等等
-func Retention[B ~[]U, C ~[]S, U comparable, S any](by B, data C) func(fun ...Retentionfun[S]) map[U][]bool {
+func Retention[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) func(fun ...Retentionfun[S]) map[U][]bool {
 
 	group := Data(by, data)
 
@@ -56,12 +54,12 @@ func Retention[B ~[]U, C ~[]S, U comparable, S any](by B, data C) func(fun ...Re
 // Count 对数据进行分组计数。
 //
 // 此函数接收两个参数：
-//   - by：B 类型，代表分组的依据，B 是一个切片类型，其元素类型 U 必须可比较（实现 comparable 接口）。
-//   - data：C 类型，表示待分组的数据集合，C 同样是切片类型，其元素类型 S 需要支持排序（实现 cmp.Ordered 接口）。
+//   - by：B 类型，代表分组的依据，B 是一个切片类型，其元素类型 U 必须可比较（实现 gotools.Comparable 接口）。
+//   - data：C 类型，表示待分组的数据集合，C 同样是切片类型，其元素类型 S 需要支持排序（实现 gotools.Ordered 接口）。
 //
 // 返回值：map[U]int
 // 函数返回一个 map[U]int，其中键 U 是分组的依据值，值 int 表示该组在 data 中出现的次数。
-func Count[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) map[U]int {
+func Count[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]int {
 
 	group := Data(by, data)
 
@@ -83,7 +81,7 @@ func Count[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) map[U]int 
 //
 // 返回值：
 // map[U]int：一个映射，键为 by 中的分组依据值，值为对应组内唯一元素的数量。
-func Distinct[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) map[U]int {
+func Distinct[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]int {
 
 	group := Data(by, data)
 
@@ -96,7 +94,7 @@ func Distinct[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) map[U]i
 }
 
 type Groupfun[T any] func(x []T) T
-type GroupFilterfun[K comparable, T any] func(x K, y []T) []bool
+type GroupFilterfun[K gotools.Comparable, T any] func(x K, y []T) []bool
 
 // Generate 是一个函数，用于根据给定的分组条件和数据，生成一个函数，该函数接受一个 Groupfun 类型的参数，并返回一个映射。
 // 该函数将根据给定的分组条件将数据分组，并对每个分组应用给定的函数，并将结果存储在映射中。
@@ -109,7 +107,7 @@ type GroupFilterfun[K comparable, T any] func(x K, y []T) []bool
 //
 //	一个函数，该函数接受一个 Groupfun 类型的参数，并返回一个映射。
 //	该映射的键类型为 U，值类型为 S。
-func Apply[B ~[]U, C ~[]S, U comparable, S any](by B, data C) func(fun Groupfun[S]) map[U]S {
+func Apply[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) func(fun Groupfun[S]) map[U]S {
 
 	group := Data(by, data)
 
@@ -135,7 +133,7 @@ func Apply[B ~[]U, C ~[]S, U comparable, S any](by B, data C) func(fun Groupfun[
 // 返回值:
 //   - 一个函数，接受一个GroupFilterfun类型的参数用于定制过滤条件，
 //     并返回过滤后的分组，数据 （类型为 []U 和 []S）。
-func GenerateFilter[B ~[]U, C ~[]S, U comparable, S any](by B, data C) func(fun GroupFilterfun[U, S]) ([]U, []S) {
+func GenerateFilter[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) func(fun GroupFilterfun[U, S]) ([]U, []S) {
 
 	id := array.Seq(0, len(data), 1)
 	group := Pair(by, data, id)
@@ -187,7 +185,7 @@ GroupMax 根据指定的分组键对数据进行分组处理，并计算每个�
 - U: 可比较类型，用于分组键的元素类型。
 - S: Ordered 类型，数据元素类型，需支持排序操作以便找出最大值。
 */
-func Max[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) map[U]S {
+func Max[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]S {
 
 	group := Data(by, data)
 
@@ -213,13 +211,13 @@ GroupMin 根据提供的分组条件和数据集，对数据进行分组，并�
 - B: 类型约束为切片U的别名，表示分组键的序列类型。
 - C: 类型约束为切片S的别名，表示数据项的序列类型。
 - U: 可比较类型，用作分组的键。
-- S: 有序类型，实现了cmp.Ordered接口，用于确定最小值。
+- S: 有序类型，实现了gotools.Ordered接口，用于确定最小值。
 
 注意：
 - 确保U类型的元素可以相互比较。
 - S类型的元素需要支持排序操作。
 */
-func Min[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) map[U]S {
+func Min[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]S {
 
 	group := Data(by, data)
 
@@ -245,7 +243,7 @@ func Min[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) map[U]S {
 //
 // 返回值:
 //   - map[U]S: 返回一个以 U 类型为键，S 类型为值的映射，表示每个分组的键与该组数据的总和。
-func Sum[B ~[]U, C ~[]S, U comparable, S gotools.Number](by B, data C) map[U]S {
+func Sum[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Number](by B, data C) map[U]S {
 
 	group := Data(by, data)
 
@@ -267,7 +265,7 @@ GroupArrayPair 根据一个关键数组将两个数据数组分组。
 
 此函数利用泛型，可适用于不同类型的数组。如果输入的 frist、by 或 second 为空，将直接返回空映射。
 */
-func Pair[D ~[]U, B ~[]T, O ~[]S, T comparable, S, U any](by B, frist D, second O) map[T]pair.Pair[[]U, []S] {
+func Pair[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S, U any](by B, frist D, second O) map[T]pair.Pair[[]U, []S] {
 
 	res := map[T]pair.Pair[[]U, []S]{}
 
@@ -308,7 +306,7 @@ func Pair[D ~[]U, B ~[]T, O ~[]S, T comparable, S, U any](by B, frist D, second 
 //
 // 返回值:
 // - map[T][]U: 一个映射，键为 T 类型的分组标识，值为对应分组内的 U 类型元素切片。
-func Data[D ~[]U, B ~[]T, T comparable, U any](by B, data D) map[T][]U {
+func Data[D ~[]U, B ~[]T, T gotools.Comparable, U any](by B, data D) map[T][]U {
 	res := map[T][]U{}
 
 	if len(data) == 0 {
@@ -334,7 +332,7 @@ func Data[D ~[]U, B ~[]T, T comparable, U any](by B, data D) map[T][]U {
 //
 // 返回值:
 // - map[T][]U: 一个映射，键为 T 类型的分组标识，值为对应分组内的 U 类型元素切片。
-func ByFunc[D ~[]U, T comparable, U any](f func(U) T, data D) map[T][]U {
+func ByFunc[D ~[]U, T gotools.Comparable, U any](f func(U) T, data D) map[T][]U {
 
 	if len(data) == 0 {
 		return map[T][]U{}
@@ -364,7 +362,7 @@ func ByFunc[D ~[]U, T comparable, U any](f func(U) T, data D) map[T][]U {
 //
 //	输出:
 //	map[1:[0] 2:[1 2] 3:[3 4 5] 4:[6 7 8 9]]
-func Location[B ~[]T, T comparable](by B) map[T][]int {
+func Location[B ~[]T, T gotools.Comparable](by B) map[T][]int {
 	res := map[T][]int{}
 
 	if len(by) == 0 {
@@ -392,7 +390,7 @@ func Location[B ~[]T, T comparable](by B) map[T][]int {
 // 注意：
 // - 当 order 为空时，直接调用 GroupArray 进行分组。
 // - 若 order 提供了排序依据，函数首先依据 by 和 order 进行分组及排序，然后将排序后的数据作为结果值。
-func ByOrder[D ~[]U, B ~[]T, O ~[]S, T comparable, S cmp.Ordered, U any](by B, data D, order O) map[T][]U {
+func ByOrder[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, U any](by B, data D, order O) map[T][]U {
 
 	if len(order) == 0 {
 		return Data(by, data)
@@ -411,7 +409,7 @@ func ByOrder[D ~[]U, B ~[]T, O ~[]S, T comparable, S cmp.Ordered, U any](by B, d
 }
 
 // ArrayByOrderDesc GroupArrayByOrder倒序版
-func ByOrderDesc[D ~[]U, B ~[]T, O ~[]S, T comparable, S cmp.Ordered, U any](by B, data D, order O) map[T][]U {
+func ByOrderDesc[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, U any](by B, data D, order O) map[T][]U {
 
 	if len(order) == 0 {
 		return Data(by, data)
@@ -429,7 +427,7 @@ func ByOrderDesc[D ~[]U, B ~[]T, O ~[]S, T comparable, S cmp.Ordered, U any](by 
 	return res
 }
 
-func WindowFun[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, order C) func(func(by B, data C) []S) []S {
+func WindowFun[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, order C) func(func(by B, data C) []S) []S {
 
 	return func(fn func(by B, data C) []S) []S {
 		return fn(by, order)
@@ -442,12 +440,12 @@ func WindowFun[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, order C) func(
 // 参数:
 //
 //	by []U: 用于分组的依据，U类型需支持比较操作。
-//	order []S: 指定每个元素在组内的排序顺序，S类型需实现cmp.Ordered接口。
+//	order []S: 指定每个元素在组内的排序顺序，S类型需实现gotools.Ordered接口。
 //
 // 返回值:
 //
 //	[]int: 包含为列表中每个元素分配的行号的切片，反映元素在排序后的相对位置。
-func RowNumber[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, order C) []int {
+func RowNumber[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, order C) []int {
 	id := array.Seq(0, len(by), 1)
 
 	group := ByOrder(by, id, order)
@@ -465,7 +463,7 @@ func RowNumber[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, order C) []int
 	return numberid
 }
 
-func RowNumberDesc[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, order C) []int {
+func RowNumberDesc[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, order C) []int {
 	id := array.Seq(0, len(by), 1)
 
 	group := ByOrderDesc(by, id, order)
@@ -485,7 +483,7 @@ func RowNumberDesc[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, order C) [
 
 // MaxValue 返回一个 S 类型数组，其中包含输入数据中按指定字段分组后的最大值。
 // 参数：
-//   - data: C 类型的数组，其中 C 是 S 类型元素的切片，S 必须实现 cmp.Ordered 接口。
+//   - data: C 类型的数组，其中 C 是 S 类型元素的切片，S 必须实现 gotools.Ordered 接口。
 //   - by: B 类型的数组，表示用于分组的字段，B 是 U 类型元素的切片，U 可以比较。
 //
 // 返回：
@@ -493,7 +491,7 @@ func RowNumberDesc[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, order C) [
 //
 // 泛型约束：
 //   - B 和 C 分别是数据和分组依据的类型，它们需要满足相应的类型约束。
-func MaxValue[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) []S {
+func MaxValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) []S {
 
 	id := array.Seq(0, len(data), 1)
 	group := Pair(by, data, id)
@@ -513,7 +511,7 @@ func MaxValue[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) []S {
 
 // MinValue 返回一个 S 类型数组，其中包含输入数据中按指定字段分组后的最小值。
 // 参数：
-//   - data: C 类型的数组，其中 C 是 S 类型元素的切片，S 必须实现 cmp.Ordered 接口。
+//   - data: C 类型的数组，其中 C 是 S 类型元素的切片，S 必须实现 gotools.Ordered 接口。
 //   - by: B 类型的数组，表示用于分组的字段，B 是 U 类型元素的切片，U 可以比较。
 //
 // 返回：
@@ -521,7 +519,7 @@ func MaxValue[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) []S {
 //
 // 泛型约束：
 //   - B 和 C 分别是数据和分组依据的类型，它们需要满足相应的类型约束。
-func MinValue[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) []S {
+func MinValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) []S {
 
 	id := array.Seq(0, len(data), 1)
 	group := Pair(by, data, id)
@@ -540,7 +538,7 @@ func MinValue[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) []S {
 }
 
 // FirstValue 根据提供的排序键by，对数据集data中的元素进行分组并提取每个分组的第一个元素值。
-// 数据集data为任意类型C的切片，排序键by为可比较类型U的切片。U必须实现comparable接口，
+// 数据集data为任意类型C的切片，排序键by为可比较类型U的切片。U必须实现gotools.Comparable接口，
 // 而S可以是任何类型。函数返回一个切片，包含每个分组的第一个元素值。
 //
 // 参数:
@@ -549,7 +547,7 @@ func MinValue[B ~[]U, C ~[]S, U comparable, S cmp.Ordered](by B, data C) []S {
 //
 // 返回值:
 // []S: 一个切片，包含根据by分组后每个组的第一个元素值
-func FirstValue[B ~[]U, C ~[]S, U comparable, S any](by B, data C) []S {
+func FirstValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 
 	id := array.Seq(0, len(data), 1)
 	group := Pair(by, data, id)
@@ -574,7 +572,7 @@ func FirstValue[B ~[]U, C ~[]S, U comparable, S any](by B, data C) []S {
 // 返回值:
 //
 //	返回一个 S 类型的切片，包含了按照分组规则提取的每个分组的最后一个元素。
-func LastValue[B ~[]U, C ~[]S, U comparable, S any](by B, data C) []S {
+func LastValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 
 	id := array.Seq(0, len(data), 1)
 	group := Pair(by, data, id)
@@ -612,7 +610,7 @@ SequenceMatch 函数用于生成一个根据指定序列和排序规则来检查
 a, b, c := []int{1, 1, 1, 2, 2, 2}, []int{1, 2, 3, 4, 5, 6}, []int{1, 1, 1, 1, 1, 1}
 SequenceMatch(a, b, c)([]int{1, 2, 3})([]int{1, 2}) = map[1:true 2:false]
 */
-func SequenceMatch[B ~[]T, D ~[]U, O ~[]S, T comparable, U comparable, S cmp.Ordered](by B, data D, order O) func([]U) func([]int) map[T]bool {
+func SequenceMatch[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Comparable, S gotools.Ordered](by B, data D, order O) func([]U) func([]int) map[T]bool {
 
 	group := ByOrder(by, data, order)
 
@@ -657,7 +655,7 @@ SequenceMatch 函数用于生成一个根据指定序列和排序规则返回匹
 a, b, c := []int{1, 1, 1}, []string{"a", "a", "b"}, []int{}
 SequenceCount(a, b, c)([]string{"a"})([]int{1}) = map[1:2]
 */
-func SequenceCount[B ~[]T, D ~[]U, O ~[]S, T comparable, U comparable, S cmp.Ordered](by B, data D, order O) func([]U) func([]int) map[T]int {
+func SequenceCount[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Comparable, S gotools.Ordered](by B, data D, order O) func([]U) func([]int) map[T]int {
 
 	group := ByOrder(by, data, order)
 
@@ -701,7 +699,7 @@ func SequenceCount[B ~[]T, D ~[]U, O ~[]S, T comparable, U comparable, S cmp.Ord
 //	"strict_order": 严格顺序模式，计算事件序列在数据中严格按照事件ID顺序出现的最大次数，意外的事件会中断。
 //	"strict_dedup": 严格去重模式，计算事件序列在数据中出现的最大次数，重复的事件会中断。
 //	"strict_increase": 严格递增模式，计算事件序列在数据中按顺序出现的最大次数，重复，意外事件不会中断。
-func WindowFunnel[B ~[]T, D ~[]U, O ~[]S, T comparable, U comparable, S cmp.Ordered](by B, data D, order O) func([]U) func(mode string) map[T]int {
+func WindowFunnel[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Comparable, S gotools.Ordered](by B, data D, order O) func([]U) func(mode string) map[T]int {
 
 	group := ByOrder(by, data, order)
 
