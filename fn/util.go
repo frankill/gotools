@@ -1,9 +1,13 @@
 package fn
 
 import (
+	"bytes"
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"hash/crc32"
+	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/zentures/cityhash"
@@ -112,4 +116,58 @@ func Ifelse[T any](condition bool, trueVal T, falseVal T) T {
 		return trueVal
 	}
 	return falseVal
+}
+
+// PasteUrl 拼接url
+func PasteUrl(baseURL string, params map[string]string) string {
+	queryParams := url.Values{}
+	for key, value := range params {
+		queryParams.Add(key, value)
+	}
+	return baseURL + "?" + queryParams.Encode()
+}
+
+// GetUrl 获取url的数据
+func GetUrl[T any](url string) (T, error) {
+	var t T
+	resp, err := http.Get(url)
+	if err != nil {
+		return t, err
+	}
+	defer resp.Body.Close()
+
+	// 检查响应状态码
+	if resp.StatusCode != http.StatusOK {
+		return t, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&t); err != nil {
+		return t, err
+	}
+	return t, nil
+}
+
+// PostUrl 发送post请求
+func PostUrl[T any](url string, data map[string]any) (T, error) {
+	var t T
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return t, err
+	}
+
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return t, err
+	}
+	defer resp.Body.Close()
+
+	// 检查响应状态码
+	if resp.StatusCode != http.StatusOK {
+		return t, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&t); err != nil {
+		return t, err
+	}
+	return t, nil
 }

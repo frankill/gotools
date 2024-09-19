@@ -197,14 +197,31 @@ func FromElasticSearch[T any](client *elastic.Client) func(index string, query a
 	}
 }
 
-// FromArray 将输入切片 `a` 中的每个元素应用函数 `f`，并返回一个包含结果的通道。
+// FromArray 将输入切片 `a` 中的每个元素发送到通道中。
+func FromArray[T any](a []T) chan T {
+
+	ch_ := make(chan T, BufferSize)
+
+	go func() {
+
+		defer close(ch_)
+		for _, v := range a {
+			ch_ <- v
+		}
+
+	}()
+
+	return ch_
+}
+
+// FromArray2 将输入切片 `a` 中的每个元素应用函数 `f`，并返回一个包含结果的通道。
 // 参数:
 //   - f: 一个函数，接受切片中的元素 `T` 类型，并返回 `U` 类型的结果。
 //   - a: 一个 `T` 类型的切片，将对其每个元素应用函数 `f`。
 //
 // 返回:
 //   - 一个 `U` 类型的通道，通道中的值是对切片 `a` 中的每个元素应用函数 `f` 的结果。
-func FromArray[T any, U any](f func(x T) U) func(a []T) chan U {
+func FromArray2[T any, U any](f func(x T) U) func(a []T) chan U {
 
 	return func(a []T) chan U {
 		ch := make(chan U, BufferSize)

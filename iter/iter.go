@@ -819,7 +819,7 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 			fn := filepath.Join(p, strconv.Itoa(num)+".gob")
 			file = append(file, fn)
 
-			err = ToGob[T](fn, true)(FromArray[T](Identity)(v))
+			err = ToGob[T](fn, true)(FromArray[T](v))
 			if err != nil {
 				log.Println(err)
 				return make(chan T)
