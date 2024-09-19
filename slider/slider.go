@@ -1,7 +1,5 @@
 package slider
 
-import "fmt"
-
 // Slide 滑动窗口计算
 // 参数:
 //   - f: 一个函数，接受类型为 []T 的输入，返回类型为 U 的结果。
@@ -42,7 +40,7 @@ func Slide[S ~[]T, U, T any](f func(x []T) U, data S, before int, after int, def
 				windows[index+j] = defaultValue
 			}
 		}
-		fmt.Println(windows)
+
 		result[i] = f(windows)
 
 	}
