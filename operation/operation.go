@@ -81,7 +81,7 @@ func ForEach[S ~[]T, T any](fun func(x ...T), arr ...S) {
 //
 //	一个切片
 func Add[S ~[]T, T gotools.Number](a, b S) []T {
-	return fn.Lapply2(func(x, y T) T { return x + y }, a, b)
+	return Operator(func(x ...T) T { return x[0] + x[1] }, a, b)
 }
 
 // Sub 逐元素相减
@@ -94,7 +94,7 @@ func Add[S ~[]T, T gotools.Number](a, b S) []T {
 //
 //	一个切片
 func Sub[S ~[]T, T gotools.Number](a, b S) []T {
-	return fn.Lapply2(func(x, y T) T { return x - y }, a, b)
+	return Operator(func(x ...T) T { return x[0] - x[1] }, a, b)
 }
 
 // Mul 逐元素相乘
@@ -107,7 +107,7 @@ func Sub[S ~[]T, T gotools.Number](a, b S) []T {
 //
 //	一个切片
 func Mul[S ~[]T, T gotools.Number](a, b S) []T {
-	return fn.Lapply2(func(x, y T) T { return x * y }, a, b)
+	return Operator(func(x ...T) T { return x[0] * x[1] }, a, b)
 }
 
 // Div 逐元素相除
@@ -120,7 +120,7 @@ func Mul[S ~[]T, T gotools.Number](a, b S) []T {
 //
 //	一个切片
 func Div[S ~[]T, T gotools.Number, R float64](a, b S) []R {
-	return fn.Lapply2(func(x, y T) R { return R(x / y) }, a, b)
+	return Operator(func(x ...T) R { return R(x[0]) / R(x[1]) }, a, b)
 }
 
 // Mod 逐元素取模
@@ -146,7 +146,7 @@ func Mod[S ~[]T, T gotools.Integer](a, b S) []int {
 //
 //	一个切片
 func Lte[S ~[]T, T gotools.Ordered](a, b S) []bool {
-	return fn.Lapply2(func(x, y T) bool { return x <= y }, a, b)
+	return Operator(func(x ...T) bool { return x[0] <= x[1] }, a, b)
 }
 
 // Gte 逐元素比较
@@ -159,7 +159,7 @@ func Lte[S ~[]T, T gotools.Ordered](a, b S) []bool {
 //
 //	一个切片
 func Gte[S ~[]T, T gotools.Ordered](a, b S) []bool {
-	return fn.Lapply2(func(x, y T) bool { return x >= y }, a, b)
+	return Operator(func(x ...T) bool { return x[0] >= x[1] }, a, b)
 }
 
 // Lt 逐元素比较
@@ -172,7 +172,7 @@ func Gte[S ~[]T, T gotools.Ordered](a, b S) []bool {
 //
 //	一个切片
 func Lt[S ~[]T, T gotools.Ordered](a, b S) []bool {
-	return fn.Lapply2(func(x, y T) bool { return x < y }, a, b)
+	return Operator(func(x ...T) bool { return x[0] < x[1] }, a, b)
 }
 
 // Gt 逐元素比较
@@ -185,7 +185,7 @@ func Lt[S ~[]T, T gotools.Ordered](a, b S) []bool {
 //
 //	一个切片
 func Gt[S ~[]T, T gotools.Ordered](a, b S) []bool {
-	return fn.Lapply2(func(x, y T) bool { return x > y }, a, b)
+	return Operator(func(x ...T) bool { return x[0] > x[1] }, a, b)
 }
 
 // Eq 逐元素比较
@@ -198,7 +198,7 @@ func Gt[S ~[]T, T gotools.Ordered](a, b S) []bool {
 //
 //	一个切片
 func Eq[S ~[]T, T gotools.Comparable](a, b S) []bool {
-	return fn.Lapply2(func(x, y T) bool { return x == y }, a, b)
+	return Operator(func(x ...T) bool { return x[0] == x[1] }, a, b)
 }
 
 // Neq 逐元素比较
@@ -211,7 +211,7 @@ func Eq[S ~[]T, T gotools.Comparable](a, b S) []bool {
 //
 //	一个切片
 func Neq[S ~[]T, T gotools.Comparable](a, b S) []bool {
-	return fn.Lapply2(func(x, y T) bool { return x != y }, a, b)
+	return Operator(func(x ...T) bool { return x[0] != x[1] }, a, b)
 }
 
 // Not 逐元素比较
