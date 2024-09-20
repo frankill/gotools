@@ -1,11 +1,13 @@
 package array_test
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
 	"testing"
 
 	"github.com/frankill/gotools/array"
+	"github.com/frankill/gotools/operation"
 )
 
 func TestArrayFromAny(t *testing.T) {
@@ -1238,4 +1240,31 @@ func TestArrayExtractByIndex(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestCartesian(t *testing.T) {
+	// 创建测试用例
+	testCases := []struct {
+		input  [][]int
+		output [][]int
+	}{
+		{
+			input:  [][]int{{1, 2}, {3, 4}},
+			output: [][]int{{1, 3}, {2, 3}, {1, 4}, {2, 4}},
+		},
+		// 添加更多的测试用例
+	}
+
+	// 遍历测试用例
+	for _, tc := range testCases {
+		result := array.Cartesian(tc.input...)
+		if !reflect.DeepEqual(result, tc.output) {
+			t.Errorf("Expected %v, but got %v", tc.output, result)
+		}
+	}
+
+	operation.ForEach(func(x ...int) {
+		fmt.Println(x)
+	}, array.Seq(1, 3, 1), array.Seq(2, 10, 1))
+
 }

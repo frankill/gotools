@@ -3,7 +3,6 @@ package maps
 import (
 	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/array"
-	"github.com/frankill/gotools/operation"
 	"github.com/frankill/gotools/pair"
 )
 
@@ -637,7 +636,7 @@ func Intersect[V []U, K, U gotools.Comparable](data ...map[K]V) pair.Pair[[][]K,
 	}
 
 	res := pair.Pair[[][]K, []V]{}
-	rf := operation.Cartesian(array.Map(func(x ...map[K]V) []K { return Keys(x[0]) }, data)...)
+	rf := array.Cartesian(array.Map(func(x ...map[K]V) []K { return Keys(x[0]) }, data)...)
 
 	for i := range rf {
 		tmp := make([][]U, 0)
