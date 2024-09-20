@@ -318,14 +318,14 @@ func CumMin[S ~[]T, T gotools.Number](arr S) S {
 	return CumFun(func(a, b T) T { return min(a, b) }, arr)
 }
 
-// Avg 计算类型为 S（元素类型为 T）的切片中所有元素的平均值。
+// Mean 计算类型为 S（元素类型为 T）的切片中所有元素的平均值。
 //
 // 参数:
 // - arr: 类型为 S 的切片，元素应为可以相加和除法运算的数字类型（实现 gotools.Number 接口）。
 //
 // 返回值:
 // - 切片中所有元素的平均值。
-func Avg[S ~[]T, T gotools.Number](arr S) T {
+func Mean[S ~[]T, T gotools.Number](arr S) T {
 	la := len(arr)
 
 	if la == 0 {
