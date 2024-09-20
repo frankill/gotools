@@ -196,14 +196,14 @@ func TestArrayCumMin(t *testing.T) {
 // Test case for the ArrayAvg function
 func TestArrayAvg(t *testing.T) {
 	input1 := []int{1, 2, 3, 4, 5}
-	output1 := array.Avg(input1)
+	output1 := array.Mean(input1)
 	expected1 := int(3)
 	if output1 != expected1 {
 		t.Errorf("Expected %v but got %v", expected1, output1)
 	}
 
 	input2 := []float32{1.5, 2.5, 3.5, 4.5, 5.5}
-	output2 := array.Avg(input2)
+	output2 := array.Mean(input2)
 	expected2 := float32(3.5)
 	if output2 != expected2 {
 		t.Errorf("Expected %v but got %v", expected2, output2)

@@ -1,11 +1,22 @@
 package slider
 
 import (
+	"strings"
+
 	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/array"
 )
 
-func SliderSum[S ~[]T, T gotools.Number](before int, after int, defaultValue T, data S) []T {
+// Sum 对数据进行滑动窗口求和。
+// 参数:
+//   - before: 一个整数，表示滑动窗口的前面部分的长度。
+//   - after: 一个整数，表示滑动窗口的后面部分的长度。
+//   - defaultValue: 一个类型为 T 的值，表示滑动窗口中的默认值。
+//   - data: 一个类型为 T 的切片。
+//
+// 返回值:
+//   - 一个类型为 T 的切片，表示滑动窗口计算后的结果。
+func Sum[S ~[]T, T gotools.Number](before int, after int, defaultValue T, data S) []T {
 
 	return Slide(func(x []T) T {
 		return array.Sum(x)
@@ -13,7 +24,16 @@ func SliderSum[S ~[]T, T gotools.Number](before int, after int, defaultValue T, 
 
 }
 
-func SliderMax[S ~[]T, T gotools.Number](before int, after int, defaultValue T, data S) []T {
+// Max 对数据进行滑动窗口求最大值。
+// 参数:
+//   - before: 一个整数，表示滑动窗口的前面部分的长度。
+//   - after: 一个整数，表示滑动窗口的后面部分的长度。
+//   - defaultValue: 一个类型为 T 的值，表示滑动窗口中的默认值。
+//   - data: 一个类型为 T 的切片。
+//
+// 返回值:
+//   - 一个类型为 T 的切片，表示滑动窗口计算后的结果。
+func Max[S ~[]T, T gotools.Number](before int, after int, defaultValue T, data S) []T {
 
 	return Slide(func(x []T) T {
 		return array.Max(x)
@@ -21,7 +41,16 @@ func SliderMax[S ~[]T, T gotools.Number](before int, after int, defaultValue T, 
 
 }
 
-func SliderMin[S ~[]T, T gotools.Number](before int, after int, defaultValue T, data S) []T {
+// Min 对数据进行滑动窗口求最小值。
+// 参数:
+//   - before: 一个整数，表示滑动窗口的前面部分的长度。
+//   - after: 一个整数，表示滑动窗口的后面部分的长度。
+//   - defaultValue: 一个类型为 T 的值，表示滑动窗口中的默认值。
+//   - data: 一个类型为 T 的切片。
+//
+// 返回值:
+//   - 一个类型为 T 的切片，表示滑动窗口计算后的结果。
+func Min[S ~[]T, T gotools.Number](before int, after int, defaultValue T, data S) []T {
 
 	return Slide(func(x []T) T {
 		return array.Min(x)
@@ -29,10 +58,37 @@ func SliderMin[S ~[]T, T gotools.Number](before int, after int, defaultValue T, 
 
 }
 
-func SliderMean[S ~[]T, T gotools.Number](before int, after int, defaultValue T, data S) []T {
+// Mean 对数据进行滑动窗口求平均值。
+// 参数:
+//   - before: 一个整数，表示滑动窗口的前面部分的长度。
+//   - after: 一个整数，表示滑动窗口的后面部分的长度。
+//   - defaultValue: 一个类型为 T 的值，表示滑动窗口中的默认值。
+//   - data: 一个类型为 T 的切片。
+//
+// 返回值:
+//   - 一个类型为 T 的切片，表示滑动窗口计算后的结果。
+func Mean[S ~[]T, T gotools.Number](before int, after int, defaultValue T, data S) []T {
 
 	return Slide(func(x []T) T {
 		return array.Mean(x)
+	}, before, after, defaultValue, data)
+
+}
+
+//	Paste 拼接滑动窗口字符串
+//
+// 参数:
+//   - before: 一个整数，表示滑动窗口的前面部分的长度。
+//   - after: 一个整数，表示滑动窗口的后面部分的长度。
+//   - defaultValue: 一个类型为 string 的值，表示滑动窗口中的默认值。
+//   - data: 一个类型为 string 的切片。
+//
+// 返回值:
+//   - 一个类型为 string 的切片，表示滑动窗口计算后的结果。
+func Paste(before int, after int, defaultValue string, data []string) []string {
+
+	return Slide(func(x []string) string {
+		return strings.Join(x, "")
 	}, before, after, defaultValue, data)
 
 }
@@ -97,7 +153,7 @@ func Slide[S ~[]T, U, T any](f func(x []T) U, before int, after int, defaultValu
 //   - 一个类型为 U 的切片，表示滑动窗口计算后的结果。
 //
 // 注意:
-// 多个切片会分别计算 并最终合并相同索引的元素到一个切片中
+// 多个切片会分别计算 并最终合并相同索引的元素到一个切片元素中
 func Pslide[S ~[]T, U, T any](f func(x []T) U, before int, after int, defaultValue T, data ...S) [][]U {
 
 	if len(data) == 0 {
