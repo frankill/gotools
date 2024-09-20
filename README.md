@@ -25,10 +25,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/frankill/gotools/db"
 	"github.com/frankill/gotools/iter"
 )
-
 
 func compare(x, y []string) bool {
 	xn, _ := strconv.Atoi(x[0])
@@ -36,10 +34,8 @@ func compare(x, y []string) bool {
 	return xn < yn
 }
 
-
-
 func main() {
-	
+
 	data := []struct {
 		Number int
 		Label  string
@@ -54,7 +50,7 @@ func main() {
 	}
 
 	iter.ToCsv("pipe.csv", false)(
-		iter.FromArray(func(x struct {
+		iter.FromArray2(func(x struct {
 			Number int
 			Label  string
 		}) []string {
@@ -75,7 +71,7 @@ func main() {
 	}
 
 	iter.ToCsv("pipe_1.csv", false)(
-		iter.FromArray(func(x struct {
+		iter.FromArray2(func(x struct {
 			Number int
 			Label  string
 		}) []string {
@@ -90,7 +86,7 @@ func main() {
 		iter.Unique(func(x, y []string) bool {
 			return x[0] == y[0]
 		})(
-			iter.MergeSort(compare)(
+			iter.Merge(compare)(
 				iter.SortSimple(compare)(ch2),
 				iter.SortSimple(compare)(ch1),
 			),
