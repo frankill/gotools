@@ -626,9 +626,9 @@ func Window[T any](ch chan T) func(windowSize int) chan []T {
 // 参数:
 //   - fn: 一个函数，接受一个类型为 T 的值，返回一个整数值，表示该值属于哪个分组。
 //   - num: 分组的数量。
+//
 // 返回:
 //   - 一个函数，接受一个通道，返回一个包含 num 个通道的切片。
-
 func Split[T any](fn func(T) int, num int) func(ch chan T) []chan T {
 	// 创建一个包含 num 个通道的切片
 	a := make([]chan T, num)

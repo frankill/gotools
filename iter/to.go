@@ -282,6 +282,7 @@ func ToCsv(path string, append bool, header ...string) func(ch chan []string) er
 
 }
 
+// TableField 表格配置
 type TableField struct {
 	Path     string
 	Seq      string
@@ -291,6 +292,7 @@ type TableField struct {
 	Escape   byte
 }
 
+// T 表格
 func T(path string) *TableField {
 
 	return &TableField{
@@ -394,6 +396,7 @@ func ToTable(t *TableField) func(ch chan []string) error {
 
 }
 
+// ExcelField Excel 文件配置
 type ExcelField struct {
 	Path   string
 	Sheet  string
@@ -452,6 +455,16 @@ func (e *ExcelField) getRow(f *excelize.File, sheet string) (int, error) {
 
 	return len(rows) + 1, err
 }
+
+// ToExcel 将通道中的数据写入指定的 Excel 文件。
+// 参数:
+//
+// e *ExcelField: Excel 文件配置
+// ch: 一个通道，通道中的每个值是一个字符串切片（[]string），表示 Excel 文件中的一行数据。
+//
+// 返回:
+//
+//	error
 func ToExcel(e *ExcelField) func(ch chan []string) error {
 
 	return func(ch chan []string) error {
@@ -522,6 +535,15 @@ func ToExcel(e *ExcelField) func(ch chan []string) error {
 }
 
 // ToGob 接收一个路径和一个通道，将通道中的数据按块写入到指定路径的 gob 文件中。
+// 参数:
+//
+//   - path: gob 文件的路径。
+//   - ch: 一个通道，用于接收待写入的数据。
+//   - replace: 是否覆盖已存在的文件。
+//
+// 返回:
+//
+// 一个函数，用于执行 gob 文件写入操作。
 func ToGob[T any](path string, replace bool) func(ch chan T) error {
 	return func(ch chan T) error {
 		// 创建文件
@@ -553,6 +575,15 @@ func ToGob[T any](path string, replace bool) func(ch chan T) error {
 	}
 }
 
+// ToGobArr 接收一个路径和一个切片，将切片中的数据按块写入到指定路径的 gob 文件中。
+// 参数:
+//
+//   - path: gob 文件的路径。
+//   - data: 需要写入的数据。
+//
+// 返回:
+//
+//	一个函数，用于将数据写入到 gob 文件中。
 func ToGobArr[S ~[]T, T any](path string) func(data S) error {
 	return func(data S) error {
 

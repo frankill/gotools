@@ -394,7 +394,7 @@ func FromTable(path string) func(header bool, seq string, escape byte) (chan []s
 //
 // 返回:
 //   - 一个通道，通道中的值是读取的 Excel 文件中的每一行数据，每一行数据是一个字符串切片（[]string）。
-//   - 一个通道，通道中的值是读取的 Excel 文件中的每一行数据，每一行数据是一个字符串切片（[]string）。
+//   - 一个通道，通道中的值是读取 Excel 文件时发生的错误。
 func FromExcel(path string) func(sheet string, header bool) (chan []string, chan error) {
 
 	return func(sheet string, header bool) (chan []string, chan error) {
