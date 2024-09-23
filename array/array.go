@@ -334,6 +334,27 @@ func Mean[S ~[]T, T gotools.Number](arr S) T {
 	return Sum(arr) / T(la)
 }
 
+// Len 计算类型为 S（元素类型为 T）的多个切片中元素的总数。
+// 参数:
+// - arr: 类型为 S 的切片
+//
+// 返回值:
+// - 切片中元素的总数。
+func Len[S ~[]T, T any](arr ...S) int {
+
+	if len(arr) == 0 {
+		return 0
+	}
+
+	var num int
+
+	for _, v := range arr {
+		num += len(v)
+	}
+	return num
+
+}
+
 // Sum 计算类型为 S（元素类型为 T）的切片中所有元素的总和。
 //
 // 参数:
@@ -1956,15 +1977,19 @@ func Cartesian[S []T, T any](arr ...S) [][]T {
 // 	return array.Zip(res...)
 // }
 
-func Flatten[S ~[]T, T any](arr []S) []T {
+// Flatten 从多维数组中拆分成单维数组
+// 参数:
+//   - arr: 一个多维数组，表示要拆分的多维数组。
+//
+// 返回:
+//   - []T: 一个单维数组，表示拆分后的单维数组。
+func Flatten[S ~[]T, T any](arr ...S) []T {
 
 	if len(arr) == 0 {
 		return []T{}
 	}
 
-	l := Sum(Map(func(x ...S) int { return len(x[0]) }, arr))
-
-	res := make([]T, 0, l)
+	res := make([]T, 0, Len(arr))
 
 	for i := 0; i < len(arr); i++ {
 		res = append(res, arr[i]...)
