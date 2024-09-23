@@ -319,7 +319,7 @@ func HasIncreaseMaxCount[S ~[]T, T gotools.Comparable](source, match S) int {
 	return count
 }
 
-// Rep 创建一个包含相同元素的切片。
+// Repeat 创建一个包含相同元素的切片。
 // 它接受一个类型为 T 的元素和一个整数 n，返回一个长度为 n 的切片，其中所有元素都与 x 相同。
 // 这个函数的目的是为了方便地初始化一个切片，当切片的所有元素都相同时，可以避免重复的初始化代码。
 // 参数:
@@ -330,34 +330,10 @@ func HasIncreaseMaxCount[S ~[]T, T gotools.Comparable](source, match S) int {
 // 返回值:
 //
 //	一个类型为 []T 的切片，长度为 n，其中所有元素都等于 x。
-func ARep[T any](x T, n int) []T {
+func Repeat[T any](x T, n int) []T {
 	result := make([]T, n)
 	for i := 0; i < n; i++ {
 		result[i] = x
 	}
 	return result
-}
-
-// Apply 对切片的每个元素应用函数。
-// 参数:
-//
-//	fun: 用于应用的函数。
-//	arr: 用于操作的切片。
-//
-// 返回值:
-//
-//	返回一个类型为 []U 的切片，其中包含了 fun 对每个 arr 中的元素进行了应用后的结果。
-func Apply[S ~[]T, T any, U any](fun func(x T) U, arr S) []U {
-
-	if len(arr) == 0 {
-		return make([]U, 0)
-	}
-
-	res := make([]U, len(arr))
-
-	for i, v := range arr {
-		res[i] = fun(v)
-	}
-	return res
-
 }

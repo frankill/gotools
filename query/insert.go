@@ -117,13 +117,13 @@ func (m *MysqlInsert) Build() (string, []any) {
 	var perch string
 
 	if len(m.Columns) > 1 {
-		perch = "(" + strings.Join(array.ARep("?", len(m.Columns)), ", ") + ")"
+		perch = "(" + strings.Join(array.Repeat("?", len(m.Columns)), ", ") + ")"
 	} else if len(m.InsertValues) > 0 {
-		perch = "(" + strings.Join(array.ARep("?", len(m.InsertValues[0])), ", ") + ")"
+		perch = "(" + strings.Join(array.Repeat("?", len(m.InsertValues[0])), ", ") + ")"
 	}
 
 	if perch != "" {
-		builder.WriteString(strings.Join(array.ARep(perch, max(len(m.InsertValues), 1)), ", "))
+		builder.WriteString(strings.Join(array.Repeat(perch, max(len(m.InsertValues), 1)), ", "))
 	}
 
 	if m.IsUpdate && len(m.UpdateColumns) > 0 {

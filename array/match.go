@@ -38,7 +38,7 @@ func MatchOne[A ~[]T, T gotools.Ordered](lookup_value A, lookup_array A) []int {
 	la := len(lookup_array)
 
 	id := Seq(0, la, 1)
-	res := ARep(-1, ll)
+	res := Repeat(-1, ll)
 
 	id, lookup_array = SortBy(func(x, y T) bool {
 		return x < y
@@ -78,7 +78,7 @@ func MatchMinusOne[A ~[]T, T gotools.Ordered](lookup_value A, lookup_array A) []
 	la := len(lookup_array)
 
 	id := Seq(0, la, 1)
-	res := ARep(-1, ll)
+	res := Repeat(-1, ll)
 
 	id, lookup_array = SortBy(func(x, y T) bool {
 		return x > y

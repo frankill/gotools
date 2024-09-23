@@ -153,7 +153,7 @@ func GenerateFilter[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) f
 
 			value = append(value, array.ToGeneric[S](vv)...)
 
-			valueby = append(valueby, array.ARep(k, len(vv))...)
+			valueby = append(valueby, array.Repeat(k, len(vv))...)
 
 			numberid = append(numberid, array.Filter(func(x ...int) bool { return x[1] > 0 }, v.Second, array.Toint(farr))...)
 
@@ -500,7 +500,7 @@ func MaxValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, dat
 	numberid := make([]int, 0, len(data))
 
 	for _, v := range group {
-		value = append(value, array.ARep(array.Max(v.First), len(v.First))...)
+		value = append(value, array.Repeat(array.Max(v.First), len(v.First))...)
 		numberid = append(numberid, v.Second...)
 	}
 
@@ -528,7 +528,7 @@ func MinValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, dat
 	numberid := make([]int, 0, len(data))
 
 	for _, v := range group {
-		value = append(value, array.ARep(array.Min(v.First), len(v.First))...)
+		value = append(value, array.Repeat(array.Min(v.First), len(v.First))...)
 		numberid = append(numberid, v.Second...)
 	}
 
@@ -556,7 +556,7 @@ func FirstValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 	numberid := make([]int, 0, len(data))
 
 	for _, v := range group {
-		value = append(value, array.ARep(v.First[0], len(v.First))...)
+		value = append(value, array.Repeat(v.First[0], len(v.First))...)
 		numberid = append(numberid, v.Second...)
 	}
 
@@ -581,7 +581,7 @@ func LastValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 	numberid := make([]int, 0, len(data))
 
 	for _, v := range group {
-		value = append(value, array.ARep(v.First[len(v.First)-1], len(v.First))...)
+		value = append(value, array.Repeat(v.First[len(v.First)-1], len(v.First))...)
 		numberid = append(numberid, v.Second...)
 	}
 

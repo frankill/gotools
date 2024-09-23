@@ -528,7 +528,7 @@ func ToPairsArray2[K gotools.Comparable, S ~[]V, V any](m map[K]S) pair.Pair[[]K
 	pairs.Second = make([]V, 0, num)
 
 	for k, v := range m {
-		pairs.First = append(pairs.First, array.ARep(k, len(v))...)
+		pairs.First = append(pairs.First, array.Repeat(k, len(v))...)
 		pairs.Second = append(pairs.Second, v...)
 	}
 
