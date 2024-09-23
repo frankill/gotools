@@ -1955,3 +1955,20 @@ func Cartesian[S []T, T any](arr ...S) [][]T {
 
 // 	return array.Zip(res...)
 // }
+
+func Flatten[S ~[]T, T any](arr []S) []T {
+
+	if len(arr) == 0 {
+		return []T{}
+	}
+
+	l := Sum(Map(func(x ...S) int { return len(x[0]) }, arr))
+
+	res := make([]T, 0, l)
+
+	for i := 0; i < len(arr); i++ {
+		res = append(res, arr[i]...)
+	}
+
+	return res
+}
