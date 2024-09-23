@@ -162,10 +162,21 @@ func Pslide[S ~[]T, U, T any](f func(x []T) U, before int, after int, defaultVal
 
 	res := make([][]U, len(data))
 
+	ch_ := make([]chan []U, len(data))
+
 	for i := 0; i < len(data); i++ {
 
-		res[i] = Slide(f, before, after, defaultValue, data[i])
+		ch_[i] = make(chan []U, 1)
 
+		go func(i int) {
+			ch_[i] <- Slide(f, before, after, defaultValue, data[i])
+		}(i)
+
+	}
+
+	for i := 0; i < len(data); i++ {
+
+		res[i] = <-ch_[i]
 	}
 
 	return array.Zip(res...)
