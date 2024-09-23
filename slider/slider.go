@@ -106,7 +106,7 @@ func Paste(before int, after int, defaultValue string, data []string) []string {
 func Slide[S ~[]T, U, T any](f func(x []T) U, before int, after int, defaultValue T, data S) []U {
 	l := len(data)
 	wl := before + after + 1
-	if wl > l {
+	if before+1 > l || after+1 > l {
 		return []U{} // 如果窗口大小大于数据长度，返回空结果
 	}
 	windows := make([]T, wl)
