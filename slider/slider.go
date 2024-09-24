@@ -198,10 +198,9 @@ func SlideIndex[S ~[]T, T, U any](f func(x []T) U, before, after int, index []ti
 	l := len(data)
 
 	result := make([]U, l)
-
+	windows := make([]T, 0)
 	for i := 0; i < l; i++ {
-		windows := make([]T, 0)
-
+		windows := windows[:0]
 		for j := 1; i-j >= 0; j++ {
 			sub := index[i].Sub(index[i-j])
 			if sub.Hours() <= float64(before*24) && sub.Hours() >= 0.0 {
