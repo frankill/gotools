@@ -2,6 +2,7 @@ package slider
 
 import (
 	"strings"
+	"time"
 
 	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/array"
@@ -170,6 +171,89 @@ func Pslide[S ~[]T, U, T any](f func(x []T) U, before int, after int, defaultVal
 
 		go func(i int) {
 			ch_[i] <- Slide(f, before, after, defaultValue, data[i])
+		}(i)
+
+	}
+
+	for i := 0; i < len(data); i++ {
+
+		res[i] = <-ch_[i]
+	}
+
+	return array.Zip(res...)
+
+}
+
+// SlideIndex 基于时间切片的滑动窗口计算
+// 参数:
+//   - f: 一个函数，接受类型为 []T 的输入，返回类型为 U 的结果。
+//   - data: 一个类型为 T 的切片。
+//   - before: 一个整数，表示滑动窗口的前面部分的长度。
+//   - after: 一个整数，表示滑动窗口的后面部分的长度。
+//   - index : 一个类型是time的切片，用于计算滑动窗口的长度
+//
+// 返回:
+//   - 一个类型为 U 的切片，表示滑动窗口计算后的结果。
+func SlideIndex[S ~[]T, T, U any](f func(x []T) U, before, after int, index []time.Time, data S) []U {
+	l := len(data)
+
+	result := make([]U, l)
+
+	for i := 0; i < l; i++ {
+		windows := make([]T, 0)
+
+		for j := 1; i-j >= 0; j++ {
+			sub := index[i].Sub(index[i-j])
+			if sub.Hours() <= float64(before*24) && sub.Hours() >= 0.0 {
+				windows = append(windows, data[i-j])
+			}
+
+		}
+
+		windows = append(windows, data[i])
+
+		for j := 1; i+j < l; j++ {
+			sub := index[i+j].Sub(index[i])
+			if sub.Hours() <= float64(after*24) && sub.Hours() >= 0.0 {
+				windows = append(windows, data[i+j])
+			}
+		}
+
+		result[i] = f(windows)
+
+	}
+
+	return result
+}
+
+// PslideIndex 多输入切片滑动窗口计算
+// 参数:
+//   - f: 一个函数，接受类型为 []T 的输入，返回类型为 U 的结果。
+//   - data: 一个类型为 T 的切片。
+//   - before: 一个整数，表示滑动窗口的前面部分的长度。
+//   - after: 一个整数，表示滑动窗口的后面部分的长度。
+//
+// 返回:
+//   - 一个类型为 U 的切片，表示滑动窗口计算后的结果。
+//
+// 注意:
+// 多个切片会分别计算 并最终合并相同索引的元素到一个切片元素中
+func PslideIndex[S ~[]T, U, T any](f func(x []T) U, before int, after int, index []time.Time, data ...S) [][]U {
+
+	if len(data) == 0 {
+		return [][]U{}
+	}
+
+	res := make([][]U, len(data))
+
+	ch_ := make([]chan []U, len(data))
+
+	for i := 0; i < len(data); i++ {
+
+		ch_[i] = make(chan []U, 1)
+
+		go func(i int) {
+			ch_[i] <- SlideIndex(f, before, after, index, data[i])
 		}(i)
 
 	}
