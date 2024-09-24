@@ -188,8 +188,8 @@ func Pslide[S ~[]T, U, T any](f func(x []T) U, before int, after int, defaultVal
 // 参数:
 //   - f: 一个函数，接受类型为 []T 的输入，返回类型为 U 的结果。
 //   - data: 一个类型为 T 的切片。
-//   - before: 一个整数，表示滑动窗口的前面部分的长度。
-//   - after: 一个整数，表示滑动窗口的后面部分的长度。
+//   - before: 一个整数，表示滑动窗口的前面部分的天数。
+//   - after: 一个整数，表示滑动窗口的后面部分的天数。
 //   - index : 一个类型是time的切片，用于计算滑动窗口的长度
 //
 // 返回:
