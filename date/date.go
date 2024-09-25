@@ -168,6 +168,21 @@ func ToTime(d string) time.Time {
 	return t
 }
 
+// ToStr 将日期字符串转换为 "2006-01-02 15:04:05" 格式的字符串
+func ToStr(d time.Time) string {
+	return d.Format("2006-01-02 15:04:05")
+}
+
+// ToYMD 将日期字符串转换为 "20060102" 格式的字符串
+func ToYMD(d time.Time) string {
+	return d.Format("20060102")
+}
+
+// UnixToStr 将 Unix 时间戳转换为日期字符串
+func UnixToStr(unix int64) string {
+	return time.Unix(unix, 0).Format("2006-01-02 15:04:05")
+}
+
 // UnixToTime 将 Unix 时间戳转换为 time.Time 对象
 //
 // 参数:
@@ -179,6 +194,7 @@ func UnixToTime(unix int64) time.Time {
 	return time.Unix(unix, 0)
 }
 
+// Days 生成指定天数的日期列表
 func Days(t time.Time, d ...int) []time.Time {
 
 	return fn.Lapply(func(x int) time.Time {
@@ -186,23 +202,27 @@ func Days(t time.Time, d ...int) []time.Time {
 	}, d)
 }
 
+// Months 生成指定月数的日期列表
 func Months(t time.Time, d ...int) []time.Time {
 	return fn.Lapply(func(x int) time.Time {
 		return t.AddDate(0, x, 0)
 	}, d)
 }
 
+// Years 生成指定年数的日期列表
 func Years(t time.Time, d ...int) []time.Time {
 	return fn.Lapply(func(x int) time.Time {
 		return t.AddDate(x, 0, 0)
 	}, d)
 }
 
+// YMD 将日期字符串转换为 "2006-01-02" 格式的字符串
 func YMD(d string) time.Time {
 	t, _ := time.Parse("2006-01-02", d)
 	return t
 }
 
+// YMDHMS 将日期字符串转换为 "2006-01-02 15:04:05" 格式的字符串
 func YMDHMS(d string) time.Time {
 	t, _ := time.Parse("2006-01-02 15:04:05", d)
 	return t
