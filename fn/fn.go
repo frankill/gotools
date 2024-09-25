@@ -3,8 +3,6 @@ package fn
 import (
 	"log"
 	"reflect"
-
-	"github.com/frankill/gotools/array"
 )
 
 // FuncType 是一个空接口，接受任意函数签名。
@@ -53,8 +51,8 @@ func (fw *FuncWrapper) Partial(args ...any) *FuncWrapper {
 // Call 调用函数，将所有已部分应用的参数与新传入的参数一起传递给函数，返回函数的结果。
 func (fw *FuncWrapper) Call(args ...any) any {
 	// 创建参数列表
-	callArgs := append(fw.params, array.Map(func(x ...any) reflect.Value {
-		return reflect.ValueOf(x[0])
+	callArgs := append(fw.params, Lapply(func(x any) reflect.Value {
+		return reflect.ValueOf(x)
 	}, args)...)
 
 	num, ok := getFunctionParamCount(fw.fun)
