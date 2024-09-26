@@ -20,10 +20,6 @@ var (
 	SortWindowSize = 100000
 )
 
-func Identity[T any](x T) T {
-	return x
-}
-
 // Map 将通道中的每个元素应用函数 f，并将结果发送到一个新的通道。
 // 参数:
 //   - f: 一个函数，接受类型为 T 的输入，返回类型为 U 的结果。

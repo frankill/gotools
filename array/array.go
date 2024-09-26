@@ -9,19 +9,6 @@ import (
 	"github.com/frankill/gotools"
 )
 
-var (
-	ASCInt  = ASCGeneric[int]
-	DESCInt = DESCGeneric[int]
-)
-
-func ASCGeneric[T gotools.Ordered](x, y T) bool {
-	return x < y
-}
-
-func DESCGeneric[T gotools.Ordered](x, y T) bool {
-	return x > y
-}
-
 // FromAny函数接受任意类型的输入参数，并将它们转换为切片。
 //
 // 参数:

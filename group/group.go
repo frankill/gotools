@@ -161,8 +161,8 @@ func GenerateFilter[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) f
 
 		numberids := array.Copy(numberid)
 
-		array.SortByL(array.ASCInt, value, numberid)
-		array.SortByL(array.ASCInt, valueby, numberids)
+		array.SortByL(gotools.ASCInt, value, numberid)
+		array.SortByL(gotools.ASCInt, valueby, numberids)
 
 		return valueby, value
 
@@ -401,7 +401,7 @@ func ByOrder[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, U 
 	res := make(map[T][]U, len(group))
 
 	for k, v := range group {
-		array.SortByL(array.ASCGeneric, v.First, v.Second)
+		array.SortByL(gotools.ASCGeneric, v.First, v.Second)
 		res[k] = v.First
 	}
 
@@ -420,7 +420,7 @@ func ByOrderDesc[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered
 	res := make(map[T][]U, len(group))
 
 	for k, v := range group {
-		array.SortByL(array.DESCGeneric, v.First, v.Second)
+		array.SortByL(gotools.DESCGeneric, v.First, v.Second)
 		res[k] = v.First
 	}
 
@@ -458,7 +458,7 @@ func RowNumber[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, or
 		numberid = append(numberid, array.Seq(0, len(v), 1)...)
 	}
 
-	array.SortByL(array.ASCInt, numberid, sortid)
+	array.SortByL(gotools.ASCInt, numberid, sortid)
 
 	return numberid
 }
@@ -476,7 +476,7 @@ func RowNumberDesc[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B
 		numberid = append(numberid, array.Seq(0, len(v), 1)...)
 	}
 
-	array.SortByL(array.ASCInt, numberid, sortid)
+	array.SortByL(gotools.ASCInt, numberid, sortid)
 
 	return numberid
 }
@@ -504,7 +504,7 @@ func MaxValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, dat
 		numberid = append(numberid, v.Second...)
 	}
 
-	array.SortByL(array.ASCInt, value, numberid)
+	array.SortByL(gotools.ASCInt, value, numberid)
 
 	return value
 }
@@ -532,7 +532,7 @@ func MinValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, dat
 		numberid = append(numberid, v.Second...)
 	}
 
-	array.SortByL(array.ASCInt, value, numberid)
+	array.SortByL(gotools.ASCInt, value, numberid)
 
 	return value
 }
@@ -560,7 +560,7 @@ func FirstValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 		numberid = append(numberid, v.Second...)
 	}
 
-	array.SortByL(array.ASCInt, value, numberid)
+	array.SortByL(gotools.ASCInt, value, numberid)
 
 	return value
 }
@@ -585,7 +585,7 @@ func LastValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 		numberid = append(numberid, v.Second...)
 	}
 
-	array.SortByL(array.ASCInt, value, numberid)
+	array.SortByL(gotools.ASCInt, value, numberid)
 
 	return value
 }

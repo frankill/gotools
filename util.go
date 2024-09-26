@@ -29,3 +29,20 @@ type Comparable interface {
 type Ordered interface {
 	cmp.Ordered
 }
+
+func Identity[T any](x T) T {
+	return x
+}
+
+var (
+	ASCInt  = ASCGeneric[int]
+	DESCInt = DESCGeneric[int]
+)
+
+func ASCGeneric[T Ordered](x, y T) bool {
+	return x < y
+}
+
+func DESCGeneric[T Ordered](x, y T) bool {
+	return x > y
+}
