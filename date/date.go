@@ -8,6 +8,28 @@ import (
 	"github.com/frankill/gotools/fn"
 )
 
+// FloorMonth 将日期向下取整到月份
+//
+// 参数:
+//   - t: 要向下取整的日期对象。
+//
+// 返回:
+//   - 一个 time.Time 对象，表示向下取整后的日期。
+func FloorMonth(t time.Time) time.Time {
+	return floor(t, "month", 0)
+}
+
+// FloorYear 将日期向下取整到年份
+//
+// 参数:
+//   - t: 要向下取整的日期对象。
+//
+// 返回:
+//   - 一个 time.Time 对象，表示向下取整后的日期。
+func FloorYear(t time.Time) time.Time {
+	return floor(t, "year", 0)
+}
+
 // Floor 将时间向下取整到指定的时间单位
 //
 // 参数:
@@ -17,7 +39,6 @@ import (
 //
 // 返回:
 //   - 一个 time.Time 对象，表示向下取整后的时间。
-
 func Floor(unit string, weekStart int) func(d ...time.Time) []time.Time {
 
 	return func(d ...time.Time) []time.Time {
@@ -60,6 +81,28 @@ func floor(t time.Time, unit string, weekStart int) time.Time {
 	}
 }
 
+// CeilingMonth 将日期向上取整到月份
+//
+// 参数:
+//   - t: 要向上取整的日期对象。
+//
+// 返回:
+//   - 一个 time.Time 对象，表示向上取整后的日期。
+func CeilingMonth(t time.Time) time.Time {
+	return ceiling(t, "month", 0)
+}
+
+// CeilingYear 将日期向上取整到年份
+//
+// 参数:
+//   - t: 要向上取整的日期对象。
+//
+// 返回:
+//   - 一个 time.Time 对象，表示向上取整后的日期。
+func CeilingYear(t time.Time) time.Time {
+	return ceiling(t, "year", 0)
+}
+
 // Floor 将时间向上取整到指定的时间单位
 //
 // 参数:
@@ -69,7 +112,6 @@ func floor(t time.Time, unit string, weekStart int) time.Time {
 //
 // 返回:
 //   - 一个 time.Time 对象，表示向上取整后的时间。
-
 func Ceiling(unit string, weekStart int) func(d ...time.Time) []time.Time {
 
 	return func(d ...time.Time) []time.Time {
