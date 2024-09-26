@@ -303,9 +303,13 @@ func First[T any](f func(x T) bool) func(ch chan T) T {
 	return func(ch chan T) T {
 
 		var result T
+		var ok bool
 		for v := range ch {
-			if f(v) {
-				return v
+			if !ok && f(v) {
+				ok = true
+				result = v
+			} else {
+				continue
 			}
 		}
 
@@ -394,7 +398,7 @@ func TakeWhile[T any](f func(x T) bool) func(ch chan T) chan T {
 				if f(v) {
 					ch_ <- v
 				} else {
-					return
+					continue
 				}
 			}
 		}()
