@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	ASCInt  = func(x, y int) bool { return x < y }
-	DESCInt = func(x, y int) bool { return x < y }
+	ASCInt  = ASCGeneric[int]
+	DESCInt = DESCGeneric[int]
 )
 
 func ASCGeneric[T gotools.Ordered](x, y T) bool {
