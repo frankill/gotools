@@ -1,6 +1,7 @@
 package iter
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -1175,4 +1176,8 @@ func Flatten[S ~[]T, T any](ch chan S) chan T {
 	}()
 
 	return ch_
+}
+
+func Println[T any](x T) {
+	fmt.Println(x)
 }
