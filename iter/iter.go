@@ -460,9 +460,9 @@ func DropWhile[T any](f func(x T) bool) func(ch chan T) chan T {
 //	Merge 函数会启动多个 goroutine，每个 goroutine 从一个输入通道中读取数据
 //	并将数据写入到返回的通道中。所有输入通道的数据都将被合并到这个返回的通道中。
 //	当所有输入通道的数据都被读取完毕后，返回的通道将会被关闭。
-func Union[T any](chs ...chan T) chan T {
+func Union[T, U any](fn func(x T) U, chs ...chan T) chan U {
 
-	out := make(chan T, BufferSize)
+	out := make(chan U, BufferSize)
 
 	var wg sync.WaitGroup
 
@@ -471,7 +471,7 @@ func Union[T any](chs ...chan T) chan T {
 		go func(c chan T) {
 			defer wg.Done()
 			for v := range c {
-				out <- v
+				out <- fn(v)
 			}
 		}(ch)
 	}

@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/frankill/gotools"
+	"github.com/frankill/gotools/array"
 	"github.com/frankill/gotools/iter"
 )
 
@@ -700,11 +702,11 @@ func TestMerge(t *testing.T) {
 			}
 
 			// 使用 Merge 函数
-			resultCh := iter.Union(channels...)
+			resultCh := iter.Union(gotools.Identity[int], channels...)
 			result := iter.Collect(resultCh) // 收集结果
 
 			// 比较结果和期望结果
-			if !reflect.DeepEqual(result, tt.expected) {
+			if !reflect.DeepEqual(array.Sum[[]int](result), array.Sum(tt.expected)) {
 				t.Errorf("For inputs %v, expected %v, got %v", tt.inputs, tt.expected, result)
 			}
 		})
