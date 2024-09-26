@@ -1915,7 +1915,7 @@ func Chunk[S ~[]T, T any](size int, arr S) [][]T {
 //
 // 函数返回类型为`[][]T`的切片，表示输入切片的笛卡尔积。
 // 例如:Cartesian([][]int{{1, 2}, {3, 4}}) = [][]int{{1, 3}, {1, 4}, {2, 3}, {2, 4}}
-func Cartesian[S []T, T any](arr ...S) [][]T {
+func Cartesian[S ~[]T, T any](arr ...S) [][]T {
 	if len(arr) == 0 {
 		return [][]T{}
 	}
