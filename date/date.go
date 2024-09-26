@@ -11,13 +11,30 @@ import (
 // Floor 将时间向下取整到指定的时间单位
 //
 // 参数:
-//   - t: 要向下取整的时间对象。
 //   - unit: 字符串，指定要向下取整到的时间单位，如 "year", "month", "day" 等。
 //   - weekStart: 整数，指定一周的开始是星期几，0 表示星期日，1 表示星期一，依此类推。
+//   - t: 要向下取整的时间对象。
 //
 // 返回:
 //   - 一个 time.Time 对象，表示向下取整后的时间。
-func Floor(t time.Time, unit string, weekStart int) time.Time {
+
+func Floor(unit string, weekStart int) func(d ...time.Time) []time.Time {
+
+	return func(d ...time.Time) []time.Time {
+
+		if len(d) == 0 {
+			return []time.Time{}
+		}
+
+		var res []time.Time
+		for _, t := range d {
+			res = append(res, floor(t, unit, weekStart))
+		}
+		return res
+	}
+}
+
+func floor(t time.Time, unit string, weekStart int) time.Time {
 	switch strings.ToLower(unit) {
 	case "years", "year", "Y":
 		return time.Date(t.Year(), 1, 1, 0, 0, 0, 0, t.Location())
@@ -52,7 +69,24 @@ func Floor(t time.Time, unit string, weekStart int) time.Time {
 //
 // 返回:
 //   - 一个 time.Time 对象，表示向上取整后的时间。
-func Ceiling(t time.Time, unit string, weekStart int) time.Time {
+
+func Ceiling(unit string, weekStart int) func(d ...time.Time) []time.Time {
+
+	return func(d ...time.Time) []time.Time {
+
+		if len(d) == 0 {
+			return []time.Time{}
+		}
+
+		var res []time.Time
+		for _, t := range d {
+			res = append(res, ceiling(t, unit, weekStart))
+		}
+		return res
+	}
+}
+
+func ceiling(t time.Time, unit string, weekStart int) time.Time {
 	switch strings.ToLower(unit) {
 	case "years", "year":
 		// 获取年份的最后一天
@@ -107,17 +141,18 @@ func getLastDayOfMonth(year int, month time.Month) int {
 //
 // 返回:
 //   - 一个 time.Time 对象，表示转换后的时间。
-func Zone(d time.Time, zone string) time.Time {
+func Zone(zone string) func(d ...time.Time) []time.Time {
 
-	if zone == "" {
-		zone = "Asia/Shanghai"
-	}
-	_, err := time.LoadLocation(zone)
-	if err != nil {
-		return time.Time{}
+	return func(d ...time.Time) []time.Time {
+
+		return fn.Lapply(func(x time.Time) time.Time {
+			if zone == "" {
+				zone = "Asia/Shanghai"
+			}
+			return x.In(time.FixedZone(zone, 0))
+		}, d)
 	}
 
-	return d.In(time.FixedZone(zone, 0))
 }
 
 // ToUnix 将日期字符串转换为 Unix 时间戳
@@ -127,9 +162,12 @@ func Zone(d time.Time, zone string) time.Time {
 //
 // 返回:
 //   - 一个 int64，表示转换后的 Unix 时间戳。
-func ToUnix(d string) int64 {
-	t, _ := time.Parse("2006-01-02 15:04:05", d)
-	return t.Unix()
+func ToUnix(d ...string) []int64 {
+
+	return fn.Lapply(func(x string) int64 {
+		t, _ := time.Parse("2006-01-02 15:04:05", x)
+		return t.Unix()
+	}, d)
 }
 
 // ToUnixMilli 将日期字符串转换为 Unix 时间戳
@@ -139,9 +177,12 @@ func ToUnix(d string) int64 {
 //
 // 返回:
 //   - 一个 int64，表示转换后的 Unix 时间戳。
-func ToUnixMilli(d string) int64 {
-	t, _ := time.Parse("2006-01-02 15:04:05", d)
-	return t.UnixMilli()
+func ToUnixMilli(d ...string) []int64 {
+
+	return fn.Lapply(func(x string) int64 {
+		t, _ := time.Parse("2006-01-02 15:04:05", x)
+		return t.UnixMilli()
+	}, d)
 }
 
 // ToUnixNano 将日期字符串转换为 Unix 时间戳
@@ -151,9 +192,12 @@ func ToUnixMilli(d string) int64 {
 //
 // 返回:
 //   - 一个 int64，表示转换后的 Unix 时间戳。
-func ToUnixNano(d string) int64 {
-	t, _ := time.Parse("2006-01-02 15:04:05", d)
-	return t.UnixNano()
+func ToUnixNano(d ...string) []int64 {
+
+	return fn.Lapply(func(x string) int64 {
+		t, _ := time.Parse("2006-01-02 15:04:05", x)
+		return t.UnixNano()
+	}, d)
 }
 
 // ToTime 将日期字符串转换为 time.Time 对象
@@ -163,24 +207,36 @@ func ToUnixNano(d string) int64 {
 //
 // 返回:
 //   - 一个 time.Time 对象，表示转换后的时间。
-func ToTime(d string) time.Time {
-	t, _ := time.Parse("2006-01-02 15:04:05", d)
-	return t
+func ToTime(d ...string) []time.Time {
+
+	return fn.Lapply(func(x string) time.Time {
+		t, _ := time.Parse("2006-01-02 15:04:05", x)
+		return t
+	}, d)
 }
 
 // ToStr 将日期字符串转换为 "2006-01-02 15:04:05" 格式的字符串
-func ToStr(d time.Time) string {
-	return d.Format("2006-01-02 15:04:05")
+func ToStr(d ...time.Time) []string {
+
+	return fn.Lapply(func(x time.Time) string {
+		return x.Format("2006-01-02 15:04:05")
+	}, d)
 }
 
 // ToYMD 将日期字符串转换为 "20060102" 格式的字符串
-func ToYMD(d time.Time) string {
-	return d.Format("20060102")
+func ToYMD(d ...time.Time) []string {
+
+	return fn.Lapply(func(x time.Time) string {
+		return x.Format("20060102")
+	}, d)
 }
 
 // UnixToStr 将 Unix 时间戳转换为日期字符串
-func UnixToStr(unix int64) string {
-	return time.Unix(unix, 0).Format("2006-01-02 15:04:05")
+func UnixToStr(unix ...int64) []string {
+
+	return fn.Lapply(func(x int64) string {
+		return time.Unix(x, 0).Format("2006-01-02 15:04:05")
+	}, unix)
 }
 
 // UnixToTime 将 Unix 时间戳转换为 time.Time 对象
@@ -190,8 +246,11 @@ func UnixToStr(unix int64) string {
 //
 // 返回:
 //   - 一个 time.Time 对象，表示转换后的时间。
-func UnixToTime(unix int64) time.Time {
-	return time.Unix(unix, 0)
+func UnixToTime(unix ...int64) []time.Time {
+
+	return fn.Lapply(func(x int64) time.Time {
+		return time.Unix(x, 0)
+	}, unix)
 }
 
 // Days 生成指定天数的日期列表
@@ -217,15 +276,21 @@ func Years(t time.Time, d ...int) []time.Time {
 }
 
 // YMD 将日期字符串转换为 "2006-01-02" 格式的字符串
-func YMD(d string) time.Time {
-	t, _ := time.Parse("2006-01-02", d)
-	return t
+func YMD(d ...string) []time.Time {
+
+	return fn.Lapply(func(x string) time.Time {
+		t, _ := time.Parse("2006-01-02", x)
+		return t
+	}, d)
 }
 
 // YMDHMS 将日期字符串转换为 "2006-01-02 15:04:05" 格式的字符串
-func YMDHMS(d string) time.Time {
-	t, _ := time.Parse("2006-01-02 15:04:05", d)
-	return t
+func YMDHMS(d ...string) []time.Time {
+
+	return fn.Lapply(func(x string) time.Time {
+		t, _ := time.Parse("2006-01-02 15:04:05", x)
+		return t
+	}, d)
 }
 
 // Sub 计算两个时间相差多少天

@@ -123,7 +123,7 @@ func Seq(start, end, step int) []int {
 //     如果 `samples` 大于等于输入切片的长度，则直接返回原切片。
 //
 // 此函数使用当前时间作为随机数生成器的种子，确保每次调用都能得到不同的随机结果。
-func RandomSample[S ~[]T, T any](input S, samples int, replace bool) S {
+func RandomSample[S ~[]T, T any](input S, samples int, replace bool) []T {
 
 	li := len(input)
 
@@ -250,7 +250,7 @@ func Product[S ~[]T, T gotools.Number](arr S) float64 {
 // 示例用途:
 // - 使用加法函数时，可计算累积和。
 // - 使用乘法函数时，可计算累积积。
-func CumFun[S ~[]T, T gotools.Number](fun func(T, T) T, arr S) S {
+func CumFun[S ~[]T, T gotools.Number](fun func(T, T) T, arr S) []T {
 	la := len(arr)
 	result := make(S, la)
 	result[0] = arr[0]
@@ -268,7 +268,7 @@ func CumFun[S ~[]T, T gotools.Number](fun func(T, T) T, arr S) S {
 // 返回值:
 //   - 一个新的切片 S，其中每个元素是从原切片开始到当前位置的所有元素的和。
 //     例如，给定切片 [1, 2, 3, 4]，返回的累积和切片将是 [1, 3, 6, 10]。
-func CumSum[S ~[]T, T gotools.Number](arr S) S {
+func CumSum[S ~[]T, T gotools.Number](arr S) []T {
 	return CumFun(func(a, b T) T { return a + b }, arr)
 }
 
@@ -281,7 +281,7 @@ func CumSum[S ~[]T, T gotools.Number](arr S) S {
 // 返回值:
 //   - 返回一个新的 S 类型切片，其中第 i 个元素是原切片中从第 0 项到第 i 项的累积差分值。
 //     即新切片的第 i 项等于原切片第 i 项减去第 i-1 项的结果，首项特殊处理（通常为原切片的首项）。
-func CumDiff[S ~[]T, T gotools.Number](arr S) S {
+func CumDiff[S ~[]T, T gotools.Number](arr S) []T {
 	return CumFun(func(a, b T) T { return b - a }, arr)
 }
 
@@ -292,7 +292,7 @@ func CumDiff[S ~[]T, T gotools.Number](arr S) S {
 //
 // 返回值:
 // - 一个新的 S 类型切片，其中每个元素是原始切片中从开始到当前位置（含当前位置）的所有元素的累积乘积。
-func CumProd[S ~[]T, T gotools.Number](arr S) S {
+func CumProd[S ~[]T, T gotools.Number](arr S) []T {
 	return CumFun(func(a, b T) T { return a * b }, arr)
 }
 
@@ -303,7 +303,7 @@ func CumProd[S ~[]T, T gotools.Number](arr S) S {
 //
 // 返回值:
 // - 一个新的 S 类型切片，其中每个元素是原始切片中从开始到当前位置（含当前位置）的所有元素的累积最大值。
-func CumMax[S ~[]T, T gotools.Number](arr S) S {
+func CumMax[S ~[]T, T gotools.Number](arr S) []T {
 	return CumFun(func(a, b T) T { return max(a, b) }, arr)
 }
 
@@ -314,7 +314,7 @@ func CumMax[S ~[]T, T gotools.Number](arr S) S {
 //
 // 返回值:
 // - 一个新的 S 类型切片，其中每个元素是原始切片中从开始到当前位置（含当前位置）的所有元素的累积最小值。
-func CumMin[S ~[]T, T gotools.Number](arr S) S {
+func CumMin[S ~[]T, T gotools.Number](arr S) []T {
 	return CumFun(func(a, b T) T { return min(a, b) }, arr)
 }
 
@@ -716,16 +716,16 @@ func Any[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
 // - 数组将在元素的右侧进行拆分。
-func ReverseSplit[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []S {
+func ReverseSplit[S ~[]T, T any](fun func(x ...T) bool, arr ...S) [][]T {
 
 	if len(arr) == 0 || len(arr[0]) == 0 {
-		return []S{}
+		return [][]T{}
 	}
 
 	l := len(arr[0])
 	f := len(arr)
 	param := make([]T, f)
-	result := make([]S, 0)
+	result := make([][]T, 0)
 
 	num := 0
 
@@ -761,15 +761,15 @@ func ReverseSplit[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []S {
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
 // - 数组将在元素的左侧进行拆分。
 // - 数组不会在第一个元素之前被分割。
-func Split[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []S {
+func Split[S ~[]T, T any](fun func(x ...T) bool, arr ...S) [][]T {
 	if len(arr) == 0 || len(arr[0]) == 0 {
-		return []S{}
+		return [][]T{}
 	}
 
 	l := len(arr[0])
 	f := len(arr)
 	param := make([]T, f)
-	result := make([]S, 0)
+	result := make([][]T, 0)
 
 	num := 0
 
@@ -805,10 +805,10 @@ func Split[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []S {
 //
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ReverseFill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) S {
+func ReverseFill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []T {
 
 	if len(arr) == 0 || len(arr[0]) == 0 {
-		return S{}
+		return []T{}
 	}
 
 	if len(arr[0]) == 1 {
@@ -849,7 +849,7 @@ func ReverseFill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) S {
 //
 // 注意:
 // - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func Fill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) S {
+func Fill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []T {
 	if len(arr) == 0 || len(arr[0]) == 0 {
 		return []T{}
 	}
@@ -1075,9 +1075,9 @@ func Zip[S ~[]T, T any](arr ...S) [][]T {
 //
 // 此函数遍历输入切片，仅将与前一个元素不同的元素添加到结果切片中，
 // 从而实现连续重复元素的紧凑化处理。如果输入切片为空，则返回同类型的空切片。
-func Compact[S ~[]T, T gotools.Comparable](arr S) S {
+func Compact[S ~[]T, T gotools.Comparable](arr S) []T {
 	if len(arr) == 0 {
-		return S{}
+		return []T{}
 	}
 
 	l := len(arr)
@@ -1103,9 +1103,9 @@ func Compact[S ~[]T, T gotools.Comparable](arr S) S {
 //
 // 此函数遍历输入切片，仅将与前一个元素不同的元素添加到结果切片中，
 // 从而实现连续重复元素的紧凑化处理。如果输入切片为空，则返回同类型的空切片。
-func CompactAny[S ~[]T, T any](fun func(x, y T) bool, arr S) S {
+func CompactAny[S ~[]T, T any](fun func(x, y T) bool, arr S) []T {
 	if len(arr) == 0 {
-		return S{}
+		return []T{}
 	}
 
 	l := len(arr)
@@ -1130,16 +1130,16 @@ func CompactAny[S ~[]T, T any](fun func(x, y T) bool, arr S) S {
 //
 // 此函数通过双指针技巧实现切片元素的原地交换，达到反转的目的。
 // 当输入切片为空时，会直接返回同类型的空切片。
-func Reverse[S ~[]T, T any](arr S) S {
+func Reverse[S ~[]T, T any](arr S) []T {
 
 	la := len(arr)
 	if la == 0 {
-		return S{}
+		return []T{}
 	}
 	if la == 1 {
-		return S{arr[0]}
+		return []T{arr[0]}
 	}
-	res := make(S, la)
+	res := make([]T, la)
 
 	for i, j := 0, la-1; i < j; i, j = i+1, j-1 {
 		res[i], res[j] = arr[j], arr[i]
@@ -1429,17 +1429,17 @@ func SortByL[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D) {
 //
 // 返回值:
 // - 返回一个新的 S 类型切片，其中的元素根据提供的比较函数 `fun` 进行排序。
-func Sort[S ~[]T, T any](fun func(x, y T) bool, arr S) S {
+func Sort[S ~[]T, T any](fun func(x, y T) bool, arr S) []T {
 
 	la := len(arr)
 	if la == 0 {
-		return S{}
+		return []T{}
 	}
 	if la == 1 {
-		return arr
+		return []T{arr[0]}
 	}
 
-	res := make(S, la)
+	res := make([]T, la)
 	copy(res, arr)
 
 	for i := 1; i < la; {
@@ -1467,7 +1467,7 @@ func Sort[S ~[]T, T any](fun func(x, y T) bool, arr S) S {
 //
 // 参数:
 // - arr: 要排序的切片 S，其中元素类型 T 必须是可比较的（实现 gotools.Ordered 接口）。
-// func SortQuick[S ~[]T, T gotools.Ordered](arr S) S {
+// func SortQuick[S ~[]T, T gotools.Ordered](arr S) []T {
 
 // 	return ArraySort(func(x, y T) bool { return x < y }, arr)
 
@@ -1547,13 +1547,13 @@ func Choose[S ~[]T, T any](index []int, arr S) []T {
 //
 // 返回值:
 // - 返回一个新的 S 类型切片，其中重复的元素已被移除，剩余元素按升序排列。
-func Distinct[S ~[]T, T gotools.Ordered](arr S) S {
+func Distinct[S ~[]T, T gotools.Ordered](arr S) []T {
 
 	if len(arr) == 0 {
-		return S{}
+		return []T{}
 	}
 	if len(arr) == 1 {
-		return arr
+		return []T{arr[0]}
 	}
 
 	res := Sort(func(x, y T) bool { return x < y }, arr)
@@ -1575,14 +1575,14 @@ func Distinct[S ~[]T, T gotools.Ordered](arr S) S {
 //
 //	输入: []int{5, 2, 9, 1}
 //	输出: []int{5, -3, 7, -8}
-func Difference[S ~[]T, T gotools.Number](arr S) S {
+func Difference[S ~[]T, T gotools.Number](arr S) []T {
 
 	la := len(arr)
 	if la == 0 {
-		return S{}
+		return []T{}
 	}
 
-	res := make(S, 0, la)
+	res := make([]T, 0, la)
 
 	res = append(res, arr[0])
 
