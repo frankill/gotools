@@ -1984,3 +1984,59 @@ func Flatten[S ~[]T, T any](arr ...S) []T {
 
 	return res
 }
+
+// InsertAt 在指定多个位置插入数据，当前位置的数据顺延到下一个位置
+// 参数:
+//   - data: 一个切片，表示要插入的数据
+//   - pos: 一个切片，表示要插入的位置
+//
+// 返回:
+//   - func(default_x T) []T: 一个函数，用于插入默认值
+//
+// 例如:
+//
+//	InsertAt([]int{1, 2, 3, 4}, 1, 3, 5)(0) // => [1 0 2 0 3 0 4]
+//	InsertAt([]int{1, 2, 3, 4}, 1, 3, 5，7)(0) // => [1 0 2 0 3 0 4]
+func InsertAt[S ~[]T, T any](data S, pos ...int) func(default_x T) []T {
+
+	SortLocal(func(x, y int) bool { return x < y }, pos)
+
+	for i := len(pos) - 1; i >= 0; i-- {
+		if pos[i] < len(data)+len(pos)-1 {
+			break
+		}
+		pos = pos[:i]
+	}
+
+	return func(default_x T) []T {
+
+		num := len(data) + len(pos)
+
+		res := make([]T, num)
+
+		loc := 0
+		dloc := 0
+
+		if len(pos) == 0 {
+			log.Println("pos is empty")
+			return []T{default_x}
+		}
+
+		for i := 0; i < num; i++ {
+
+			if loc < len(pos) && i == pos[loc] {
+				res[i] = default_x
+				loc++
+				continue
+			}
+
+			res[i] = data[dloc]
+			dloc++
+
+		}
+
+		return res
+
+	}
+
+}
