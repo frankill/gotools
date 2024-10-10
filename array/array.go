@@ -156,7 +156,6 @@ func RandomSample[S ~[]T, T any](input S, samples int, replace bool) []T {
 // 返回值:
 //   - 新的 T 类型切片，为移位操作后得到的结果。
 //     如果输入切片为空，则直接返回原切片。
-
 func Shif[S ~[]T, T any](arr S, n int) []T {
 
 	la := len(arr)
