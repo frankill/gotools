@@ -120,7 +120,7 @@ func TestArrayCumFun(t *testing.T) {
 	input1 := []int{1, 2, 3, 4, 5, 6}
 	output1 := array.CumFun(func(a, b int) int {
 		return a + b
-	}, input1)
+	}, 0, input1)
 	expected1 := []int{1, 3, 6, 10, 15, 21}
 	if !reflect.DeepEqual(output1, expected1) {
 		t.Errorf("Expected %v but got %v", expected1, output1)
@@ -129,7 +129,7 @@ func TestArrayCumFun(t *testing.T) {
 	input2 := []float32{1.5, 2.5, 3.5, 4.5, 5.5, 6.5}
 	output2 := array.CumFun(func(a, b float32) float32 {
 		return a + b
-	}, input2)
+	}, 0.0, input2)
 	expected2 := []float32{1.5, 4, 7.5, 12, 17.5, 24}
 	if !reflect.DeepEqual(output2, expected2) {
 		t.Errorf("Expected %v but got %v", expected2, output2)

@@ -231,17 +231,16 @@ func Product[S ~[]T, T gotools.Number](arr S) float64 {
 //
 // 返回值:
 //   - 一个新的切片 S，其中每个元素是原切片元素依序应用 `fun` 函数累积计算的结果。
-//     第一个元素与原切片的第一个元素相同，之后每个元素都是前一个累积值与下一个数组元素的函数运算结果。
 //
 // 示例用途:
 // - 使用加法函数时，可计算累积和。
 // - 使用乘法函数时，可计算累积积。
-func CumFun[S ~[]T, T gotools.Number](fun func(T, T) T, arr S) []T {
+func CumFun[S ~[]T, T gotools.Number, U any](f func(U, T) U, initV U, arr S) []U {
 	la := len(arr)
-	result := make(S, la)
-	result[0] = arr[0]
+	result := make([]U, la)
+	result[0] = f(initV, arr[0])
 	for i := 1; i < la; i++ {
-		result[i] = fun(result[i-1], arr[i])
+		result[i] = f(result[i-1], arr[i])
 	}
 	return result
 }
@@ -255,7 +254,7 @@ func CumFun[S ~[]T, T gotools.Number](fun func(T, T) T, arr S) []T {
 //   - 一个新的切片 S，其中每个元素是从原切片开始到当前位置的所有元素的和。
 //     例如，给定切片 [1, 2, 3, 4]，返回的累积和切片将是 [1, 3, 6, 10]。
 func CumSum[S ~[]T, T gotools.Number](arr S) []T {
-	return CumFun(func(a, b T) T { return a + b }, arr)
+	return CumFun(func(a, b T) T { return a + b }, 0, arr)
 }
 
 // CumDiff 计算类型为 S（元素类型为 T）的切片中元素的累积差分，并返回一个新的切片。
@@ -268,7 +267,7 @@ func CumSum[S ~[]T, T gotools.Number](arr S) []T {
 //   - 返回一个新的 S 类型切片，其中第 i 个元素是原切片中从第 0 项到第 i 项的累积差分值。
 //     即新切片的第 i 项等于原切片第 i 项减去第 i-1 项的结果，首项特殊处理（通常为原切片的首项）。
 func CumDiff[S ~[]T, T gotools.Number](arr S) []T {
-	return CumFun(func(a, b T) T { return b - a }, arr)
+	return CumFun(func(a, b T) T { return b - a }, 0, arr)
 }
 
 // CumProd 计算类型为 S（元素类型为 T）的切片中累积乘积序列。
@@ -279,7 +278,7 @@ func CumDiff[S ~[]T, T gotools.Number](arr S) []T {
 // 返回值:
 // - 一个新的 S 类型切片，其中每个元素是原始切片中从开始到当前位置（含当前位置）的所有元素的累积乘积。
 func CumProd[S ~[]T, T gotools.Number](arr S) []T {
-	return CumFun(func(a, b T) T { return a * b }, arr)
+	return CumFun(func(a, b T) T { return a * b }, 0, arr)
 }
 
 // CumMax 计算类型为 S（元素类型为 T）的切片中累积最大值序列。
@@ -290,7 +289,7 @@ func CumProd[S ~[]T, T gotools.Number](arr S) []T {
 // 返回值:
 // - 一个新的 S 类型切片，其中每个元素是原始切片中从开始到当前位置（含当前位置）的所有元素的累积最大值。
 func CumMax[S ~[]T, T gotools.Number](arr S) []T {
-	return CumFun(func(a, b T) T { return max(a, b) }, arr)
+	return CumFun(func(a, b T) T { return max(a, b) }, 0, arr)
 }
 
 // CumMin 计算类型为 S（元素类型为 T）的切片中累积最小值序列。
@@ -301,7 +300,7 @@ func CumMax[S ~[]T, T gotools.Number](arr S) []T {
 // 返回值:
 // - 一个新的 S 类型切片，其中每个元素是原始切片中从开始到当前位置（含当前位置）的所有元素的累积最小值。
 func CumMin[S ~[]T, T gotools.Number](arr S) []T {
-	return CumFun(func(a, b T) T { return min(a, b) }, arr)
+	return CumFun(func(a, b T) T { return min(a, b) }, 0, arr)
 }
 
 // Mean 计算类型为 S（元素类型为 T）的切片中所有元素的平均值。
@@ -1078,7 +1077,7 @@ func Compact[S ~[]T, T gotools.Comparable](arr S) []T {
 	return result
 }
 
-// Compact 移除给定切片 S 中连续重复的元素，其中 S 是泛型类型 T 的切片 ，且 T 为任意类型。
+// CompactAny 移除给定切片 S 中连续重复的元素，其中 S 是泛型类型 T 的切片 ，且 T 为任意类型。
 //
 // 参数:
 // - arr: 类型为 S 的切片，可能包含连续重复的元素。
@@ -1503,7 +1502,6 @@ func SortLocal[S ~[]T, T any](fun func(x, y T) bool, arr S) {
 //	返回一个与原数组相同类型的数组 S，其元素按照 index 指定的新顺序排列。
 //
 // 注意:
-
 // 索引数组中的 -1 值会被跳过，不会影响结果数组的构建。
 func Choose[S ~[]T, T any](index []int, arr S) []T {
 
@@ -1900,7 +1898,7 @@ func Chunk[S ~[]T, T any](size int, arr S) [][]T {
 // 类型`T`表示切片中元素的类型。
 //
 // 函数返回类型为`[][]T`的切片，表示输入切片的笛卡尔积。
-// 例如:Cartesian([][]int{{1, 2}, {3, 4}}) = [][]int{{1, 3}, {1, 4}, {2, 3}, {2, 4}}
+// 例如:Cartesian([][]int{{1, 2}, {3, 4}}...) = [][]int{{1, 3}, {1, 4}, {2, 3}, {2, 4}}
 func Cartesian[S ~[]T, T any](arr ...S) [][]T {
 	if len(arr) == 0 {
 		return [][]T{}
