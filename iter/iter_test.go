@@ -702,7 +702,7 @@ func TestMerge(t *testing.T) {
 			}
 
 			// 使用 Merge 函数
-			resultCh := iter.Union(gotools.Identity[int], channels...)
+			resultCh := iter.Union(gotools.Identity[int])(channels...)
 			result := iter.Collect(resultCh) // 收集结果
 
 			// 比较结果和期望结果
