@@ -4,6 +4,7 @@ go 1.22
 
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.28.1
+	github.com/go-redis/redis/v7 v7.4.1
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/xuri/excelize/v2 v2.8.1
@@ -21,6 +22,8 @@ require (
 	github.com/klauspost/compress v1.17.7 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
+	github.com/onsi/ginkgo v1.16.5 // indirect
+	github.com/onsi/gomega v1.34.2 // indirect
 	github.com/paulmach/orb v0.11.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -34,7 +37,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.26.0 // indirect
 	golang.org/x/crypto v0.26.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
-	golang.org/x/sys v0.23.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
