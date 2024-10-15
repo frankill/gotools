@@ -31,6 +31,18 @@ func ErrorCH(ch chan error) {
 	}
 }
 
+func FromRedisList[T any](host, pwd string, dbNUM int) func(key string) (chan T, chan error) {
+
+	return func(key string) (chan T, chan error) {
+
+		con := db.NewRedisClient[T](host, pwd, dbNUM)
+
+		return con.PopList(key)
+
+	}
+
+}
+
 // FromGzip 方法从 gzip 文件中读取数据并发送到通道中
 // 参数:
 //

@@ -39,6 +39,8 @@ func (r *Redis[T]) PopList(key string) (chan T, chan error) {
 
 	go func() {
 		defer close(ch)
+		defer close(errs)
+		defer r.client.Close()
 
 		pipe := r.client.Pipeline()
 		for i := 0; i < int(r.NUM); i++ {
@@ -46,6 +48,11 @@ func (r *Redis[T]) PopList(key string) (chan T, chan error) {
 		}
 
 		for {
+
+			if _, err := r.client.Ping().Result(); err != nil {
+				errs <- err
+				return
+			}
 
 			select {
 
