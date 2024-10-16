@@ -64,7 +64,7 @@ func FromRedisList[T any](host, pwd string, dbNUM int) func(key string) (chan T,
 // 一个通道，用于接收错误信息
 func FromGzip(path string) func(skip int) (chan string, chan error) {
 	return func(skip int) (chan string, chan error) {
-		ch := make(chan string, BufferSize)
+		ch := make(chan string, bufferSize)
 		errs := make(chan error, 1)
 
 		go func() {
@@ -115,7 +115,7 @@ func FromJson[T any](path string) func(skip int) (chan T, chan error) {
 
 	return func(skip int) (chan T, chan error) {
 
-		ch := make(chan T, BufferSize)
+		ch := make(chan T, bufferSize)
 		errs := make(chan error, 1)
 
 		go func() {
@@ -166,7 +166,7 @@ func FromTxt(path string) func(skip int) (chan string, chan error) {
 
 	return func(skip int) (chan string, chan error) {
 
-		ch := make(chan string, BufferSize)
+		ch := make(chan string, bufferSize)
 		errs := make(chan error, 1)
 
 		go func() {
@@ -221,7 +221,7 @@ func FromElasticSearch[T any](client *elastic.Client) func(index string, query a
 // FromArray 将输入切片 `a` 中的每个元素发送到通道中。
 func FromArray[T any](a []T) chan T {
 
-	ch_ := make(chan T, BufferSize)
+	ch_ := make(chan T, bufferSize)
 
 	go func() {
 
@@ -245,7 +245,7 @@ func FromArray[T any](a []T) chan T {
 func FromArray2[T any, U any](f func(x T) U) func(a []T) chan U {
 
 	return func(a []T) chan U {
-		ch := make(chan U, BufferSize)
+		ch := make(chan U, bufferSize)
 
 		go func() {
 			defer close(ch)
@@ -273,7 +273,7 @@ func FromArray2[T any, U any](f func(x T) U) func(a []T) chan U {
 func FromMap[K gotools.Comparable, V any](m map[K]V) func() chan pair.Pair[K, V] {
 
 	return func() chan pair.Pair[K, V] {
-		ch := make(chan pair.Pair[K, V], BufferSize)
+		ch := make(chan pair.Pair[K, V], bufferSize)
 
 		go func() {
 			defer close(ch)
@@ -299,7 +299,7 @@ func FromMap[K gotools.Comparable, V any](m map[K]V) func() chan pair.Pair[K, V]
 func FromCsv(path string) func(header bool) (chan []string, chan error) {
 
 	return func(header bool) (chan []string, chan error) {
-		ch := make(chan []string, BufferSize)
+		ch := make(chan []string, bufferSize)
 		errs := make(chan error, 1)
 
 		go func() {
@@ -361,7 +361,7 @@ func FromCsv(path string) func(header bool) (chan []string, chan error) {
 func FromTable(path string) func(header bool, seq string, escape byte) (chan []string, chan error) {
 
 	return func(header bool, seq string, escape byte) (chan []string, chan error) {
-		ch := make(chan []string, BufferSize)
+		ch := make(chan []string, bufferSize)
 		errs := make(chan error, 1)
 
 		go func() {
@@ -419,7 +419,7 @@ func FromTable(path string) func(header bool, seq string, escape byte) (chan []s
 func FromExcel(path string) func(sheet string, header bool) (chan []string, chan error) {
 
 	return func(sheet string, header bool) (chan []string, chan error) {
-		ch := make(chan []string, BufferSize)
+		ch := make(chan []string, bufferSize)
 		errs := make(chan error, 1)
 
 		go func() {
@@ -479,7 +479,7 @@ func FromMysql[T any](con string) func(query *query.SQLBuilder) (chan T, chan er
 
 		query_ := query.Build()
 
-		ch := make(chan T, BufferSize)
+		ch := make(chan T, bufferSize)
 		errs := make(chan error, 1)
 
 		go func() {
@@ -555,7 +555,7 @@ func FromCK[T any](ck *db.CKinfo) func(query *query.SQLBuilder) (chan T, chan er
 
 		query_ := query.Build()
 
-		ch := make(chan T, BufferSize)
+		ch := make(chan T, bufferSize)
 		errs := make(chan error, 1)
 
 		go func() {
@@ -675,7 +675,7 @@ func FromCKStr(ck *db.CKinfo) func(query *query.SQLBuilder) (chan []string, chan
 
 // FromGob 从指定的 gob 文件路径读取数据，并通过通道返回。
 func FromGob[T any](path string, del bool) (chan T, chan error) {
-	ch := make(chan T, BufferSize)
+	ch := make(chan T, bufferSize)
 	errs := make(chan error, 1) // 只有一个错误通道缓冲区
 
 	file, err := os.Open(path)

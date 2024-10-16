@@ -16,10 +16,48 @@ import (
 
 var (
 	// iter函数中协程通道的缓冲区大小
-	BufferSize = 100
+	bufferSize = 100
 	// sort外部文件排序使用到的排序窗口大小，默认为 100000，具体根据排序数据量进行调整
-	SortWindowSize = 100000
+	sortWindowSize = 100000
+
+	bufferMutex = sync.RWMutex{}
 )
+
+// 用于修改 sortWindowSize 的函数
+func SetSortWindowSize(newSize int) {
+	bufferMutex.Lock()
+	defer bufferMutex.Unlock()
+
+	// 安全地修改 sortWindowSize
+	sortWindowSize = newSize
+}
+
+// 用于读取 sortWindowSize 的函数
+func GetSortWindowSize() int {
+	bufferMutex.RLock()
+	defer bufferMutex.RUnlock()
+
+	// 安全地返回 sortWindowSize
+	return sortWindowSize
+}
+
+// 用于修改 BufferSize 的函数
+func SetBufferSize(newSize int) {
+	bufferMutex.Lock()
+	defer bufferMutex.Unlock()
+
+	// 安全地修改 BufferSize
+	bufferSize = newSize
+}
+
+// 用于读取 BufferSize 的函数
+func GetBufferSize() int {
+	bufferMutex.RLock()
+	defer bufferMutex.RUnlock()
+
+	// 安全地返回 BufferSize
+	return bufferSize
+}
 
 // Map 将通道中的每个元素应用函数 f，并将结果发送到一个新的通道。
 // 参数:
@@ -36,7 +74,7 @@ func Map[T any, U any](f func(x T) U) func(ch chan T) chan U {
 
 	return func(ch chan T) chan U {
 
-		ch_ := make(chan U, BufferSize)
+		ch_ := make(chan U, bufferSize)
 
 		go func() {
 			defer close(ch_)
@@ -55,7 +93,7 @@ func Map[T any, U any](f func(x T) U) func(ch chan T) chan U {
 // 用于发送展平后的结果。返回的输出通道在处理完成后会被关闭。
 func FlatMap[T any, U any](f func(x T) []U) func(ch chan T) chan U {
 	return func(ch chan T) chan U {
-		ch_ := make(chan U, BufferSize)
+		ch_ := make(chan U, bufferSize)
 		go func() {
 			defer close(ch_)
 			for v := range ch {
@@ -73,7 +111,7 @@ func FlatMap[T any, U any](f func(x T) []U) func(ch chan T) chan U {
 // 函数内部使用一个映射（map）来跟踪已经见过的元素，以确保每个元素只出现一次。
 // 返回的输出通道在处理完成后会被关闭。
 func Distinct[T gotools.Comparable](ch chan T) chan T {
-	ch_ := make(chan T, BufferSize)
+	ch_ := make(chan T, bufferSize)
 	set := make(map[T]struct{})
 	go func() {
 		defer close(ch_)
@@ -119,7 +157,7 @@ func Filter[T any](f func(x T) bool) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
 
-		ch_ := make(chan T, BufferSize)
+		ch_ := make(chan T, bufferSize)
 
 		go func() {
 			defer close(ch_)
@@ -147,7 +185,7 @@ func Filter[T any](f func(x T) bool) func(ch chan T) chan T {
 //   - 从 start 开始，根据步长 step 生成整数序列，直到达到 end 为止（不包括 end）。
 func Sequence(start, end, step int) chan int {
 
-	ch := make(chan int, BufferSize)
+	ch := make(chan int, bufferSize)
 
 	go func() {
 		defer close(ch)
@@ -199,7 +237,7 @@ func Scanl[T, U any](f func(x U, y T) U, init U) func(ch chan T) chan U {
 
 	return func(ch chan T) chan U {
 
-		ch_ := make(chan U, BufferSize)
+		ch_ := make(chan U, bufferSize)
 
 		go func() {
 			defer close(ch_)
@@ -231,7 +269,7 @@ func Scanl[T, U any](f func(x U, y T) U, init U) func(ch chan T) chan U {
 func Zip[T any, U any, V any](f func(x T, y U) V) func(ch1 chan T, ch2 chan U) chan V {
 
 	return func(ch1 chan T, ch2 chan U) chan V {
-		ch := make(chan V, BufferSize)
+		ch := make(chan V, bufferSize)
 
 		go func() {
 			defer close(ch)
@@ -267,8 +305,8 @@ func Zip[T any, U any, V any](f func(x T, y U) V) func(ch1 chan T, ch2 chan U) c
 func Partition[T any](f func(x T) bool) func(ch chan T) (chan T, chan T) {
 
 	return func(ch chan T) (chan T, chan T) {
-		ch1 := make(chan T, BufferSize)
-		ch2 := make(chan T, BufferSize)
+		ch1 := make(chan T, bufferSize)
+		ch2 := make(chan T, bufferSize)
 
 		go func() {
 
@@ -391,7 +429,7 @@ func CollectFun[T any, U gotools.Comparable](f func(x T) U) func(ch chan T) []U 
 func TakeWhile[T any](f func(x T) bool) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
-		ch_ := make(chan T, BufferSize)
+		ch_ := make(chan T, bufferSize)
 
 		go func() {
 			defer close(ch_)
@@ -422,7 +460,7 @@ func TakeWhile[T any](f func(x T) bool) func(ch chan T) chan T {
 //   - 新通道 ch_ 包含从第一个不满足条件的值之后的所有值。
 func DropWhile[T any](f func(x T) bool) func(ch chan T) chan T {
 	return func(ch chan T) chan T {
-		ch_ := make(chan T, BufferSize)
+		ch_ := make(chan T, bufferSize)
 
 		num := 0
 		go func() {
@@ -464,7 +502,7 @@ func DropWhile[T any](f func(x T) bool) func(ch chan T) chan T {
 func Union[T, U any](fn func(x T) U) func(chs ...chan T) chan U {
 
 	return func(chs ...chan T) chan U {
-		out := make(chan U, BufferSize)
+		out := make(chan U, bufferSize)
 
 		var wg sync.WaitGroup
 
@@ -500,7 +538,7 @@ func Union[T, U any](fn func(x T) U) func(chs ...chan T) chan U {
 // 如果第二个通道数据很多，要考虑内存占用问题。
 func InterSimple[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
 
-	ch := make(chan T, BufferSize)
+	ch := make(chan T, bufferSize)
 
 	go func() {
 
@@ -533,7 +571,7 @@ func InterSimple[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
 // 如果第二个通道数据很多，要考虑内存占用问题。
 func SubSimple[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
 
-	ch := make(chan T, BufferSize)
+	ch := make(chan T, bufferSize)
 
 	go func() {
 
@@ -565,7 +603,7 @@ func SubSimple[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
 // 如果第二个通道数据很多，要考虑内存占用问题。
 func Cartesian[T, U any](ch1 chan T, ch2 chan U) chan pair.Pair[T, U] {
 
-	ch := make(chan pair.Pair[T, U], BufferSize)
+	ch := make(chan pair.Pair[T, U], bufferSize)
 
 	dd := Collect(ch2)
 
@@ -603,7 +641,7 @@ func Window[T any](ch chan T) func(windowSize int) chan []T {
 
 	return func(windowSize int) chan []T {
 		window := make([]T, 0, windowSize)
-		out := make(chan []T, BufferSize)
+		out := make(chan []T, bufferSize)
 
 		go func() {
 			defer close(out)
@@ -637,7 +675,7 @@ func Split[T any](fn func(T) int, num int) func(ch chan T) []chan T {
 	// 创建一个包含 num 个通道的切片
 	a := make([]chan T, num)
 	for i := 0; i < num; i++ {
-		a[i] = make(chan T, BufferSize)
+		a[i] = make(chan T, bufferSize)
 	}
 
 	return func(ch chan T) []chan T {
@@ -702,7 +740,7 @@ func SortSimple[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
 
-		ch_ := make(chan T, BufferSize)
+		ch_ := make(chan T, bufferSize)
 
 		go func() {
 			defer close(ch_)
@@ -734,7 +772,7 @@ func Merge[T any](f func(x, y T) bool) func(cs ...chan T) chan T {
 	return func(cs ...chan T) chan T {
 
 		mins := make([]T, len(cs))
-		sortedCh := make(chan T, BufferSize)
+		sortedCh := make(chan T, bufferSize)
 
 		go func() {
 
@@ -801,7 +839,7 @@ func Merge[T any](f func(x, y T) bool) func(cs ...chan T) chan T {
 func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
-		ch_ := Window(ch)(SortWindowSize)
+		ch_ := Window(ch)(sortWindowSize)
 		num := 0
 		file := []string{}
 
@@ -858,7 +896,7 @@ func Group[T any](f func(x, y T) bool) func(ch chan T) chan []T {
 
 	return func(ch chan T) chan []T {
 
-		ch_ := make(chan []T, BufferSize)
+		ch_ := make(chan []T, bufferSize)
 
 		go func() {
 			defer close(ch_)
@@ -904,7 +942,7 @@ func Group[T any](f func(x, y T) bool) func(ch chan T) chan []T {
 func InnerJoin[T any, U any, R any](f func(x T, y U) R, f1 func(x T, y U) int) func(ch1 chan T, ch2 chan U) chan R {
 
 	return func(ch1 chan T, ch2 chan U) chan R {
-		ch_ := make(chan R, BufferSize) // 使用合理的缓冲区大小
+		ch_ := make(chan R, bufferSize) // 使用合理的缓冲区大小
 
 		go func() {
 			defer close(ch_)
@@ -991,7 +1029,7 @@ func InnerJoin[T any, U any, R any](f func(x T, y U) R, f1 func(x T, y U) int) f
 func LeftJoin[T any, U any, R any](f func(x T, y U) R, f1 func(x T, y U) int) func(ch1 chan T, ch2 chan U) chan R {
 
 	return func(ch1 chan T, ch2 chan U) chan R {
-		ch_ := make(chan R, BufferSize) // 使用合理的缓冲区大小
+		ch_ := make(chan R, bufferSize) // 使用合理的缓冲区大小
 
 		go func() {
 			defer close(ch_)
@@ -1087,7 +1125,7 @@ func LeftJoin[T any, U any, R any](f func(x T, y U) R, f1 func(x T, y U) int) fu
 //   - 一个通道，用于接收排序后的数据。
 func Unique[T any](f func(x, y T) bool) func(ch chan T) chan T {
 	return func(ch chan T) chan T {
-		ch_ := make(chan T, BufferSize)
+		ch_ := make(chan T, bufferSize)
 
 		go func() {
 			defer close(ch_)
@@ -1121,7 +1159,7 @@ func Unique[T any](f func(x, y T) bool) func(ch chan T) chan T {
 //   - 一个通道，用于接收排序后的数据。
 func Subtract[T any](f func(x, y T) int) func(ch1 chan T, ch2 chan T) chan T {
 	return func(ch1 chan T, ch2 chan T) chan T {
-		ch_ := make(chan T, BufferSize)
+		ch_ := make(chan T, bufferSize)
 
 		go func() {
 			defer close(ch_)
@@ -1165,7 +1203,7 @@ func Subtract[T any](f func(x, y T) int) func(ch1 chan T, ch2 chan T) chan T {
 //   - 返回一个新的通道，该通道发送类型为 T 的元素，这些元素是展平后的切片元素。
 func Flatten[S ~[]T, T any](ch chan S) chan T {
 
-	ch_ := make(chan T, BufferSize)
+	ch_ := make(chan T, bufferSize)
 
 	go func() {
 		defer close(ch_)
