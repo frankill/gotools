@@ -18,6 +18,17 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+// ToRedisList 方法将通道中的数据写入 Redis 中list键
+// 参数:
+//
+// host - Redis 地址
+// pwd - Redis 密码
+// dbNUM - Redis 数据库编号
+//
+// key - Redis 中的列表名
+// 返回:
+//
+// 一个函数，接受一个键名和一个通道作为参数，将通道中的数据写入 Redis 中list键，并返回错误信息
 func ToRedisList[T any](host, pwd string, dbNUM int) func(key string, ch chan T) error {
 	return func(key string, ch chan T) error {
 		con := db.NewRedisClient[T](host, pwd, dbNUM).Clear(true)

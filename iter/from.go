@@ -31,6 +31,15 @@ func ErrorCH(ch chan error) {
 	}
 }
 
+// FromRedisList 方法从 Redis 中读取数据并发送到通道中
+// 参数:
+//
+// host - Redis 地址
+// pwd - Redis 密码
+// dbNUM - Redis 数据库编号
+//
+// 返回:
+// 返回一个函数，接受一个键名作为参数，返回一个通道，用于接收从 Redis 中读取的数据，并返回错误信息
 func FromRedisList[T any](host, pwd string, dbNUM int) func(key string) (chan T, chan error) {
 
 	return func(key string) (chan T, chan error) {
