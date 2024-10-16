@@ -18,6 +18,13 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+func ToRedisList[T any](host, pwd string, dbNUM int) func(key string, ch chan T) error {
+	return func(key string, ch chan T) error {
+		con := db.NewRedisClient[T](host, pwd, dbNUM).Clear(true)
+		return con.PushList(key, ch)
+	}
+}
+
 // ToGzip 方法将通道中的数据写入 gzip 文件
 // 参数:
 //

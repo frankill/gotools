@@ -3,17 +3,15 @@ package db
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"time"
 
-	"github.com/frankill/gotools"
 	"github.com/go-redis/redis/v7"
 )
 
 type Redis[T any] struct {
 	client *redis.Client
+	clear  bool
 	ctx    context.Context
-	NUM    int64
 }
 
 func NewRedisClient[T any](host, pwd string, db int) *Redis[T] {
@@ -23,76 +21,109 @@ func NewRedisClient[T any](host, pwd string, db int) *Redis[T] {
 		DB:       db, // 默认数据库
 	})
 
-	ctx := gotools.SysStop()
-
 	return &Redis[T]{
 		client: rdb,
-		ctx:    ctx,
-		NUM:    100,
 	}
+}
+
+func (r *Redis[T]) Context(ctx context.Context) *Redis[T] {
+	r.ctx = ctx
+	return r
+}
+
+func (r *Redis[T]) Clear(t bool) *Redis[T] {
+	r.clear = t
+	return r
+}
+
+func (r *Redis[T]) Close() error {
+	return r.client.Close()
+}
+
+func (r *Redis[T]) LLen(key string) (int64, error) {
+	return r.client.LLen(key).Result()
+}
+
+func (r *Redis[T]) PushList(key string, data chan T) error {
+
+	defer func() {
+		if r.clear {
+			r.Close()
+		}
+
+	}()
+
+	for {
+		select {
+
+		case <-r.ctx.Done():
+			return nil
+
+		case item, ok := <-data:
+
+			if !ok {
+				return nil
+			}
+
+			itemBytes, err := json.Marshal(item)
+			if err != nil {
+				return err
+			}
+
+			_, err = r.client.RPush(key, itemBytes).Result()
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 }
 
 func (r *Redis[T]) PopList(key string) (chan T, chan error) {
 
-	ch := make(chan T)
-	errs := make(chan error, 1)
+	ch := make(chan T, 100)
+	errs := make(chan error, 3)
 
 	go func() {
+
 		defer close(ch)
 		defer close(errs)
-		defer r.client.Close()
 
-		pipe := r.client.Pipeline()
-		for i := 0; i < int(r.NUM); i++ {
-			pipe.LPop(key)
-		}
+		defer func() {
+			if r.clear {
+				r.Close()
+			}
+		}()
 
 		for {
-
-			if _, err := r.client.Ping().Result(); err != nil {
-				errs <- err
-				return
-			}
-
 			select {
 
 			case <-r.ctx.Done():
 				return
 
 			default:
-				num, _ := r.client.LLen(key).Result()
-				if num == 0 {
-					time.Sleep(100 * time.Second)
+				var item T
+				value, err := r.client.LPop(key).Result()
+
+				if err == redis.Nil {
+					time.Sleep(time.Second * 10)
 					continue
 				}
-				if num < r.NUM {
-					pipe = r.client.Pipeline()
-					for i := 0; i < int(num); i++ {
-						pipe.LPop(key)
-					}
 
-				}
-
-				res, err := pipe.Exec()
 				if err != nil {
 					errs <- err
 					return
 				}
 
-				for _, v := range res {
-					var tmp T
-					err = json.Unmarshal([]byte(v.String()[len(key)+7:]), tmp)
-
-					if err != nil {
-						errs <- errors.New("json unmarshal error:" + v.String())
-						continue
-					}
-					ch <- tmp
+				if err := json.Unmarshal([]byte(value), &item); err != nil {
+					errs <- err
+					return
 				}
 
+				ch <- item
 			}
-
 		}
+
 	}()
 
 	return ch, errs

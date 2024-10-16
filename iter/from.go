@@ -35,7 +35,7 @@ func FromRedisList[T any](host, pwd string, dbNUM int) func(key string) (chan T,
 
 	return func(key string) (chan T, chan error) {
 
-		con := db.NewRedisClient[T](host, pwd, dbNUM)
+		con := db.NewRedisClient[T](host, pwd, dbNUM).Clear(true)
 
 		return con.PopList(key)
 
