@@ -46,6 +46,9 @@ func (r *Redis[T]) LLen(key string) (int64, error) {
 
 func (r *Redis[T]) PushList(key string, data chan T) error {
 
+	if r.ctx == nil {
+		r.ctx = context.Background()
+	}
 	defer func() {
 		if r.clear {
 			r.Close()
@@ -80,6 +83,10 @@ func (r *Redis[T]) PushList(key string, data chan T) error {
 }
 
 func (r *Redis[T]) PopList(key string) (chan T, chan error) {
+
+	if r.ctx == nil {
+		r.ctx = context.Background()
+	}
 
 	ch := make(chan T, 100)
 	errs := make(chan error, 3)
