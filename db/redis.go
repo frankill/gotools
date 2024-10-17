@@ -82,7 +82,7 @@ func (r *Redis[T]) PushList(key string, data chan T) error {
 
 }
 
-func (r *Redis[T]) PopList(key string) (chan T, chan error) {
+func (r *Redis[T]) PopList(key string, num int) (chan T, chan error) {
 
 	if r.ctx == nil {
 		r.ctx = context.Background()
@@ -102,7 +102,18 @@ func (r *Redis[T]) PopList(key string) (chan T, chan error) {
 			}
 		}()
 
+		if num == 0 {
+			return
+		}
+
+		n := 0
+
 		for {
+
+			if num > 0 && n >= num {
+				return
+			}
+
 			select {
 
 			case <-r.ctx.Done():
@@ -128,6 +139,8 @@ func (r *Redis[T]) PopList(key string) (chan T, chan error) {
 				}
 
 				ch <- item
+
+				n++
 			}
 		}
 

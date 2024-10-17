@@ -37,16 +37,19 @@ func ErrorCH(ch chan error) {
 // host - Redis 地址
 // pwd - Redis 密码
 // dbNUM - Redis 数据库编号
+// num - 从 Redis 中读取的数据条数 等于0 直接返回，大于0 读取指定数量的数据， 小于0 读取所有数据
 //
 // 返回:
 // 返回一个函数，接受一个键名作为参数，返回一个通道，用于接收从 Redis 中读取的数据，并返回错误信息
-func FromRedisList[T any](host, pwd string, dbNUM int) func(key string) (chan T, chan error) {
+//
+// 注意: 该函数会持续从 Redis 中读取数据
+func FromRedisList[T any](host, pwd string, dbN, num int) func(key string) (chan T, chan error) {
 
 	return func(key string) (chan T, chan error) {
 
-		con := db.NewRedisClient[T](host, pwd, dbNUM).Clear(true)
+		con := db.NewRedisClient[T](host, pwd, dbN).Clear(true)
 
-		return con.PopList(key)
+		return con.PopList(key, num)
 
 	}
 
