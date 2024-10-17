@@ -16,15 +16,17 @@ var (
 // 并记录满足条件的位置（以1表示）和不满足条件的位置（以0表示）到结果切片中返回。
 //
 // 参数:
-// - fun: 一个通用型函数，接受任意数量的T类型参数并返回一个布尔值，用于判断一组元素是否满足特定条件。
-// - arr: 可变数量的切片数组，每个切片包含相同数量的T类型元素，这些切片将被并行遍历以应用fun函数。
+//   - fun: 一个通用型函数，接受任意数量的T类型参数并返回一个布尔值，用于判断一组元素是否满足特定条件。
+//   - arr: 可变数量的切片数组，每个切片包含相同数量的T类型元素，这些切片将被并行遍历以应用fun函数。
 //
 // 返回值:
-// - 一个int类型的切片，表示在对应位置上元素是否满足fun条件的结果。满足条件的位置记为1，不满足则记为0。
+//   - 一个int类型的切片，表示在对应位置上元素是否满足fun条件的结果。满足条件的位置记为1，不满足则记为0。
 //
 // 注意:
-// - 所有输入的切片arr必须具有相同的长度。
-// - 使用了Go泛型[T any]，允许该函数接受任何类型的参数和切片。
+//
+//   - 所有输入的切片arr必须具有相同的长度。
+//
+//   - 使用了Go泛型[T any]，允许该函数接受任何类型的参数和切片。
 func Which[T any](fun func(x ...T) bool, arr ...[]T) []int {
 
 	if len(arr) == 0 {
@@ -82,10 +84,10 @@ func ToGeneric[T any](arr []any) []T {
 // 要求 T 类型实现 `any` 接口。
 //
 // 参数:
-// - arr: 要转换的切片 S。
+//   - arr: 要转换的切片 S。
 //
 // 返回值:
-// - 返回一个新的 []any 类型切片，包含输入的所有元素，保持原有的顺序。
+//   - 返回一个新的 []any 类型切片，包含输入的所有元素，保持原有的顺序。
 func ToAny[S ~[]T, T any](arr S) []any {
 
 	res := make([]any, 0, len(arr))
@@ -100,11 +102,11 @@ func ToAny[S ~[]T, T any](arr S) []any {
 // 它返回一个新的切片，其中包含与输入切片相同的元素。
 // 参数:
 //
-//	arr - 要复制的切片。
+//   - arr - 要复制的切片。
 //
 // 返回:
 //
-//	一个新的切片，它是输入切片的副本。
+//   - 一个新的切片，它是输入切片的副本。
 func Copy[T any](arr []T) []T {
 	return CopyWithNum(arr, len(arr))
 }
@@ -113,12 +115,12 @@ func Copy[T any](arr []T) []T {
 // 如果 num 大于原切片长度，则重复原切片中的元素以填充新切片。
 // 参数:
 //
-//	arr - 要复制的切片。
-//	num - 新切片的长度。
+//   - arr - 要复制的切片。
+//   - num - 新切片的长度。
 //
 // 返回:
 //
-//	一个新的切片，其长度为 num，且元素为 arr 的重复。
+//   - 一个新的切片，其长度为 num，且元素为 arr 的重复。
 func CopyWithNum[T any](arr []T, num int) []T {
 
 	res := make([]T, num)
@@ -143,10 +145,10 @@ func CopyWithNum[T any](arr []T, num int) []T {
 // 并返回转换后的切片。如果 x 中的元素在映射中不存在，则使用 default_value 填充。
 // 参数:
 //
-//	x - 待转换的切片。
-//	array_from - 映射的键值切片。
-//	array_to - 映射的值切片。
-//	default_value - 当 x 中的元素在映射中不存在时使用的默认值。
+//   - x - 待转换的切片。
+//   - array_from - 映射的键值切片。
+//   - array_to - 映射的值切片。
+//   - default_value - 当 x 中的元素在映射中不存在时使用的默认值。
 //
 // 返回:
 //
@@ -183,17 +185,17 @@ func Transform[S ~[]F, D ~[]T, F gotools.Comparable, T any](x S, array_from S, a
 // 该函数的目的是通过索引匹配将key数组的元素作为映射的键，value数组的元素作为对应的值。
 // 参数:
 //
-//	key K: 用于映射的键的数组。
-//	value V: 与键对应的值的数组。
+//   - key K: 用于映射的键的数组。
+//   - value V: 与键对应的值的数组。
 //
 // 返回值:
 //
-//	map[T]S: 一个映射，其中键来自key数组，值来自value数组。
+//   - map[T]S: 一个映射，其中键来自key数组，值来自value数组。
 //
 // 注意:
 //
-//	K和V的类型参数必须是数组类型，且K的元素类型必须是可比较的。
-//	这个函数假设key和value数组的长度是相同的，以便进行索引匹配。
+//   - K和V的类型参数必须是数组类型，且K的元素类型必须是可比较的。
+//   - 这个函数假设key和value数组的长度是相同的，以便进行索引匹配。
 func ToMas[K ~[]T, V ~[]S, T gotools.Comparable, S any](key K, value V) map[T]S {
 
 	dict := make(map[T]S, len(key))
@@ -214,13 +216,13 @@ func ToMas[K ~[]T, V ~[]S, T gotools.Comparable, S any](key K, value V) map[T]S 
 //
 // 参数:
 //
-//	a: 类型为 S 的切片，S 是一个泛型切片，其元素类型为 T。
-//	b: 类型同样为 S 的切片，作为参考顺序。
-//	exist: 一个映射，键为 T 类型，用于快速判断元素是否存在于某个集合中。
+//   - a: 类型为 S 的切片，S 是一个泛型切片，其元素类型为 T。
+//   - b: 类型同样为 S 的切片，作为参考顺序。
+//   - exist: 一个映射，键为 T 类型，用于快速判断元素是否存在于某个集合中。
 //
 // 返回值:
 //
-//	返回一个整数，表示 source 中与 match 顺序一致的最长连续子序列的长度。
+//   - 返回一个整数，表示 source 中与 match 顺序一致的最长连续子序列的长度。
 func HasOrderMaxCount[S ~[]T, T gotools.Comparable](source, match S, exist map[T]struct{}) int {
 
 	count := 0
@@ -254,13 +256,13 @@ func HasOrderMaxCount[S ~[]T, T gotools.Comparable](source, match S, exist map[T
 //
 // 参数：
 //
-//	source: 待检查的源切片。
-//	match: 用于匹配的参考切片。
+//   - source: 待检查的源切片。
+//   - match: 用于匹配的参考切片。
 //
 // 返回值：
 //
-//	返回源切片中与 match 中元素相等的元素个数。
-//	如果在计数过程中发现源切片中有重复元素，则提前终止并返回当前计数值。
+//   - 返回源切片中与 match 中元素相等的元素个数。
+//   - 如果在计数过程中发现源切片中有重复元素，则提前终止并返回当前计数值。
 func HasDupMaxCount[S ~[]T, T gotools.Comparable](source, match S) int {
 	count := 0
 	j := 0 // 用于追踪 b 切片中的当前元素位置
@@ -293,13 +295,13 @@ func HasDupMaxCount[S ~[]T, T gotools.Comparable](source, match S) int {
 //
 // 参数：
 //
-//	source: 待检查的源切片。
-//	match: 用于匹配的参考切片。
+//   - source: 待检查的源切片。
+//   - match: 用于匹配的参考切片。
 //
 // 返回值：
 //
-//	返回源切片中与 match 中元素相等的连续元素个数。
-//	当 match 中的所有元素都已在 source 中找到匹配或 source 中不再有匹配元素时，停止计数并返回结果。
+//   - 返回源切片中与 match 中元素相等的连续元素个数。
+//   - 当 match 中的所有元素都已在 source 中找到匹配或 source 中不再有匹配元素时，停止计数并返回结果。
 func HasIncreaseMaxCount[S ~[]T, T gotools.Comparable](source, match S) int {
 	count := 0
 	j := 0 // 用于追踪 b 切片中的当前元素位置
@@ -324,12 +326,12 @@ func HasIncreaseMaxCount[S ~[]T, T gotools.Comparable](source, match S) int {
 // 这个函数的目的是为了方便地初始化一个切片，当切片的所有元素都相同时，可以避免重复的初始化代码。
 // 参数:
 //
-//	x: 类型为 T 的元素，切片中的每个元素都将复制这个值。
-//	n: 切片的长度，指定切片将包含多少个元素。
+//   - x: 类型为 T 的元素，切片中的每个元素都将复制这个值。
+//   - n: 切片的长度，指定切片将包含多少个元素。
 //
 // 返回值:
 //
-//	一个类型为 []T 的切片，长度为 n，其中所有元素都等于 x。
+//   - 一个类型为 []T 的切片，长度为 n，其中所有元素都等于 x。
 func Repeat[T any](x T, n int) []T {
 	result := make([]T, n)
 	for i := 0; i < n; i++ {

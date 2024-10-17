@@ -21,11 +21,11 @@ import (
 // ToRedisList 方法将通道中的数据写入 Redis 中list键
 // 参数:
 //
-// host - Redis 地址
-// pwd - Redis 密码
-// dbNUM - Redis 数据库编号
+//   - host - Redis 地址
+//   - pwd - Redis 密码
+//   - dbNUM - Redis 数据库编号
+//   - key - Redis 中的列表名
 //
-// key - Redis 中的列表名
 // 返回:
 //
 // 一个函数，接受一个list键，一个通道作为参数，将通道中的数据写入 Redis 中list键，并返回错误信息
@@ -39,12 +39,12 @@ func ToRedisList[T any](host, pwd string, dbNUM int) func(key string, ch chan T)
 // ToGzip 方法将通道中的数据写入 gzip 文件
 // 参数:
 //
-// path - gzip 文件路径
-// append - 是否追加到文件末尾（true）还是覆盖文件（false）
+//   - path - gzip 文件路径
+//   - append - 是否追加到文件末尾（true）还是覆盖文件（false）
 //
 // 返回:
 //
-// 一个函数，接受一个通道作为参数，写入通道中的数据到 gzip 文件中，并返回错误信息。
+//   - 一个函数，接受一个通道作为参数，写入通道中的数据到 gzip 文件中，并返回错误信息。
 func ToGzip(path string, append bool) func(ch chan string) error {
 	return func(ch chan string) error {
 		var f *os.File
@@ -80,13 +80,13 @@ func ToGzip(path string, append bool) func(ch chan string) error {
 // ToJson 方法将通道中的数据写入到 JSON 文件中
 // 参数:
 //
-// path - 文件路径
-// append - 是否追加写入文件
-// ch - 一个通道，用于接收待写入的数据。
+//   - path - 文件路径
+//   - append - 是否追加写入文件
+//   - ch - 一个通道，用于接收待写入的数据。
 //
 // 返回:
 //
-// 一个函数，用于执行 JSON 文件写入操作。
+//   - 一个函数，用于执行 JSON 文件写入操作。
 func ToJson[T any](path string, append bool) func(ch chan T) error {
 
 	return func(ch chan T) error {
@@ -126,13 +126,13 @@ func ToJson[T any](path string, append bool) func(ch chan T) error {
 // ToTxt 方法将通道中的数据写入到文本文件中
 // 参数:
 //
-// path - 文件路径
-// append - 是否追加写入文件
-// ch - 一个通道，用于接收待写入的数据。
+//   - path - 文件路径
+//   - append - 是否追加写入文件
+//   - ch - 一个通道，用于接收待写入的数据。
 //
 // 返回:
 //
-// 一个函数，用于执行文件写入操作。
+//   - 一个函数，用于执行文件写入操作。
 func ToTxt(path string, append bool) func(ch chan string) error {
 
 	return func(ch chan string) error {
@@ -170,14 +170,13 @@ func ToTxt(path string, append bool) func(ch chan string) error {
 // ToMysqlInset 方法将通道中的数据插入到 MySQL 数据库中
 // 参数:
 //
-// con mysql 连接字符串
-//
-//	q - *SQLBuilder 类型的结构体，用于构建 SQL 查询语句。
-//	ch - 一个通道，用于接收待插入的数据。
+//   - con mysql 连接字符串
+//   - q - *SQLBuilder 类型的结构体，用于构建 SQL 查询语句。
+//   - ch - 一个通道，用于接收待插入的数据。
 //
 // 返回:
 //
-// 一个函数， 用于执行数据库插入操作。
+//   - 一个函数， 用于执行数据库插入操作。
 func ToMysqlInset(con string, q query.SqlInsert) func(ch chan []any) error {
 
 	return func(ch chan []any) error {
@@ -199,14 +198,13 @@ func ToMysqlInset(con string, q query.SqlInsert) func(ch chan []any) error {
 // ToCKInsert 方法将通道中的数据插入到 ClickHouse 数据库中
 // 参数:
 //
-// ck *db.CKinfo - *db.CKinfo 类型的结构体，用于构建 ck 客户端信息
-//
-//	q - *SQLBuilder 类型的结构体，用于构建 SQL 查询语句。
-//	ch - 一个通道，用于接收待插入的数据。
+//   - ck *db.CKinfo - *db.CKinfo 类型的结构体，用于构建 ck 客户端信息
+//   - q - *SQLBuilder 类型的结构体，用于构建 SQL 查询语句。
+//   - ch - 一个通道，用于接收待插入的数据。
 //
 // 返回:
 //
-// 一个函数， 用于执行数据库插入操作。
+//   - 一个函数， 用于执行数据库插入操作。
 func ToCK(ck *db.CKinfo, q query.SqlInsert) func(ch chan []any) error {
 
 	return func(ch chan []any) error {
@@ -228,11 +226,10 @@ func ToCK(ck *db.CKinfo, q query.SqlInsert) func(ch chan []any) error {
 // ToElasticSearch 将数据写入 ElasticSearch。
 // 参数:
 //
-// client: ElasticSearch 客户端。
-// index: ElasticSearch 索引名称。
-// ctype: ElasticSearch 写入类型 index create
-//
-//	data: 需要写入的数据。
+//   - client: ElasticSearch 客户端。
+//   - index: ElasticSearch 索引名称。
+//   - ctype: ElasticSearch 写入类型 index create
+//   - data: 需要写入的数据。
 //
 // 返回:
 //
@@ -362,12 +359,13 @@ func (t *TableField) SetPath(path string) *TableField {
 // ToTable 将通道中的数据写入指定分隔符 文件。
 // 参数:
 //
-// t *TableField: 表格配置
-// ch: 一个通道，通道中的每个值是一个字符串切片（[]string），表示表格文件中的一行数据。
+//   - t *TableField: 表格配置
+//   - ch: 一个通道，通道中的每个值是一个字符串切片（[]string），表示表格文件中的一行数据。
 //
 // 返回:
 //
-//	error
+//   - 一个函数，用于执行文件写入操作。
+//   - error
 func ToTable(t *TableField) func(ch chan []string) error {
 
 	return func(ch chan []string) error {
@@ -477,8 +475,8 @@ func (e *ExcelField) getRow(f *excelize.File, sheet string) (int, error) {
 // ToExcel 将通道中的数据写入指定的 Excel 文件。
 // 参数:
 //
-// e *ExcelField: Excel 文件配置
-// ch: 一个通道，通道中的每个值是一个字符串切片（[]string），表示 Excel 文件中的一行数据。
+//   - e *ExcelField: Excel 文件配置
+//   - ch: 一个通道，通道中的每个值是一个字符串切片（[]string），表示 Excel 文件中的一行数据。
 //
 // 返回:
 //

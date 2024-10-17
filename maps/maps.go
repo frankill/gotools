@@ -50,15 +50,15 @@ func OfCount[K gotools.Comparable, V any](f func(V) K, data []V) map[K]int {
 // 该函数允许泛型使用，确保键类型K是可比较的，值类型V可以是任何类型。
 // 参数:
 //
-//	m: 一个映射，它的键将被收集到切片中。
+//   - m: 一个映射，它的键将被收集到切片中。
 //
 // 返回值:
 //
-//	一个包含映射所有键的切片。
+//   - 一个包含映射所有键的切片。
 //
 // 使用场景:
 //
-//	当需要单独处理或传递映射的键集合时，此函数非常有用。
+//   - 当需要单独处理或传递映射的键集合时，此函数非常有用。
 func Keys[K gotools.Comparable, V any](m ...map[K]V) []K {
 
 	if len(m) == 0 {
@@ -88,11 +88,11 @@ func Keys[K gotools.Comparable, V any](m ...map[K]V) []K {
 //
 // 参数:
 //
-//	m: 一个类型为map[K]V的map，其中K是可比较的，V可以是任何类型。
+//   - m: 一个类型为map[K]V的map，其中K是可比较的，V可以是任何类型。
 //
 // 返回值:
 //
-//	一个类型为[]V的切片，包含了map m中所有值的副本。
+//   - 一个类型为[]V的切片，包含了map m中所有值的副本。
 func Values[K gotools.Comparable, V any](m ...map[K]V) []V {
 
 	if len(m) == 0 {
@@ -113,10 +113,14 @@ func Values[K gotools.Comparable, V any](m ...map[K]V) []V {
 }
 
 // Filter 过滤给定映射中的元素，仅保留满足特定条件的键值对。
-// 参数 f 是一个函数，用于测试每个键值对是否满足条件。如果满足，则返回 true，否则返回 false。
-// 参数 m 是要过滤的映射。
-// 返回值是一个新的映射，仅包含满足条件的键值对。
-// Filter 的类型参数 K 和 V 分别表示映射的键类型和值类型，其中 K 必须实现 gotools.Comparable 接口，以支持作为映射的键。
+// 参数:
+//
+//   - f: 一个函数，它接受每个元素作为输入，返回一个可比较的键。
+//   - m: 要过滤的映射。
+//
+// 返回值:
+//
+//   - 一个新的映射，其中键都是在 m 中存在的键。
 func Filter[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) map[K]V {
 	filtered := make(map[K]V)
 	for k, v := range m {
@@ -130,13 +134,13 @@ func Filter[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) map[K]V {
 // FilterArr 根据给定的数组过滤给定映射中的元素，仅保留满足特定条件的键值对。
 // 参数:
 //
-//	m: 要过滤的映射。
+//   - m: 要过滤的映射。
 //
-// arr : 要过滤的数组。
+//   - arr : 要过滤的数组。
+//
 // 返回值:
 //
-//	一个新的映射，其中键都是在 arr 中存在的键，
-
+//   - 一个新的映射，其中键都是在 arr 中存在的键，
 func FilterArr[S ~[]K, K gotools.Comparable, V any](m map[K]V, arr S) map[K]V {
 	filtered := make(map[K]V)
 	for k, v := range m {
@@ -153,18 +157,18 @@ func FilterArr[S ~[]K, K gotools.Comparable, V any](m map[K]V, arr S) map[K]V {
 // 其中包含原始键和应用函数后得到的新值。
 // 参数:
 //
-//	f: 一个函数，它接受映射中的键和值作为参数，并返回一个新值。
-//	m: 要应用函数的映射。
+//   - f: 一个函数，它接受映射中的键和值作为参数，并返回一个新值。
+//   - m: 要应用函数的映射。
 //
 // 返回值:
 //
-//	一个新的映射，其中每个键都对应于原始映射中的键，
-//	但其值是通过应用函数 f 得到的新值。
+//   - 一个新的映射，其中每个键都对应于原始映射中的键，
+//     但其值是通过应用函数 f 得到的新值。
 //
 // 使用场景:
 //
-//	当需要对映射中的所有值进行某种转换时，此函数非常有用。
-//	它允许在不改变原始映射的情况下，创建一个包含转换后值的新映射。
+//   - 当需要对映射中的所有值进行某种转换时，此函数非常有用。
+//   - 它允许在不改变原始映射的情况下，创建一个包含转换后值的新映射。
 func ApplyValue[K gotools.Comparable, V, U any](f func(K, V) U, m map[K]V) map[K]U {
 	applied := make(map[K]U, len(m))
 
@@ -179,16 +183,16 @@ func ApplyValue[K gotools.Comparable, V, U any](f func(K, V) U, m map[K]V) map[K
 // 其中键是应用函数后的结果，值保持不变。
 // 参数:
 //
-//	f: 一个函数，接受映射的键和值作为参数，返回一个新的键。
-//	m: 待处理的映射。
+//   - f: 一个函数，接受映射的键和值作为参数，返回一个新的键。
+//   - m: 待处理的映射。
 //
 // 返回值:
 //
-//	一个新的映射，其中键是应用函数 f 后的结果，值是从原始映射中对应的值。
+//   - 一个新的映射，其中键是应用函数 f 后的结果，值是从原始映射中对应的值。
 //
 // 使用场景:
 //
-//	当需要根据原始映射的键和值计算出新的键，并保持值不变时，可以使用这个函数。
+//   - 当需要根据原始映射的键和值计算出新的键，并保持值不变时，可以使用这个函数。
 func ApplyKey[K, U gotools.Comparable, V any](f func(K, V) U, m map[K]V) map[U]V {
 	applied := make(map[U]V, len(m))
 
@@ -203,12 +207,12 @@ func ApplyKey[K, U gotools.Comparable, V any](f func(K, V) U, m map[K]V) map[U]V
 // 值是原映射的值通过函数处理后的结果。
 // 参数:
 //
-//	f: 一个函数，它接受原映射的键和值作为参数，返回新的键和值。
-//	m: 原映射，它的键值对将被应用函数处理。
+//   - f: 一个函数，它接受原映射的键和值作为参数，返回新的键和值。
+//   - m: 原映射，它的键值对将被应用函数处理。
 //
 // 返回值:
 //
-//	一个新的映射，其中键是原映射的键和值通过函数处理后的结果，值是原映射的值通过函数处理后的结果。
+//   - 一个新的映射，其中键是原映射的键和值通过函数处理后的结果，值是原映射的值通过函数处理后的结果。
 func ApplyBoth[K, U gotools.Comparable, V, S any](f func(K, V) (U, S), m map[K]V) map[U]S {
 	applied := make(map[U]S, len(m))
 
@@ -222,14 +226,14 @@ func ApplyBoth[K, U gotools.Comparable, V, S any](f func(K, V) (U, S), m map[K]V
 // Apply 应用给定的函数 f 到 map m 的每个键值对上，返回应用函数后的结果集合。
 // 参数:
 //
-//	f: 一个函数，它接受 map 的键和值作为参数，返回一个任意类型的值。
-//	m: 一个 map，它的每个键值对都会被函数 f 处理。
+//   - f: 一个函数，它接受 map 的键和值作为参数，返回一个任意类型的值。
+//   - m: 一个 map，它的每个键值对都会被函数 f 处理。
 //
 // 返回值:
 //
-//	一个切片，包含对 map 中每个键值对应用函数 f 后的结果。
+//   - 一个切片，包含对 map 中每个键值对应用函数 f 后的结果。
 //
-// Apply 的目的是提供一个通用的方式，来对 map 的所有元素执行某种操作，而无需直接修改原 map。
+//   - Apply 的目的是提供一个通用的方式，来对 map 的所有元素执行某种操作，而无需直接修改原 map。
 func Apply[K gotools.Comparable, V, U any](f func(K, V) U, m map[K]V) []U {
 
 	applied := make([]U, 0, len(m))
@@ -245,12 +249,12 @@ func Apply[K gotools.Comparable, V, U any](f func(K, V) U, m map[K]V) []U {
 // 该函数的目的是通过索引匹配将value数组的元素作为映射的键，通过调用f函数将value数组的元素作为对应的值。
 // 参数:
 //
-//	f: 一个函数，它接受一个S类型的参数，返回一个T类型的值。
-//	value: 用于映射的值的数组。
+//	 - f: 一个函数，它接受一个S类型的参数，返回一个T类型的值。
+//	 - value: 用于映射的值的数组。
 //
 // 返回值:
 //
-//	map[T]S: 一个映射，其中键来自value数组，值来自f函数的返回值。
+//	 - map[T]S: 一个映射，其中键来自value数组，值来自f函数的返回值。
 //
 
 func FromArray2[V ~[]S, T gotools.Comparable, S any](f func(x S) T, value V) map[T]S {
@@ -273,11 +277,11 @@ func FromArray2[V ~[]S, T gotools.Comparable, S any](f func(x S) T, value V) map
 // 这个函数的目的是为了提供一种将map结构转换为更方便处理的切片形式的方法。
 // 参数:
 //
-//	m: 输入的映射(map)，其中K是键类型，V是值类型。
+//   - m: 输入的映射(map)，其中K是键类型，V是值类型。
 //
 // 返回值:
 //
-//	一个由Pair[K, V]组成的切片(slice)，每个Pair包含映射中的一对键值对。
+//   - 一个由Pair[K, V]组成的切片(slice)，每个Pair包含映射中的一对键值对。
 func ToArrayPairs[K gotools.Comparable, V any](m map[K]V) []pair.Pair[K, V] {
 
 	pairs := make([]pair.Pair[K, V], 0, len(m))
@@ -296,12 +300,12 @@ func ToArrayPairs[K gotools.Comparable, V any](m map[K]V) []pair.Pair[K, V] {
 // 值是对应 Pair 中的 Second 字段。
 // 参数:
 //
-//	fun - 一个函数，用于将数据数组中的元素转换为映射的键。
-//	data - 一个数组，其元素类型是 Pair，用于生成映射。
+//   - fun - 一个函数，用于将数据数组中的元素转换为映射的键。
+//   - data - 一个数组，其元素类型是 Pair，用于生成映射。
 //
 // 返回值:
 //
-//	一个映射，其中键是通过 fun 函数转换得到的，值是对应 Pair 中的 Second 字段。
+//   - 一个映射，其中键是通过 fun 函数转换得到的，值是对应 Pair 中的 Second 字段。
 func FromPairs[K ~[]pair.Pair[V, S], T gotools.Comparable, V, S any](fun func(V) T, data K) map[T]S {
 
 	dict := make(map[T]S, len(data))
@@ -320,18 +324,18 @@ func FromPairs[K ~[]pair.Pair[V, S], T gotools.Comparable, V, S any](fun func(V)
 //
 // 参数:
 //
-//	fun - 一个函数，它接受一个类型为S的参数，并返回一个可比较的类型T的结果。
-//	key - 一个类型为K的数组，其元素将被用于生成映射的键。
-//	value - 一个类型为V的数组，其元素将被用作生成映射的值。
+//   - fun - 一个函数，它接受一个类型为S的参数，并返回一个可比较的类型T的结果。
+//   - key - 一个类型为K的数组，其元素将被用于生成映射的键。
+//   - value - 一个类型为V的数组，其元素将被用作生成映射的值。
 //
 // 返回值:
 //
-//	一个映射，其中键是通过应用fun函数到key数组的元素得到的，值是对应于键在value数组中的元素。
+//   - 一个映射，其中键是通过应用fun函数到key数组的元素得到的，值是对应于键在value数组中的元素。
 //
 // 注意:
 //
-//	K和V的类型参数必须是数组类型，而T必须是可比较的类型，S可以是任何类型。
-//	这个函数假设key和value数组的长度是相同的，以便在生成映射时保持键-值对的一致性。
+//   - K和V的类型参数必须是数组类型，而T必须是可比较的类型，S可以是任何类型。
+//     这个函数假设key和value数组的长度是相同的，以便在生成映射时保持键-值对的一致性。
 func FromArrayWithFun[A ~[]K, B ~[]V, T gotools.Comparable, K, V any](fun func(K) T, key A, value B) map[T]V {
 
 	dict := make(map[T]V, len(key))
@@ -350,15 +354,15 @@ func FromArrayWithFun[A ~[]K, B ~[]V, T gotools.Comparable, K, V any](fun func(K
 // 键和值的序列用于初始化映射，随后映射将被扩展到指定的最大范围。
 // 参数:
 //
-//	key K: 键的序列，类型为切片。
-//	value V: 值的序列，类型为切片，必须与键的序列长度相同。
-//	max int: 映射的最大范围。
+//   - key K: 键的序列，类型为切片。
+//   - value V: 值的序列，类型为切片，必须与键的序列长度相同。
+//   - max int: 映射的最大范围。
 //
 // 返回值:
 //
-//	map[T]S: 创建的映射，其中T是键的类型，S是值的类型。
+//   - map[T]S: 创建的映射，其中T是键的类型，S是值的类型。
 //
-// 注意：该函数的类型参数使用了通用约束，要求K为切片类型，V也为切片类型，T和S分别是切片元素的类型。
+//   - 注意：该函数的类型参数使用了通用约束，要求K为切片类型，V也为切片类型，T和S分别是切片元素的类型。
 func PopulateSeries[K ~[]T, V ~[]S, T gotools.Number, S any](key K, value V, max int) map[T]S {
 
 	var v S
@@ -391,13 +395,13 @@ func PopulateSeries[K ~[]T, V ~[]S, T gotools.Number, S any](key K, value V, max
 //
 // 参数:
 //
-//	m: 要检查的map。
-//	key: 一个可变长参数，包含要检查的键。
+//   - m: 要检查的map。
+//   - key: 一个可变长参数，包含要检查的键。
 //
 // 返回值:
 //
-//	一个切片，包含所有指定键在map中的对应值。
-//	如果某个键不存在于map中，则对应位置的值为提供的默认值。
+//   - 一个切片，包含所有指定键在map中的对应值。
+//   - 如果某个键不存在于map中，则对应位置的值为提供的默认值。
 func Contains[M map[K]V, A []V, K gotools.Comparable, V any](m M, default_value V, key ...K) A {
 
 	lk := len(key)
@@ -427,11 +431,12 @@ func Contains[M map[K]V, A []V, K gotools.Comparable, V any](m M, default_value 
 // 这样做的目的是为了减少映射的大小或删除不再需要的条目。
 // 参数:
 //
-//	M: 映射的类型，它定义了键和值的类型。
-//	K: 映射中键的类型，必须是可比较的。
-//	V: 映射中值的类型。
-//	m: 要操作的映射。
-//	key: 要移除的键的切片。可以同时移除多个键。
+//   - m: 一个映射。
+//   - key: 一个或多个键。
+//
+// 返回值:
+//
+//   - 无
 func Remove[M map[K]V, K gotools.Comparable, V any](m M, key ...K) {
 
 	for i := range key {
@@ -443,10 +448,13 @@ func Remove[M map[K]V, K gotools.Comparable, V any](m M, key ...K) {
 }
 
 // Concat 合并多个映射表为一个。
-// 该函数接受一个或多个类型为[K]V的映射表作为参数，返回一个合并后的映射表。
-// 参数 m1 是一个变长参数，表示要合并的映射表序列。
-// 返回值是一个映射表，包含了所有输入映射表的键值对。
-// 如果没有提供任何映射表作为参数，函数将返回 空map
+// 参数:
+//
+//   - m1: 一个或多个映射。
+//
+// 返回值:
+//
+//   - 一个新的映射，其中包含了所有映射中的键值对。
 func Concat[K gotools.Comparable, V any](m1 ...map[K]V) map[K]V {
 
 	if len(m1) == 0 {
@@ -468,10 +476,14 @@ func Concat[K gotools.Comparable, V any](m1 ...map[K]V) map[K]V {
 }
 
 // Exists 检查给定的映射中是否存在满足特定条件的键值对。
-// 参数 f 是一个函数，用于定义条件，它接受映射的键和值作为参数，并返回一个布尔值。
-// 参数 m 是要检查的映射。
-// 返回值表示是否找到满足条件的键值对。
-// Exists 的泛型设计允许它适用于任何类型的映射，只要键是可比较的。
+// 参数:
+//
+//   - f: 一个函数，它接受每个元素作为输入，返回一个可比较的键。
+//   - m: 要检查的映射。
+//
+// 返回值:
+//
+//   - 如果映射中存在键值对满足 f 的条件，则返回 true。
 func Exists[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) bool {
 
 	for k, v := range m {
@@ -486,14 +498,14 @@ func Exists[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) bool {
 // 如果函数 f 对任何键值对返回 false，则立即返回 false，表示不是所有应用都成功。
 // 参数:
 //
-//	f: 一个函数，接受映射的键和值作为参数，并返回一个布尔值。
-//	    这个函数用于对每个键值对进行某种测试或处理。
-//	m: 要处理的映射，其键类型和值类型分别为 K 和 V。
+//   - f: 一个函数，接受映射的键和值作为参数，并返回一个布尔值。
+//     这个函数用于对每个键值对进行某种测试或处理。
+//   - m: 要处理的映射，其键类型和值类型分别为 K 和 V。
 //
 // 返回值:
 //
-//	如果函数 f 对映射中的所有键值对都返回 true，则返回 true；
-//	如果函数 f 对任何键值对返回 false，则返回 false。
+//   - 如果函数 f 对映射中的所有键值对都返回 true，则返回 true；
+//   - 如果函数 f 对任何键值对返回 false，则返回 false。
 func All[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) bool {
 	for k, v := range m {
 		if !f(k, v) {
@@ -510,11 +522,11 @@ func All[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) bool {
 //
 // 参数:
 //
-//	m: 输入的映射表，键为 K 类型，值为 V 类型元素的切片 S。
+//   - m: 输入的映射表，键为 K 类型，值为 V 类型元素的切片 S。
 //
 // 返回:
 //
-//	Pair[[]K, []V]: 包含两个切片的 Pair 结构体，First 切片包含映射表的所有键，Second 切片包含映射表的所有值。
+//   - Pair[[]K, []V]: 包含两个切片的 Pair 结构体，First 切片包含映射表的所有键，Second 切片包含映射表的所有值。
 func ToPairsArray2[K gotools.Comparable, S ~[]V, V any](m map[K]S) pair.Pair[[]K, []V] {
 
 	pairs := pair.Pair[[]K, []V]{}
@@ -543,11 +555,11 @@ func ToPairsArray2[K gotools.Comparable, S ~[]V, V any](m map[K]S) pair.Pair[[]K
 //
 // 参数:
 //
-//	m: 输入的映射表，键为 K 类型，值为 V 类型。
+//   - m: 输入的映射表，键为 K 类型，值为 V 类型。
 //
 // 返回:
 //
-//	Pair[[]K, []V]: 包含两个切片的 Pair 结构体，First 切片包含映射表的所有键，Second 切片包含映射表的所有值。
+//   - Pair[[]K, []V]: 包含两个切片的 Pair 结构体，First 切片包含映射表的所有键，Second 切片包含映射表的所有值。
 func ToPairsArray[K gotools.Comparable, V any](m map[K]V) pair.Pair[[]K, []V] {
 
 	pairs := pair.Pair[[]K, []V]{}
@@ -565,10 +577,13 @@ func ToPairsArray[K gotools.Comparable, V any](m map[K]V) pair.Pair[[]K, []V] {
 }
 
 // Merge 合并多个映射表为一个。
-// K: 映射表的键的类型，必须是可比较的。
-// V: 映射表的值的类型。
-// 参数 data 是一个变长参数，包含多个映射表。
-// 返回值是一个新的映射表，包含所有输入映射表的键值对，相同的键只会出现一次。
+// 参数:
+//
+//   - data: 一个由 map[K]V 类型的映射表组成的切片。
+//
+// 返回值:
+//
+//   - 一个 map[K]V 类型的映射表。
 func Merge[K gotools.Comparable, V any](data ...map[K]V) map[K]V {
 
 	if len(data) == 0 {

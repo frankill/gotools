@@ -8,7 +8,17 @@ import (
 	"strings"
 )
 
-// 按行拆分文件
+// SplitFileByLines 按文件行数拆分文件
+// 参数:
+//
+//   - inputFile - 文件路径
+//   - linesPerFile - 每个文件的行数
+//   - addHeader - 是否添加文件头
+//   - deleteSource - 是否删除源文件
+//
+// 返回:
+//
+//   - 错误信息
 func SplitFileByLines(inputFile string, linesPerFile int, addHeader, deleteSource bool) error {
 	fileInfo, err := os.Stat(inputFile)
 	if err != nil {
@@ -111,7 +121,17 @@ func SplitFileByLines(inputFile string, linesPerFile int, addHeader, deleteSourc
 	return nil
 }
 
-// 按文件大小拆分文件
+// SplitFileBySize 按文件大小拆分文件
+// 参数:
+//
+//   - inputFile - 文件路径
+//   - chunkSizeMB - 每个文件的大小（单位 MB）
+//   - addHeader - 是否添加文件头
+//   - deleteSource - 是否删除源文件
+//
+// 返回:
+//
+//   - 错误信息
 func SplitFileBySize(inputFile string, chunkSizeMB int, addHeader, deleteSource bool) error {
 	fileInfo, err := os.Stat(inputFile)
 	if err != nil {

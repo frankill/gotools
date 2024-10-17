@@ -11,16 +11,16 @@ type Pair[T, U any] struct {
 // 这个函数展示了Go的泛型特性，允许创建泛型对，其中每个元素可以是任何类型。
 // 参数:
 //
-//	first - Pair中的第一个元素，类型为T。
-//	second - Pair中的第二个元素，类型为U。
+//   - first - Pair中的第一个元素，类型为T。
+//   - second - Pair中的第二个元素，类型为U。
 //
 // 返回值:
 //
-//	返回一个Pair[T, U]实例，其中T和U是泛型类型，可以是任何类型。
+//   - 返回一个Pair[T, U]实例，其中T和U是泛型类型，可以是任何类型。
 //
 // 使用场景:
 //
-//	当需要将两个不相关或不同类型的数据作为一个单元返回时，可以使用PairOf函数。
+//   - 当需要将两个不相关或不同类型的数据作为一个单元返回时，可以使用PairOf函数。
 func Of[T, U any](first T, second U) Pair[T, U] {
 	return Pair[T, U]{
 		First:  first,
@@ -47,12 +47,12 @@ func FromMap[K gotools.Comparable, V any](data map[K]V) []Pair[K, V] {
 }
 
 // FromArray 根据两个数组创建一个包含对应元素对的数组。
-// 参数 first 和 second 分别代表两个源数组。
-// 返回值是一个 Pair[T, V] 类型的数组，其中每个 Pair 包含来自 first 和 second 的对应元素。
-// 如果任一输入数组为空，则返回一个空的 Pair 数组。
-// 该函数允许泛型使用，可以适用于任何类型的数组。
+// 参数:
+//   - first: 第一个数组，类型为 F。
+//   - second: 第二个数组，类型为 S。
 //
-// 注意：Pair[T, V] 必须是一个已定义的结构体，且包含 First 和 Second 两个字段。
+// 返回:
+//   - 一个包含对应元素对的数组，每个元素对表示为 Pair[F, S]
 func FromArray[F ~[]T, S ~[]V, T, V any](first F, second S) []Pair[T, V] {
 
 	if len(first) == 0 || len(second) == 0 {
@@ -74,11 +74,11 @@ func FromArray[F ~[]T, S ~[]V, T, V any](first F, second S) []Pair[T, V] {
 // 它返回一个K类型的切片，包含了输入切片中每个配对的第一个元素。
 // 参数:
 //
-//	data D - 一个包含Pair[K, V]类型元素的切片。
+//   - data D - 一个包含Pair[K, V]类型元素的切片。
 //
 // 返回值:
 //
-//	[]K - 一个切片，包含输入切片中每个配对的第一个元素。
+//   - []K - 一个切片，包含输入切片中每个配对的第一个元素。
 func Firsts[D ~[]Pair[K, V], K any, V any](data D) []K {
 
 	if len(data) == 0 {
@@ -97,13 +97,13 @@ func Firsts[D ~[]Pair[K, V], K any, V any](data D) []K {
 // 该函数适用于任何实现了配对（Pair）接口的切片类型D，其中每个配对包含键（K）和值（V）。
 // 参数:
 //
-//	data D: 一个包含配对数据的切片，每个配对包含一个键和一个值。
+//   - data D: 一个包含配对数据的切片，每个配对包含一个键和一个值。
 //
 // 返回值:
 //
-//	[]V: 一个切片，包含输入切片中所有配对的第二个元素（值）。
+//   - []V: 一个切片，包含输入切片中所有配对的第二个元素（值）。
 //
-// 如果输入切片为空，函数将返回一个空切片，以避免处理空切片时的潜在错误。
+//   - 如果输入切片为空，函数将返回一个空切片，以避免处理空切片时的潜在错误。
 func Seconds[D ~[]Pair[K, V], K any, V any](data D) []V {
 	ld := len(data)
 	if ld == 0 {
@@ -118,6 +118,14 @@ func Seconds[D ~[]Pair[K, V], K any, V any](data D) []V {
 	return res
 }
 
+// ToMap 将一个包含键值对的切片转换为一个映射。
+// 参数:
+//
+//   - data: 一个包含键值对的切片。
+//
+// 返回值:
+//
+//   - 一个 map[K][]V 类型的映射。
 func ToMap[D ~[]Pair[K, V], K gotools.Comparable, V any](data D) map[K][]V {
 	res := make(map[K][]V, len(data))
 	for _, p := range data {

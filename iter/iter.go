@@ -88,9 +88,12 @@ func Map[T any, U any](f func(x T) U) func(ch chan T) chan U {
 }
 
 // FlatMap 返回一个函数，该函数接受一个输入通道（chan T），
-// 对通道中的每个元素应用函数 f，并将结果展平到一个新的输出通道（chan U）中。
-// 函数 f 接受类型 T 的元素并返回类型 U 的切片。函数返回的处理步骤函数创建一个新的通道
-// 用于发送展平后的结果。返回的输出通道在处理完成后会被关闭。
+// 参数:
+//   - f: 一个函数，接受类型为 T 的输入，返回类型为 []U 的结果。
+//   - ch: 一个通道，通道中的每个值是类型为 T 的数据。
+//
+// 返回:
+//   - 一个通道，通道中的值是类型为 U 的数据，每个值是应用函数 f 之后的结果。
 func FlatMap[T any, U any](f func(x T) []U) func(ch chan T) chan U {
 	return func(ch chan T) chan U {
 		ch_ := make(chan U, bufferSize)
@@ -1218,6 +1221,9 @@ func Flatten[S ~[]T, T any](ch chan S) chan T {
 	return ch_
 }
 
+// Println 打印数据
+// 参数:
+//   - x: 数据
 func Println[T any](x T) {
 	fmt.Println(x)
 }

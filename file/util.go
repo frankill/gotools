@@ -5,7 +5,8 @@ import (
 	"path/filepath"
 )
 
-// IsExists checks if a file or directory exists.
+// 判断文件或文件夹是否存在
+// 如果是，返回 true，否则返回 false
 func IsExists(name string) (bool, error) {
 	_, err := os.Stat(name)
 	if err == nil {
@@ -17,7 +18,7 @@ func IsExists(name string) (bool, error) {
 	return false, err
 }
 
-// IsDir checks if the given path is a directory.
+// 判断所有文件夹是否存在
 func IsDir(dir string) bool {
 	info, err := os.Stat(dir)
 	if err != nil {
@@ -26,7 +27,7 @@ func IsDir(dir string) bool {
 	return info.IsDir()
 }
 
-// GetFileList returns a slice of file paths for all files in the given directory and its subdirectories.
+// 获取文件夹下所有文件
 func GetFileList(dir string) ([]string, error) {
 	var res []string
 

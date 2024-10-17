@@ -12,13 +12,13 @@ import (
 //
 // 参数:
 //
-//	fun: 一个函数，定义了如何将一个累积值和当前元素结合起来产生新的累积值。
-//	default_v: 累积的初始值。
-//	arr: 变长参数，每个元素是一个切片，切片的元素类型为 T。
+//   - fun: 一个函数，定义了如何将一个累积值和当前元素结合起来产生新的累积值。
+//   - default_v: 累积的初始值。
+//   - arr: 变长参数，每个元素是一个切片，切片的元素类型为 T。
 //
 // 返回值:
 //
-//	U: 累积操作的结果类型，由 fun 函数定义。
+//   - U: 累积操作的结果类型，由 fun 函数定义。
 func Asccumulate[S ~[]T, T, U any](fun func(x U, y T) U, default_v U, arr ...S) U {
 
 	for _, v := range arr {
@@ -33,14 +33,15 @@ func Asccumulate[S ~[]T, T, U any](fun func(x U, y T) U, default_v U, arr ...S) 
 //
 // 参数:
 //
-//	fun: 一个函数，定义了如何将一个累积值和当前元素结合起来产生新的累积值。
-//	default_v: 累积的初始值。
-//	arr: 变长参数，每个元素是一个切片，切片的元素类型为 T。
+//   - fun: 一个函数，定义了如何将一个累积值和当前元素结合起来产生新的累积值。
+//   - default_v: 累积的初始值。
+//   - arr: 变长参数，每个元素是一个切片，切片的元素类型为 T。
 //
 // 返回值:
+//
 //   - 一个 U 类型的累积结果。
 //
-// 由于此函数对多个切片元素应用函数，因此要求传递的切片必须具有相同的长度
+//   - 由于此函数对多个切片元素应用函数，因此要求传递的切片必须具有相同的长度
 func AsccumulateRow[S ~[]T, T, U any](fun func(x U, y ...T) U, default_v U, arr ...S) U {
 
 	num := len(arr[0])
@@ -62,6 +63,17 @@ func AsccumulateRow[S ~[]T, T, U any](fun func(x U, y ...T) U, default_v U, arr 
 	return default_v
 }
 
+// AsccumulateCol 对类型为 S（元素为 T 类型）的多个切片应用累计函数，并返回累计结果。
+//
+// 参数:
+//
+//   - fun: 一个函数，定义了如何将一个累积值和当前元素结合起来产生新的累积值。
+//   - default_v: 累积的初始值。
+//   - arr: 变长参数，每个元素是一个切片，切片的元素类型为 T。
+//
+// 返回值:
+//
+//   - 一个 U 类型的累积结果。
 func AsccumulateCol[S ~[]T, T, U any](fun func(x U, y S) U, default_v U, arr ...S) U {
 
 	num := len(arr)
@@ -83,11 +95,11 @@ func AsccumulateCol[S ~[]T, T, U any](fun func(x U, y S) U, default_v U, arr ...
 // 使用 ArrayMap 和 ArraySum 函数进行嵌套操作，首先对每个子切片求和，然后对所有子切片的和求和。
 // 参数:
 //
-//	slice ...[]T: 变长参数，其中每个元素是一个切片，切片的元素类型实现了 gotools.Number 接口。
+//   - slice ...[]T: 变长参数，其中每个元素是一个切片，切片的元素类型实现了 gotools.Number 接口。
 //
 // 返回值:
 //
-//	T: 所有子切片元素的总和，类型与切片的元素类型相同。
+//   - T: 所有子切片元素的总和，类型与切片的元素类型相同。
 func Sum[S ~[]T, T gotools.Number](slice ...S) T {
 	return Asccumulate(func(x, y T) T { return x + y }, T(0), slice...)
 }
@@ -106,11 +118,11 @@ func Distinct[S ~[]T, T comparable](slice ...S) int {
 // 这样做的目的是为了在多个切片中找到全局最小值，而不是仅仅在一个切片中找到最小值。
 // 参数:
 //
-//	slice ...[]T: 变长参数，每个参数是一个T类型的切片。
+//   - slice ...[]T: 变长参数，每个参数是一个T类型的切片。
 //
 // 返回值:
 //
-//	T: 所有切片中的最小元素。
+//   - T: 所有切片中的最小元素。
 func Min[S ~[]T, T gotools.Ordered](slice ...S) T {
 	return array.Min(array.Map(func(x ...S) T { return array.Min(x[0]) }, slice))
 }
@@ -120,27 +132,24 @@ func Min[S ~[]T, T gotools.Ordered](slice ...S) T {
 // 这个函数利用了泛型 T，使得它可以适用于任何实现了 gotools.Ordered 接口的类型。
 // 参数:
 //
-//	slice ...[]T: 一个变长参数，包含了多个 T 类型的切片。
+//   - slice ...[]T: 一个变长参数，包含了多个 T 类型的切片。
 //
 // 返回值:
 //
-//	T: 所有输入切片中的最大值。
+//   - T: 所有输入切片中的最大值。
 func Max[S ~[]T, T gotools.Ordered](slice ...S) T {
 	return array.Max(array.Map(func(x ...S) T { return array.Max(x[0]) }, slice))
 }
 
-/*
-AConcat 函数用于拼接多个切片。
-
-参数:
-- slice: 变长参数，每一项都是一个类型为 T 的切片，可以接受不同切片并将其合并。
-
-返回值:
-- 一个新切片，包含了输入的所有切片中的元素。新切片的类型与输入切片元素类型相同。
-
-功能说明:
-此函数通过泛型 T 支持任意数据类型的切片拼接，它内部调用 ArrayConcat 函数来完成实际的拼接操作。
-*/
+// AConcat 函数用于拼接多个切片。
+// 参数:
+//   - slice: 变长参数，每一项都是一个类型为 T 的切片，可以接受不同切片并将其合并。
+//
+// 返回值:
+//   - 一个新切片，包含了输入的所有切片中的元素。新切片的类型与输入切片元素类型相同。
+//
+// 功能说明:
+//   - 此函数通过泛型 T 支持任意数据类型的切片拼接，它内部调用 ArrayConcat 函数来完成实际的拼接操作。
 func Concat[S ~[]T, T any](slice ...S) []T {
 
 	return array.Concat(slice...)
@@ -150,11 +159,11 @@ func Concat[S ~[]T, T any](slice ...S) []T {
 // Maxif 根据提供的条件函数从多个切片中找出满足条件的最大元素。
 //
 // 参数:
-// - fun: 一个函数，接受可变数量的T类型参数并返回一个布尔值，用于判断元素是否满足条件。
-// - slice: 可变数量的切片参数，所有切片的元素类型需为T，且T需要实现Ordered接口。
+//   - fun: 一个函数，接受可变数量的T类型参数并返回一个布尔值，用于判断元素是否满足条件。
+//   - slice: 可变数量的切片参数，所有切片的元素类型需为T，且T需要实现Ordered接口。
 //
 // 返回值:
-// - T: 满足条件的所有输入切片元素中的最大值。
+//   - T: 满足条件的所有输入切片元素中的最大值。
 func Maxif[S ~[]T, T gotools.Ordered](fun func(x ...T) bool, slice ...S) T {
 
 	a := array.Map(func(x ...S) S { return array.Filter(fun, x[0]) }, slice)
@@ -169,13 +178,13 @@ func Maxif[S ~[]T, T gotools.Ordered](fun func(x ...T) bool, slice ...S) T {
 //
 // 参数:
 //
-//	fun: 一个函数，接受一个或多个 T 类型的参数，并返回一个布尔值。
-//	     该函数用于判断元素是否满足某种条件。
-//	slice: 一个或多个切片，它们的元素类型必须是 T，并且 T 必须实现了 gotools.Ordered 接口。
+//   - fun: 一个函数，接受一个或多个 T 类型的参数，并返回一个布尔值。
+//     该函数用于判断元素是否满足某种条件。
+//   - slice: 一个或多个切片，它们的元素类型必须是 T，并且 T 必须实现了 gotools.Ordered 接口。
 //
 // 返回值:
 //
-//	返回满足条件的最小元素，类型为 T。
+//   - 返回满足条件的最小元素，类型为 T。
 func Minif[S ~[]T, T gotools.Ordered](fun func(x ...T) bool, slice ...S) T {
 
 	a := array.Map(func(x ...S) S { return array.Filter(fun, x[0]) }, slice)

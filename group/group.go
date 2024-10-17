@@ -74,13 +74,11 @@ func Count[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C
 // Distinct 对数据进行分组并计算每个组的唯一元素数量。
 //
 // 参数：
-// by[B ~[]U]：一个切片，其元素作为分组的依据。
-// data[C ~[]S]：另一个切片，是需要根据 by 中的元素进行分组的数据。
-// U：类型参数，要求是可比较的类型，用于约束 by 切片的元素类型。
-// S：类型参数，要求实现了 ordered 接口，用于约束 data 切片的元素类型。
+//   - by[B ~[]U]：一个切片，其元素作为分组的依据。
+//   - data[C ~[]S]：另一个切片，是需要根据 by 中的元素进行分组的数据。
 //
 // 返回值：
-// map[U]int：一个映射，键为 by 中的分组依据值，值为对应组内唯一元素的数量。
+//   - map[U]int：一个映射，键为 by 中的分组依据值，值为对应组内唯一元素的数量。
 func Distinct[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]int {
 
 	group := Data(by, data)
@@ -169,22 +167,19 @@ func GenerateFilter[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) f
 	}
 }
 
-/*
-GroupMax 根据指定的分组键对数据进行分组处理，并计算每个组中的最大值。
-
-参数说明：
-- by(B): 分组依据的键列表，类型为切片，元素需可比较。
-- data(C): 待分组的数据列表，类型为切片，元素需要能排序。
-
-返回值：
-- 返回一个 map，key 为分组键 by 中的元素值，value 为对应组中的最大值。
-
-类型约束：
-- B: 类型为切片，元素类型为 U，要求 U 类型是可比较的。
-- C: 类型为切片，元素类型为 S，要求 S 类型实现了 Ordered 接口，表明元素可排序。
-- U: 可比较类型，用于分组键的元素类型。
-- S: Ordered 类型，数据元素类型，需支持排序操作以便找出最大值。
-*/
+// GroupMax 根据指定的分组键对数据进行分组处理，并计算每个组中的最大值。
+// 参数说明：
+//   - by(B): 分组依据的键列表，类型为切片，元素需可比较。
+//   - data(C): 待分组的数据列表，类型为切片，元素需要能排序。
+//
+// 返回值：
+//   - 返回一个 map，key 为分组键 by 中的元素值，value 为对应组中的最大值。
+//
+// 类型约束：
+//   - B: 类型为切片，元素类型为 U，要求 U 类型是可比较的。
+//   - C: 类型为切片，元素类型为 S，要求 S 类型实现了 Ordered 接口，表明元素可排序。
+//   - U: 可比较类型，用于分组键的元素类型。
+//   - S: Ordered 类型，数据元素类型，需支持排序操作以便找出最大值。
 func Max[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]S {
 
 	group := Data(by, data)
@@ -197,26 +192,23 @@ func Max[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) 
 	return res
 }
 
-/*
-GroupMin 根据提供的分组条件和数据集，对数据进行分组，并计算每个组的最小值。
-
-参数说明：
-- by(B): 分组的依据，类型为切片U的别名。
-- data(C): 待分组和计算最小值的数据集，类型为切片S的别名。
-
-返回值：
-- 返回一个从类型U到类型S的映射，键为分组的依据，值为对应组的最小值。
-
-类型参数：
-- B: 类型约束为切片U的别名，表示分组键的序列类型。
-- C: 类型约束为切片S的别名，表示数据项的序列类型。
-- U: 可比较类型，用作分组的键。
-- S: 有序类型，实现了gotools.Ordered接口，用于确定最小值。
-
-注意：
-- 确保U类型的元素可以相互比较。
-- S类型的元素需要支持排序操作。
-*/
+// GroupMin 根据提供的分组条件和数据集，对数据进行分组，并计算每个组的最小值。
+// 参数说明：
+//   - by(B): 分组的依据，类型为切片U的别名。
+//   - data(C): 待分组和计算最小值的数据集，类型为切片S的别名。
+//
+// 返回值：
+//   - 返回一个从类型U到类型S的映射，键为分组的依据，值为对应组的最小值。
+//
+// 类型参数：
+//   - B: 类型约束为切片U的别名，表示分组键的序列类型。
+//   - C: 类型约束为切片S的别名，表示数据项的序列类型。
+//   - U: 可比较类型，用作分组的键。
+//   - S: 有序类型，实现了gotools.Ordered接口，用于确定最小值。
+//
+// 注意：
+//   - 确保U类型的元素可以相互比较。
+//   - S类型的元素需要支持排序操作。
 func Min[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]S {
 
 	group := Data(by, data)
@@ -255,16 +247,14 @@ func Sum[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Number](by B, data C) m
 	return res
 }
 
-/*
-GroupArrayPair 根据一个关键数组将两个数据数组分组。
-- by: 用于分组的键值数组，类型为 B，需要与 frist 的元素类型 T 可比较。
-- frist: 需要被分组的第一个数据数组，类型为 D，元素类型为 U。
-- second: 需要被分组的第二个数据数组，类型为 O，元素类型为 S。
-返回值：
-- 一个映射，键为 T 类型（与 by 数组相同），值为 Pair 类型，包含两个分组后的数组（类型为 []U 和 []S）。
-
-此函数利用泛型，可适用于不同类型的数组。如果输入的 frist、by 或 second 为空，将直接返回空映射。
-*/
+// GroupArrayPair 根据一个关键数组将两个数据数组分组。
+//   - by: 用于分组的键值数组，类型为 B，需要与 frist 的元素类型 T 可比较。
+//   - frist: 需要被分组的第一个数据数组，类型为 D，元素类型为 U。
+//   - second: 需要被分组的第二个数据数组，类型为 O，元素类型为 S。
+//
+// 返回值：
+//   - 一个映射，键为 T 类型（与 by 数组相同），值为 Pair 类型，包含两个分组后的数组（类型为 []U 和 []S）。
+//     此函数利用泛型，可适用于不同类型的数组。如果输入的 frist、by 或 second 为空，将直接返回空映射。
 func Pair[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S, U any](by B, frist D, second O) map[T]pair.Pair[[]U, []S] {
 
 	res := map[T]pair.Pair[[]U, []S]{}
@@ -301,11 +291,11 @@ func Pair[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S, U any](by B, frist D,
 // 如果输入数据切片 data 或键值切片 by 为空，则直接返回空映射。
 //
 // 参数:
-// - data: 要进行分组的元素数据切片。
-// - by: 与 data 中元素对应的分组键值切片。
+//   - data: 要进行分组的元素数据切片。
+//   - by: 与 data 中元素对应的分组键值切片。
 //
 // 返回值:
-// - map[T][]U: 一个映射，键为 T 类型的分组标识，值为对应分组内的 U 类型元素切片。
+//   - map[T][]U: 一个映射，键为 T 类型的分组标识，值为对应分组内的 U 类型元素切片。
 func Data[D ~[]U, B ~[]T, T gotools.Comparable, U any](by B, data D) map[T][]U {
 	res := map[T][]U{}
 
@@ -327,11 +317,11 @@ func Data[D ~[]U, B ~[]T, T gotools.Comparable, U any](by B, data D) map[T][]U {
 // ByFunc 根据给定的函数进行分组。
 //
 // 参数:
-// - f: 用于分组的函数。
-// - data: 要进行分组的元素数据切片。
+//   - f: 用于分组的函数。
+//   - data: 要进行分组的元素数据切片。
 //
 // 返回值:
-// - map[T][]U: 一个映射，键为 T 类型的分组标识，值为对应分组内的 U 类型元素切片。
+//   - map[T][]U: 一个映射，键为 T 类型的分组标识，值为对应分组内的 U 类型元素切片。
 func ByFunc[D ~[]U, T gotools.Comparable, U any](f func(U) T, data D) map[T][]U {
 
 	if len(data) == 0 {
@@ -351,7 +341,7 @@ func ByFunc[D ~[]U, T gotools.Comparable, U any](f func(U) T, data D) map[T][]U 
 // by: 需要分组的切片
 //
 // 返回值:
-// - map[T][]int: 包含分组信息的映射
+//   - map[T][]int: 包含分组信息的映射
 //
 // 示例:
 //
@@ -380,16 +370,16 @@ func Location[B ~[]T, T gotools.Comparable](by B) map[T][]int {
 // ArrayByOrder 根据给定的排序规则对数组进行分组操作。
 //
 // 参数说明：
-// - data(D): 待分组的数据，类型为 D，要求 D 是 U 类型的切片。
-// - by(B): 分组依据的键值数组，类型为 B，要求 B 是 T 类型的切片，其中 T 需要可比较。
-// - order(O): 排序依据的序列，类型为 O，要求 O 是 S 类型的切片，S 必须实现了有序接口Ordered。
+//   - data(D): 待分组的数据，类型为 D，要求 D 是 U 类型的切片。
+//   - by(B): 分组依据的键值数组，类型为 B，要求 B 是 T 类型的切片，其中 T 需要可比较。
+//   - order(O): 排序依据的序列，类型为 O，要求 O 是 S 类型的切片，S 必须实现了有序接口Ordered。
 //
 // 返回值：
-// - map[T][]U: 返回一个字典，键为 T 类型，值为对应分组的 U 类型元素组成的切片。
+//   - map[T][]U: 返回一个字典，键为 T 类型，值为对应分组的 U 类型元素组成的切片。
 //
 // 注意：
-// - 当 order 为空时，直接调用 GroupArray 进行分组。
-// - 若 order 提供了排序依据，函数首先依据 by 和 order 进行分组及排序，然后将排序后的数据作为结果值。
+//   - 当 order 为空时，直接调用 GroupArray 进行分组。
+//   - 若 order 提供了排序依据，函数首先依据 by 和 order 进行分组及排序，然后将排序后的数据作为结果值。
 func ByOrder[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, U any](by B, data D, order O) map[T][]U {
 
 	if len(order) == 0 {
@@ -439,12 +429,12 @@ func WindowFun[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, or
 // 分配规则确保相同分组内的元素根据order排序后获得连续递增的行号。
 // 参数:
 //
-//	by []U: 用于分组的依据，U类型需支持比较操作。
-//	order []S: 指定每个元素在组内的排序顺序，S类型需实现gotools.Ordered接口。
+//   - by []U: 用于分组的依据，U类型需支持比较操作。
+//   - order []S: 指定每个元素在组内的排序顺序，S类型需实现gotools.Ordered接口。
 //
 // 返回值:
 //
-//	[]int: 包含为列表中每个元素分配的行号的切片，反映元素在排序后的相对位置。
+//   - []int: 包含为列表中每个元素分配的行号的切片，反映元素在排序后的相对位置。
 func RowNumber[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, order C) []int {
 	id := array.Seq(0, len(by), 1)
 
@@ -542,11 +532,11 @@ func MinValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, dat
 // 而S可以是任何类型。函数返回一个切片，包含每个分组的第一个元素值。
 //
 // 参数:
-// data: 待处理的数据集，元素类型为S。
-// by: 用于对data中元素进行分组的键，元素类型为U，需可比较。
+//   - data: 待处理的数据集，元素类型为S。
+//   - by: 用于对data中元素进行分组的键，元素类型为U，需可比较。
 //
 // 返回值:
-// []S: 一个切片，包含根据by分组后每个组的第一个元素值
+//   - []S: 一个切片，包含根据by分组后每个组的第一个元素值
 func FirstValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 
 	id := array.Seq(0, len(data), 1)
@@ -567,11 +557,12 @@ func FirstValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 
 // LastValue 根据指定的键值（by）对数据（data）进行分组，
 // 并返回每个分组的最后一个元素组成的切片。
-// - data: 输入的数据切片，类型为 C，其中 C 可以是任何切片类型。
-// - by: 分组依据的键值切片，类型为 B，其中 B 也是切片类型，且其元素可比较。
+//   - data: 输入的数据切片，类型为 C，其中 C 可以是任何切片类型。
+//   - by: 分组依据的键值切片，类型为 B，其中 B 也是切片类型，且其元素可比较。
+//
 // 返回值:
 //
-//	返回一个 S 类型的切片，包含了按照分组规则提取的每个分组的最后一个元素。
+//   - 返回一个 S 类型的切片，包含了按照分组规则提取的每个分组的最后一个元素。
 func LastValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 
 	id := array.Seq(0, len(data), 1)
@@ -590,26 +581,20 @@ func LastValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 	return value
 }
 
-/*
-SequenceMatch 函数用于生成一个根据指定序列和排序规则来检查元素匹配情况的函数。
-
-参数说明：
-- B: 类型参数，表示用于确定排序规则的切片类型，元素类型为 T，要求可比较。
-- D: 类型参数，表示数据集的切片类型，元素类型为 U，要求可比较。
-- O: 类型参数，表示排序顺序的切片类型，元素类型为 S，要求为有序类型。
-- by: 实际的排序规则依据序列，类型为 B。
-- data: 需要进行匹配操作的数据序列，类型为 D。
-- order: 指定的排序顺序，类型为 O。
-
-返回值：
-该函数返回一个高阶函数，该高阶函数接受一个与 D 类型相同的序列作为输入，
-进一步返回一个函数，该函数接受一个整数切片作为索引，最终产出一个 map，
-其键为 T 类型，值为布尔类型，表示 data 中相应位置的元素是否在输入序列中按照给定排序规则出现。
-
-示例 :
-a, b, c := []int{1, 1, 1, 2, 2, 2}, []int{1, 2, 3, 4, 5, 6}, []int{1, 1, 1, 1, 1, 1}
-SequenceMatch(a, b, c)([]int{1, 2, 3})([]int{1, 2}) = map[1:true 2:false]
-*/
+// SequenceMatch 函数用于生成一个根据指定序列和排序规则来检查元素匹配情况的函数。
+// 参数：
+//   - by: 实际的排序规则依据序列，类型为 B。
+//   - data: 需要进行匹配操作的数据序列，类型为 D。
+//   - order: 指定的排序顺序，类型为 O。
+//
+// 返回值：
+//   - 该函数返回一个高阶函数，该高阶函数接受一个与 D 类型相同的序列作为输入，
+//     进一步返回一个函数，该函数接受一个整数切片作为索引，最终产出一个 map，
+//     其键为 T 类型，值为布尔类型，表示 data 中相应位置的元素是否在输入序列中按照给定排序规则出现。
+//
+// 示例 :
+//   - a, b, c := []int{1, 1, 1, 2, 2, 2}, []int{1, 2, 3, 4, 5, 6}, []int{1, 1, 1, 1, 1, 1}
+//   - SequenceMatch(a, b, c)([]int{1, 2, 3})([]int{1, 2}) = map[1:true 2:false]
 func SequenceMatch[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Comparable, S gotools.Ordered](by B, data D, order O) func([]U) func([]int) map[T]bool {
 
 	group := ByOrder(by, data, order)
@@ -635,26 +620,20 @@ func SequenceMatch[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Compa
 
 }
 
-/*
-SequenceMatch 函数用于生成一个根据指定序列和排序规则返回匹配次数。
+// SequenceMatch 函数用于生成一个根据指定序列和排序规则返回匹配次数。
+// 参数说明：
+//  - by: 实际的排序规则依据序列，类型为 B。
+//  - data: 需要进行匹配操作的数据序列，类型为 D。
+//  - order: 指定的排序顺序，类型为 O。
 
-参数说明：
-- B: 类型参数，表示用于确定排序规则的切片类型，元素类型为 T，要求可比较。
-- D: 类型参数，表示数据集的切片类型，元素类型为 U，要求可比较。
-- O: 类型参数，表示排序顺序的切片类型，元素类型为 S，要求为有序类型。
-- by: 实际的排序规则依据序列，类型为 B。
-- data: 需要进行匹配操作的数据序列，类型为 D。
-- order: 指定的排序顺序，类型为 O。
+// 返回值：
+//  - 该函数返回一个高阶函数，该高阶函数接受一个与 D 类型相同的序列作为输入，
+//    进一步返回一个函数，该函数接受一个整数切片作为索引，最终产出一个 map，
+//    其键为 T 类型，值为int类型，表示 data 中相应位置的元素是否在输入序列中按照给定排序规则出现次数。
 
-返回值：
-该函数返回一个高阶函数，该高阶函数接受一个与 D 类型相同的序列作为输入，
-进一步返回一个函数，该函数接受一个整数切片作为索引，最终产出一个 map，
-其键为 T 类型，值为int类型，表示 data 中相应位置的元素是否在输入序列中按照给定排序规则出现次数。
-
-示例 :
-a, b, c := []int{1, 1, 1}, []string{"a", "a", "b"}, []int{}
-SequenceCount(a, b, c)([]string{"a"})([]int{1}) = map[1:2]
-*/
+// 示例 :
+//   - a, b, c := []int{1, 1, 1}, []string{"a", "a", "b"}, []int{}
+//   - SequenceCount(a, b, c)([]string{"a"})([]int{1}) = map[1:2]
 func SequenceCount[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Comparable, S gotools.Ordered](by B, data D, order O) func([]U) func([]int) map[T]int {
 
 	group := ByOrder(by, data, order)
@@ -684,21 +663,21 @@ func SequenceCount[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Compa
 //
 // Parameters:
 //
-//	by: 用于分组的键值切片。通常这些键值代表了数据的不同维度，如用户ID或产品类别。
-//	data: 包含实际数据的切片，每个元素对应于一个事件或记录。
-//	order: 用于排序的有序切片，确保数据按照时间或其它有意义的顺序排列。
+//   - by: 用于分组的键值切片。通常这些键值代表了数据的不同维度，如用户ID或产品类别。
+//   - data: 包含实际数据的切片，每个元素对应于一个事件或记录。
+//   - order: 用于排序的有序切片，确保数据按照时间或其它有意义的顺序排列。
 //
 // Returns:
 //
-//	一个函数，该函数接收事件ID切片作为参数，并进一步返回一个函数。
-//	这个进一步返回的函数接受模式字符串并返回一个映射，其中键是分组键，
-//	值是在该组内满足给定模式的事件序列的最大计数。
+//   - 一个函数，该函数接收事件ID切片作为参数，并进一步返回一个函数。
+//     这个进一步返回的函数接受模式字符串并返回一个映射，其中键是分组键，
+//     值是在该组内满足给定模式的事件序列的最大计数。
 //
 // Modes:
 //
-//	"strict_order": 严格顺序模式，计算事件序列在数据中严格按照事件ID顺序出现的最大次数，意外的事件会中断。
-//	"strict_dedup": 严格去重模式，计算事件序列在数据中出现的最大次数，重复的事件会中断。
-//	"strict_increase": 严格递增模式，计算事件序列在数据中按顺序出现的最大次数，重复，意外事件不会中断。
+//   - "strict_order": 严格顺序模式，计算事件序列在数据中严格按照事件ID顺序出现的最大次数，意外的事件会中断。
+//   - "strict_dedup": 严格去重模式，计算事件序列在数据中出现的最大次数，重复的事件会中断。
+//   - "strict_increase": 严格递增模式，计算事件序列在数据中按顺序出现的最大次数，重复，意外事件不会中断。
 func WindowFunnel[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Comparable, S gotools.Ordered](by B, data D, order O) func([]U) func(mode string) map[T]int {
 
 	group := ByOrder(by, data, order)

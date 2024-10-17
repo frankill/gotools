@@ -34,13 +34,13 @@ func ErrorCH(ch chan error) {
 // FromRedisList 方法从 Redis 中读取数据并发送到通道中
 // 参数:
 //
-// host - Redis 地址
-// pwd - Redis 密码
-// dbNUM - Redis 数据库编号
-// num - 从 Redis 中读取的数据条数 等于0 直接返回，大于0 读取指定数量的数据， 小于0 读取所有数据
+//   - host - Redis 地址
+//   - pwd - Redis 密码
+//   - dbNUM - Redis 数据库编号
+//   - num - 从 Redis 中读取的数据条数 等于0 直接返回，大于0 读取指定数量的数据， 小于0 读取所有数据
 //
 // 返回:
-// 返回一个函数，接受一个键名作为参数，返回一个通道，用于接收从 Redis 中读取的数据，并返回错误信息
+//   - 返回一个函数，接受一个键名作为参数，返回一个通道，用于接收从 Redis 中读取的数据，并返回错误信息
 //
 // 注意: 该函数会持续从 Redis 中读取数据
 func FromRedisList[T any](host, pwd string, dbN, num int) func(key string) (chan T, chan error) {
@@ -58,13 +58,13 @@ func FromRedisList[T any](host, pwd string, dbN, num int) func(key string) (chan
 // FromGzip 方法从 gzip 文件中读取数据并发送到通道中
 // 参数:
 //
-// path - gzip 文件路径
-// skip - 跳过的行数
+//   - path - gzip 文件路径
+//   - skip - 跳过的行数
 //
 // 返回:
 //
-// 一个通道，用于接收从 gzip 文件中读取的数据。
-// 一个通道，用于接收错误信息
+//   - 一个通道，用于接收从 gzip 文件中读取的数据。
+//   - 一个通道，用于接收错误信息
 func FromGzip(path string) func(skip int) (chan string, chan error) {
 	return func(skip int) (chan string, chan error) {
 		ch := make(chan string, bufferSize)
@@ -107,13 +107,13 @@ func FromGzip(path string) func(skip int) (chan string, chan error) {
 // FromJson 方法从 JSON 文件中读取数据并发送到通道中
 // 参数:
 //
-// path - 文件路径
-// skip - 跳过的行数
+//   - path - 文件路径
+//   - skip - 跳过的行数
 //
 // 返回:
 //
-// 一个通道，用于接收从文件中读取的数据。
-// 一个通道，用于接收错误信息
+// - 一个通道，用于接收从文件中读取的数据。
+// - 一个通道，用于接收错误信息
 func FromJson[T any](path string) func(skip int) (chan T, chan error) {
 
 	return func(skip int) (chan T, chan error) {
@@ -158,13 +158,13 @@ func FromJson[T any](path string) func(skip int) (chan T, chan error) {
 // FromTxt 方法从文本文件中读取数据并发送到通道中
 // 参数:
 //
-// path - 文件路径
-// skip - 跳过的行数
+//   - path - 文件路径
+//   - skip - 跳过的行数
 //
 // 返回:
 //
-// 一个通道，用于接收从文件中读取的数据。
-// error: 错误信息
+// - 一个通道，用于接收从文件中读取的数据。
+// - 一个通道，用于接收错误信息
 func FromTxt(path string) func(skip int) (chan string, chan error) {
 
 	return func(skip int) (chan string, chan error) {
@@ -203,14 +203,14 @@ func FromTxt(path string) func(skip int) (chan string, chan error) {
 // FromElasticSearch 从 ElasticSearch 中读取数据。
 // 参数:
 //
-//	client: ElasticSearch 客户端。
-//	index: ElasticSearch 索引名称。
-//	 query: ElasticSearch 查询请求。
+//   - client: ElasticSearch 客户端。
+//   - index: ElasticSearch 索引名称。
+//   - query: ElasticSearch 查询请求。
 //
 // 返回:
 //
-//	chan db.ElasticBluk[T]: 数据通道。
-//	chan error: 错误通道。
+//   - chan db.ElasticBluk[T]: 数据通道。
+//   - chan error: 错误通道。
 func FromElasticSearch[T any](client *elastic.Client) func(index string, query any) (chan db.ElasticBluk[T], chan error) {
 	return func(index string, query any) (chan db.ElasticBluk[T], chan error) {
 
@@ -470,12 +470,12 @@ type ftype struct {
 // FromMysqlQuery 从 MySQL 数据库中执行查询并返回数据通道。
 // 参数:
 //
-//	query: *query.SQLBuilder - 查询语句
+//   - query: *query.SQLBuilder - 查询语句
 //
 // 返回:
 //
-//	chan T: 查询结果数据通道
-//	error: 错误信息，如果查询失败。
+//   - chan T: 查询结果数据通道
+//   - error: 错误信息，如果查询失败。
 func FromMysql[T any](con string) func(query *query.SQLBuilder) (chan T, chan error) {
 
 	return func(query *query.SQLBuilder) (chan T, chan error) {
@@ -552,6 +552,15 @@ func FromMysql[T any](con string) func(query *query.SQLBuilder) (chan T, chan er
 	}
 }
 
+// FromCK 从 ClickHouse 数据库中执行查询并返回数据通道。
+// 参数:
+//
+//   - query: *query.SQLBuilder - 查询语句
+//
+// 返回:
+//
+//   - chan T: 查询结果数据通道
+//   - error: 错误信息，如果查询失败。
 func FromCK[T any](ck *db.CKinfo) func(query *query.SQLBuilder) (chan T, chan error) {
 
 	return func(query *query.SQLBuilder) (chan T, chan error) {
@@ -651,14 +660,15 @@ func convertToGoType(field ftype, value []byte) error {
 
 // FromMysqlStr 从 MySQL 数据库中执行查询并返回数据通道，
 // 使用 SQL 查询字符串。
-// 参数:
 //
-//	query - *SQLBuilder 类型的结构体，用于构建 SQL 查询语句。
+//	参数:
+//
+//	- query - *SQLBuilder 类型的结构体，用于构建 SQL 查询语句。
 //
 // 返回:
 //
-//	chan []string: 查询结果数据通道。
-//	error: 错误信息，如果查询失败。
+//   - chan []string: 查询结果数据通道。
+//   - error: 错误信息，如果查询失败。
 func FromMysqlStr(con string) func(query *query.SQLBuilder) (chan []string, chan error) {
 
 	return func(query *query.SQLBuilder) (chan []string, chan error) {
@@ -668,6 +678,17 @@ func FromMysqlStr(con string) func(query *query.SQLBuilder) (chan []string, chan
 	}
 }
 
+// FromCKStr 从 ClickHouse 数据库中执行查询并返回数据通道。
+// 使用 SQL 查询字符串。
+//
+//	参数:
+//
+//	- query - *SQLBuilder 类型的结构体，用于构建 SQL 查询语句。
+//
+// 返回:
+//
+//   - chan []string: 查询结果数据通道。
+//   - error: 错误信息，如果查询失败。
 func FromCKStr(ck *db.CKinfo) func(query *query.SQLBuilder) (chan []string, chan error) {
 
 	return func(query *query.SQLBuilder) (chan []string, chan error) {
@@ -677,6 +698,15 @@ func FromCKStr(ck *db.CKinfo) func(query *query.SQLBuilder) (chan []string, chan
 }
 
 // FromGob 从指定的 gob 文件路径读取数据，并通过通道返回。
+// 参数:
+//
+//   - path - 文件路径
+//   - del - 是否删除文件
+//
+// 返回:
+//
+//   - chan T: 数据通道
+//   - chan error: 错误通道
 func FromGob[T any](path string, del bool) (chan T, chan error) {
 	ch := make(chan T, bufferSize)
 	errs := make(chan error, 1) // 只有一个错误通道缓冲区
