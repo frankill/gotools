@@ -5,6 +5,7 @@ import (
 	"log"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/frankill/gotools/array"
 	"github.com/frankill/gotools/maps"
@@ -63,6 +64,9 @@ func (m *DB) Insert(q query.SqlInsert) func(ch chan []any) error {
 		num := 1000
 		res := make([][]any, 0, num)
 
+		ticker := time.NewTicker(time.Second * 10)
+		defer ticker.Stop()
+
 		commit := func() error {
 			if err := m.do(res, q); err != nil {
 				return err
@@ -71,22 +75,37 @@ func (m *DB) Insert(q query.SqlInsert) func(ch chan []any) error {
 			return nil
 		}
 
-		for v := range ch {
+		for {
+			select {
+			case data, ok := <-ch:
 
-			if len(v) == 0 {
-				continue
-			}
+				if !ok {
+					goto last
+				}
 
-			res = append(res, v)
+				if len(data) == 0 {
+					continue
+				}
 
-			if len(res) == num {
-				err := commit()
-				if err != nil {
-					return err
+				res = append(res, data)
+
+				if len(res) == num {
+					err := commit()
+					if err != nil {
+						return err
+					}
+
+				}
+			case <-ticker.C:
+				if len(res) > 0 {
+					err := commit()
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}
-
+	last:
 		if len(res) > 0 {
 			err := commit()
 			if err != nil {

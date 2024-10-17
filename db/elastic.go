@@ -99,16 +99,33 @@ func (es *ElasticSearchClient[U]) BulkInsert() func(ch chan ElasticBluk[U]) erro
 		bulkSize := 3000
 		bulkData := make([]elastic.BulkableRequest, 0, bulkSize)
 
-		for data := range ch {
-			bulkData = append(bulkData, createdoc(data))
-			if len(bulkData) >= bulkSize {
-				if err := es.sendBulk(bulkData); err != nil {
-					return err
+		ticker := time.NewTicker(time.Second * 10)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case doc, ok := <-ch:
+				if !ok {
+					goto last
 				}
-				bulkData = bulkData[:0]
+				bulkData = append(bulkData, createdoc(doc))
+				if len(bulkData) == bulkSize {
+					if err := es.sendBulk(bulkData); err != nil {
+						return err
+					}
+					bulkData = bulkData[:0]
+				}
+			case <-ticker.C:
+				if len(bulkData) > 0 {
+					if err := es.sendBulk(bulkData); err != nil {
+						return err
+					}
+					bulkData = bulkData[:0]
+				}
 			}
 		}
 
+	last:
 		// Send remaining data
 		if len(bulkData) > 0 {
 			if err := es.sendBulk(bulkData); err != nil {
