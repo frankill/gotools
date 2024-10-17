@@ -59,6 +59,38 @@ func GetBufferSize() int {
 	return bufferSize
 }
 
+// Count 计算通道中元素的数量
+// 参数:
+//   - ch: 一个通道，用于接收数据。
+//
+// 返回:
+//   - int: 通道中元素的数量。
+func Count[T any](ch chan T) int {
+	count := 0
+	for range ch {
+		count++
+	}
+	return count
+}
+
+// DistinctCount 去重计数
+// 参数:
+//   - ch: 一个通道，用于接收数据。
+//
+// 返回:
+//   - int: 通道中去重后元素的数量。
+func DistinctCount[T comparable](ch chan T) int {
+	count := 0
+	seen := make(map[T]struct{})
+	for v := range ch {
+		if _, ok := seen[v]; !ok {
+			seen[v] = struct{}{}
+			count++
+		}
+	}
+	return count
+}
+
 // Map 将通道中的每个元素应用函数 f，并将结果发送到一个新的通道。
 // 参数:
 //   - f: 一个函数，接受类型为 T 的输入，返回类型为 U 的结果。
@@ -731,7 +763,7 @@ func Maps[T any, U any](fn func(ch chan T, num int) U) func(cs ...chan T) chan U
 	}
 }
 
-// sort 排序通道，并返回排序后的chan
+// SortS 排序通道，并返回排序后的chan
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个布尔值，表示是否满足排序条件。
 //     当 `fun(x, y)` 返回 `true`，则在排序时 `x` 应位于 `y` 之前。
@@ -739,7 +771,7 @@ func Maps[T any, U any](fn func(ch chan T, num int) U) func(cs ...chan T) chan U
 //
 // 返回:
 //   - 一个通道，用于接收排序后的数据。
-func SortSimple[T any](f func(x, y T) bool) func(ch chan T) chan T {
+func SortS[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
 
@@ -1149,6 +1181,34 @@ func Unique[T any](f func(x, y T) bool) func(ch chan T) chan T {
 		}()
 
 		return ch_
+	}
+}
+
+// UniqueCount 去重, 要求传入的ch必须是排序过的
+// 参数:
+//   - f: 一个函数，接受两个类型为 T 的值，返回一个布尔值，表示是否相等。
+//   - ch: 一个通道，用于接收数据。
+//
+// 返回:
+//   - 去重后的数量
+func UniqueCount[T any](f func(x, y T) bool) func(ch chan T) int {
+
+	return func(ch chan T) int {
+
+		count := 0
+
+		prev, ok := <-ch
+		if !ok {
+			return count
+		}
+
+		for v := range ch {
+			if !f(prev, v) {
+				count++
+				prev = v
+			}
+		}
+		return count
 	}
 }
 
