@@ -1200,6 +1200,8 @@ func UniqueCount[T any](f func(x, y T) bool) func(ch chan T) int {
 		prev, ok := <-ch
 		if !ok {
 			return count
+		} else {
+			count++
 		}
 
 		for v := range ch {
