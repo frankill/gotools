@@ -65,7 +65,7 @@ func Keys[K gotools.Comparable, V any](m ...map[K]V) []K {
 		return make([]K, 0)
 	}
 
-	num := array.Sum(array.Map(func(x ...map[K]V) int { return len(x[0]) }, m))
+	num := array.Sum(array.Map(func(x map[K]V) int { return len(x) }, m))
 
 	keys := make([]K, 0, num)
 
@@ -99,7 +99,7 @@ func Values[K gotools.Comparable, V any](m ...map[K]V) []V {
 		return make([]V, 0)
 	}
 
-	num := array.Sum(array.Map(func(x ...map[K]V) int { return len(x[0]) }, m))
+	num := array.Sum(array.Map(func(x map[K]V) int { return len(x) }, m))
 
 	values := make([]V, 0, num)
 
@@ -461,7 +461,7 @@ func Concat[K gotools.Comparable, V any](m1 ...map[K]V) map[K]V {
 		return make(map[K]V)
 	}
 
-	num := array.Map(func(x ...map[K]V) int { return len(x[0]) }, m1)
+	num := array.Map(func(x map[K]V) int { return len(x) }, m1)
 
 	res := make(map[K]V, array.Sum(num))
 
@@ -590,7 +590,7 @@ func Merge[K gotools.Comparable, V any](data ...map[K]V) map[K]V {
 		return make(map[K]V)
 	}
 
-	num := array.Unique(Keys(data...))
+	num := array.Distinct(Keys(data...))
 
 	res := make(map[K]V, len(num))
 
@@ -651,7 +651,7 @@ func Intersect[V []U, K, U gotools.Comparable](data ...map[K]V) pair.Pair[[][]K,
 	}
 
 	res := pair.Pair[[][]K, []V]{}
-	rf := array.Cartesian(array.Map(func(x ...map[K]V) []K { return Keys(x[0]) }, data)...)
+	rf := array.Cartesian(array.Map(func(x map[K]V) []K { return Keys(x) }, data)...)
 
 	for i := range rf {
 		tmp := make([][]U, 0)

@@ -287,7 +287,7 @@ func (m *DB) QueryAny(query *query.SQLBuilder) func() ([][]string, error) {
 				log.Fatalln(err)
 			}
 
-			tmpRow := array.Map(func(x ...sql.NullString) string { return x[0].String }, row)
+			tmpRow := array.Map(func(x sql.NullString) string { return x.String }, row)
 			rawResult = append(rawResult, tmpRow)
 
 		}
@@ -345,8 +345,8 @@ func (m *DB) QueryAnyIter(query *query.SQLBuilder) func() (chan []string, chan e
 					return
 				}
 
-				ch <- array.Map(func(i ...sql.NullString) string {
-					return i[0].String
+				ch <- array.Map(func(i sql.NullString) string {
+					return i.String
 				}, row)
 			}
 		}()

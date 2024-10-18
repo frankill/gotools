@@ -4,6 +4,7 @@ import (
 	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/array"
 	"github.com/frankill/gotools/maps"
+	"github.com/frankill/gotools/operation"
 	"github.com/frankill/gotools/pair"
 )
 
@@ -147,13 +148,13 @@ func GenerateFilter[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) f
 
 			farr := fun(k, v.First)
 
-			vv := array.Filter(func(x ...any) bool { return x[1].(bool) }, array.ToAny(v.First), array.ToAny(farr))
+			vv := operation.Filter(func(x ...any) bool { return x[1].(bool) }, array.ToAny(v.First), array.ToAny(farr))
 
 			value = append(value, array.ToGeneric[S](vv)...)
 
 			valueby = append(valueby, array.Repeat(k, len(vv))...)
 
-			numberid = append(numberid, array.Filter(func(x ...int) bool { return x[1] > 0 }, v.Second, array.Toint(farr))...)
+			numberid = append(numberid, operation.Filter(func(x ...int) bool { return x[1] > 0 }, v.Second, array.Toint(farr))...)
 
 		}
 
@@ -602,13 +603,13 @@ func SequenceMatch[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Compa
 	return func(eventID []U) func([]int) map[T]bool {
 
 		group = maps.ApplyValue(func(k T, v []U) []U {
-			return array.Filter(func(x ...U) bool { return array.Has(eventID, x[0]) }, v)
+			return array.Filter(func(x U) bool { return array.Has(eventID, x) }, v)
 		}, group)
 
 		return func(modeID []int) map[T]bool {
 
-			modeID = array.Map(func(x ...int) int { return x[0] - 1 }, modeID)
-			eID := array.Map(func(x ...int) U { return eventID[x[0]] }, modeID)
+			modeID = array.Map(func(x int) int { return x - 1 }, modeID)
+			eID := array.Map(func(x int) U { return eventID[x] }, modeID)
 			return maps.ApplyValue(func(k T, v []U) bool {
 				ok, _ := array.HasSequence(v, eID)
 				return ok
@@ -641,13 +642,13 @@ func SequenceCount[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Compa
 	return func(eventID []U) func([]int) map[T]int {
 
 		group = maps.ApplyValue(func(k T, v []U) []U {
-			return array.Filter(func(x ...U) bool { return array.Has(eventID, x[0]) }, v)
+			return array.Filter(func(x U) bool { return array.Has(eventID, x) }, v)
 		}, group)
 
 		return func(modeID []int) map[T]int {
 
-			modeID = array.Map(func(x ...int) int { return x[0] - 1 }, modeID)
-			eID := array.Map(func(x ...int) U { return eventID[x[0]] }, modeID)
+			modeID = array.Map(func(x int) int { return x - 1 }, modeID)
+			eID := array.Map(func(x int) U { return eventID[x] }, modeID)
 			return maps.ApplyValue(func(k T, v []U) int {
 				return array.ArrSequenceCount(v, eID)
 			}, group)

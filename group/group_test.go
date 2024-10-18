@@ -48,7 +48,7 @@ func TestRetention(t *testing.T) {
 func TestGroupGenerateFilter(t *testing.T) {
 	// Test case 1: Empty data slice
 
-	f := func(x int, y []int) []bool { return array.Map(func(x ...int) bool { return x[0]%2 == 0 }, y) }
+	f := func(x int, y []int) []bool { return array.Map(func(x int) bool { return x%2 == 0 }, y) }
 
 	data := []int{}
 	by := []int{1, 2, 3}

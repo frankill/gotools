@@ -1,7 +1,8 @@
-package array
+package operation
 
 import (
 	"github.com/frankill/gotools"
+	"github.com/frankill/gotools/array"
 )
 
 // MatchZero 执行精确匹配，在 'lookup_array' 中查找与 'lookup_value' 相同的元素。
@@ -37,10 +38,10 @@ func MatchOne[A ~[]T, T gotools.Ordered](lookup_value A, lookup_array A) []int {
 	ll := len(lookup_value)
 	la := len(lookup_array)
 
-	id := Seq(0, la, 1)
-	res := Repeat(-1, ll)
+	id := array.Seq(0, la, 1)
+	res := array.Repeat(-1, ll)
 
-	id, lookup_array = SortBy(func(x, y T) bool {
+	id, lookup_array = array.SortBy(func(x, y T) bool {
 		return x < y
 	}, id, lookup_array)
 
@@ -77,10 +78,10 @@ func MatchMinusOne[A ~[]T, T gotools.Ordered](lookup_value A, lookup_array A) []
 	ll := len(lookup_value)
 	la := len(lookup_array)
 
-	id := Seq(0, la, 1)
-	res := Repeat(-1, ll)
+	id := array.Seq(0, la, 1)
+	res := array.Repeat(-1, ll)
 
-	id, lookup_array = SortBy(func(x, y T) bool {
+	id, lookup_array = array.SortBy(func(x, y T) bool {
 		return x > y
 	}, id, lookup_array)
 
@@ -121,6 +122,6 @@ func Xlookup[S ~[]T, T gotools.Comparable, R ~[]U, U any](lookup_value S, lookup
 
 	index := MatchZero(lookup_value, lookup_array)
 
-	return Choose(index, lookup_result)
+	return array.Choose(index, lookup_result)
 
 }

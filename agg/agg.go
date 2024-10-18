@@ -105,11 +105,11 @@ func Sum[S ~[]T, T gotools.Number](slice ...S) T {
 }
 
 func Count[S ~[]T, T any](slice ...S) int {
-	return array.Sum(array.Map(func(x ...S) int { return len(x[0]) }, slice))
+	return array.Sum(array.Map(func(x S) int { return len(x) }, slice))
 }
 
 func Distinct[S ~[]T, T comparable](slice ...S) int {
-	return len(array.Unique(slice...))
+	return len(array.Distinct(slice...))
 }
 
 // Min 寻找多个切片中的最小元素。
@@ -124,7 +124,7 @@ func Distinct[S ~[]T, T comparable](slice ...S) int {
 //
 //   - T: 所有切片中的最小元素。
 func Min[S ~[]T, T gotools.Ordered](slice ...S) T {
-	return array.Min(array.Map(func(x ...S) T { return array.Min(x[0]) }, slice))
+	return array.Min(array.Map(func(x S) T { return array.Min(x) }, slice))
 }
 
 // Max 函数接收多个切片的切片作为输入，返回这些切片中的最大值。
@@ -138,7 +138,7 @@ func Min[S ~[]T, T gotools.Ordered](slice ...S) T {
 //
 //   - T: 所有输入切片中的最大值。
 func Max[S ~[]T, T gotools.Ordered](slice ...S) T {
-	return array.Max(array.Map(func(x ...S) T { return array.Max(x[0]) }, slice))
+	return array.Max(array.Map(func(x S) T { return array.Max(x) }, slice))
 }
 
 // AConcat 函数用于拼接多个切片。
@@ -152,7 +152,7 @@ func Max[S ~[]T, T gotools.Ordered](slice ...S) T {
 //   - 此函数通过泛型 T 支持任意数据类型的切片拼接，它内部调用 ArrayConcat 函数来完成实际的拼接操作。
 func Concat[S ~[]T, T any](slice ...S) []T {
 
-	return array.Concat(slice...)
+	return array.Union(slice...)
 
 }
 
@@ -164,9 +164,9 @@ func Concat[S ~[]T, T any](slice ...S) []T {
 //
 // 返回值:
 //   - T: 满足条件的所有输入切片元素中的最大值。
-func Maxif[S ~[]T, T gotools.Ordered](fun func(x ...T) bool, slice ...S) T {
+func Maxif[S ~[]T, T gotools.Ordered](fun func(x T) bool, slice ...S) T {
 
-	a := array.Map(func(x ...S) S { return array.Filter(fun, x[0]) }, slice)
+	a := array.Map(func(x S) S { return array.Filter(fun, x) }, slice)
 
 	return Max(a...)
 }
@@ -185,9 +185,9 @@ func Maxif[S ~[]T, T gotools.Ordered](fun func(x ...T) bool, slice ...S) T {
 // 返回值:
 //
 //   - 返回满足条件的最小元素，类型为 T。
-func Minif[S ~[]T, T gotools.Ordered](fun func(x ...T) bool, slice ...S) T {
+func Minif[S ~[]T, T gotools.Ordered](fun func(x T) bool, slice ...S) T {
 
-	a := array.Map(func(x ...S) S { return array.Filter(fun, x[0]) }, slice)
+	a := array.Map(func(x S) S { return array.Filter(fun, x) }, slice)
 
 	return Min(a...)
 }

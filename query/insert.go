@@ -137,7 +137,7 @@ func (m *MysqlInsert) Build() (string, []any) {
 		builder.WriteString(strings.Join(updateStrings, ", "))
 	}
 
-	return builder.String(), array.Concat(m.InsertValues...)
+	return builder.String(), array.Union(m.InsertValues...)
 }
 
 func (m *MysqlInsert) Clear() {

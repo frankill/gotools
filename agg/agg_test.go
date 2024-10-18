@@ -150,17 +150,15 @@ func TestAMaxif(t *testing.T) {
 	// Define test cases
 	tests := []struct {
 		name     string
-		fun      func(x ...int) bool
+		fun      func(x int) bool
 		slice    []int
 		expected int
 	}{
 		{
 			name: "Find maximum even number",
-			fun: func(x ...int) bool {
-				for _, num := range x {
-					if num%2 == 0 {
-						return true
-					}
+			fun: func(x int) bool {
+				if x%2 == 0 {
+					return true
 				}
 				return false
 			},
@@ -169,11 +167,9 @@ func TestAMaxif(t *testing.T) {
 		},
 		{
 			name: "Find maximum odd number",
-			fun: func(x ...int) bool {
-				for _, num := range x {
-					if num%2 != 0 {
-						return true
-					}
+			fun: func(x int) bool {
+				if x%2 != 0 {
+					return true
 				}
 				return false
 			},
@@ -197,30 +193,30 @@ func TestAMinif(t *testing.T) {
 	// Define test cases
 	tests := []struct {
 		name     string
-		fun      func(x ...int) bool
+		fun      func(x int) bool
 		slice    [][]int
 		expected int
 	}{
 		{
 			name: "Find minimum value in a slice of positive integers",
-			fun: func(x ...int) bool {
-				return x[0] > 0
+			fun: func(x int) bool {
+				return x > 0
 			},
 			slice:    [][]int{{5, 3, 8, 1, 7}, {4, 5, 6}},
 			expected: 1,
 		},
 		{
 			name: "Find minimum value in a slice of negative integers",
-			fun: func(x ...int) bool {
-				return x[0] < 0
+			fun: func(x int) bool {
+				return x < 0
 			},
 			slice:    [][]int{{-5, -3, -8, -1, -7}, {-10, -18}},
 			expected: -18,
 		},
 		{
 			name: "Find minimum value in an empty slice",
-			fun: func(x ...int) bool {
-				return x[0] > 0
+			fun: func(x int) bool {
+				return x > 0
 			},
 			slice:    [][]int{},
 			expected: 0,

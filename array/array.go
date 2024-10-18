@@ -32,10 +32,9 @@ func FromAny[T any](input ...T) []T {
 // 返回:
 //   - 一个类型为 `[]T` 的新切片，包含重复的 `x` 元素。
 func Rep[S ~[]T, T any](x S, n int, sort bool) []T {
-	// Create an empty slice with a capacity equal to `n` times the length of `x`.
+
 	result := make([]T, 0, n*len(x))
 
-	// If `sort` is set to `true`, repeat each element of `x` `n` times and append them to the result slice.
 	if sort {
 		for i := range x {
 			for j := 0; j < n; j++ {
@@ -45,7 +44,6 @@ func Rep[S ~[]T, T any](x S, n int, sort bool) []T {
 		return result
 	}
 
-	// If `sort` is set to `false`, repeat the entire `x` slice `n` times and append it to the result slice.
 	for i := 0; i < n; i++ {
 		result = append(result, x...)
 	}
@@ -470,20 +468,17 @@ func FindMax[S ~[]T, T gotools.Ordered](arr S) int {
 	return index
 }
 
-// FindLast 查找类型为 S（元素类型为 T）的切片数组中最后一个使条件函数 `fun` 返回 true 的元素组合所在的索引位置。
+// FindLast 查找切片中最后一个使条件函数 `fun` 返回 true 的元素组合所在的索引位置。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
-//   - arr: 变长参数，每个元素为类型为 S 的切片（T 类型的切片），所有切片长度需一致。
+//   - arr:   T 类型的切片
 //
 // 返回值:
 //   - 最后一个满足条件的元素组合在原数组中的起始索引位置。
 //     如果没有找到满足条件的组合，则返回   - 1。
 //     如果输入切片数组为空，则直接返回   - 1。
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func FindLast[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
+func FindLast[S ~[]T, T any](fun func(x T) bool, arr S) int {
 
 	result := -1
 
@@ -491,35 +486,27 @@ func FindLast[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 		return result
 	}
 
-	l := len(arr[0])
-	f := len(arr)
-	param := make([]T, f)
+	l := len(arr)
 
 	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		if fun(param...) {
+		if fun(arr[i]) {
 			result = i
 		}
 	}
 	return result
 }
 
-// FindFirst 查找类型为 S（元素类型为 T）的切片数组中第一个使条件函数 `fun` 返回 true 的元素组合所在的索引位置。
+// FindFirst 查找切片中第一个使条件函数 `fun` 返回 true 的元素组合所在的索引位置。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
-//   - arr: 变长参数，每个元素为类型为 S 的切片（T 类型的切片），所有切片长度需一致。
+//   - arr:   T 类型的切片
 //
 // 返回值:
 //   - 第一个满足条件的元素组合在原数组中的起始索引位置。
 //     如果没有找到满足条件的组合，则返回   - 1。
 //     如果输入切片数组为空，则直接返回   - 1。
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func FindFirst[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
+func FindFirst[S ~[]T, T any](fun func(x T) bool, arr S) int {
 
 	result := -1
 
@@ -527,15 +514,11 @@ func FindFirst[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 		return result
 	}
 
-	l := len(arr[0])
-	f := len(arr)
-	param := make(S, f)
+	l := len(arr)
 
 	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		if fun(param...) {
+
+		if fun(arr[i]) {
 			result = i
 			break
 		}
@@ -543,20 +526,17 @@ func FindFirst[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 	return result
 }
 
-// Last 查找类型为 S（元素类型为 T）的切片数组中最后一个使条件函数 `fun` 返回 true 的元素组合，并返回该组合的第一个元素。
+// Last 查找切片中最后一个使条件函数 `fun` 返回 true 的元素组合，并返回该组合的第一个元素。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
-//   - arr: 变长参数，每个元素为类型为 S 的切片（T 类型的切片），所有切片长度需一致。
+//   - arr:  T 类型的切片
 //
 // 返回值:
 //   - 最后一个满足条件的元素组合中的第一个元素。
 //     如果没有找到满足条件的组合，则返回 T 类型的零值。
 //     如果输入切片数组为空，则直接返回 T 类型的零值。
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func Last[S ~[]T, T any](fun func(x ...T) bool, arr ...S) T {
+func Last[S ~[]T, T any](fun func(x T) bool, arr S) T {
 
 	var result T
 
@@ -564,35 +544,28 @@ func Last[S ~[]T, T any](fun func(x ...T) bool, arr ...S) T {
 		return result
 	}
 
-	l := len(arr[0])
-	f := len(arr)
-	param := make(S, f)
+	l := len(arr)
 
 	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		if fun(param...) {
-			result = param[0]
+
+		if fun(arr[i]) {
+			result = arr[i]
 		}
 	}
 	return result
 }
 
-// First 查找类型为 S（元素类型为 T）的切片数组中第一个使条件函数 `fun` 返回 true 的元素组合，并返回该组合的第一个元素。
+// First 查找切片中第一个使条件函数 `fun` 返回 true 的元素组合，并返回该组合的第一个元素。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
-//   - arr: 变长参数，每个元素为类型为 S 的切片（T 类型的切片），所有切片长度需一致。
+//   - arr:  T 类型的切片
 //
 // 返回值:
 //   - 第一个满足条件的元素组合中的第一个元素。
 //     如果没有找到满足条件的组合，则返回 T 类型的零值。
 //     如果输入切片数组为空，则直接返回 T 类型的零值。
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func First[S ~[]T, T any](fun func(x ...T) bool, arr ...S) T {
+func First[S ~[]T, T any](fun func(x T) bool, arr S) T {
 
 	var result T
 
@@ -600,49 +573,38 @@ func First[S ~[]T, T any](fun func(x ...T) bool, arr ...S) T {
 		return result
 	}
 
-	l := len(arr[0])
-	f := len(arr)
-	param := make(S, f)
+	l := len(arr)
 
 	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		if fun(param...) {
-			result = param[0]
+
+		if fun(arr[i]) {
+			result = arr[i]
 			break
 		}
 	}
 	return result
 }
 
-// All 检查类型为 S（元素类型为 T）的切片数组中所有元素组合是否都满足提供的条件函数。
+// All 检查切片中所有元素组合是否都满足提供的条件函数。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
-//   - arr: 变长参数，每个元素为类型为 S 的切片（T 类型的切片），所有切片长度需一致。
+//   - arr: T 类型的切片
 //
 // 返回值:
 //   - 如果所有元素组合均使得 `fun` 返回 true，则返回 true；只要有一个不满足则返回 false。
 //     如果输入切片数组为空，则直接返回 false
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func All[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
+func All[S ~[]T, T any](fun func(x T) bool, arr S) bool {
 
 	if len(arr) == 0 {
 		return false
 	}
 
-	l := len(arr[0])
-	f := len(arr)
-	param := make(S, f)
+	l := len(arr)
 
 	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		if !fun(param...) {
+
+		if !fun(arr[i]) {
 			return false
 		}
 	}
@@ -651,33 +613,26 @@ func All[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
 
 }
 
-// Any 检查类型为 S（元素类型为 T）的切片数组中是否有任一元素组合满足提供的条件函数。
+// Any 检查切片中是否有任一元素满足提供的条件函数。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
-//   - arr: 变长参数，每个元素为类型为 S 的切片（T 类型的切片），所有切片长度需一致。
+//   - arr: T 类型的切片
 //
 // 返回值:
 //   - 如果至少有一个元素组合使得 `fun` 返回 true，则返回 true；否则返回 false。
 //     如果输入切片数组为空，则直接返回 false。
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func Any[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
+func Any[S ~[]T, T any](fun func(x T) bool, arr S) bool {
 
 	if len(arr) == 0 {
 		return false
 	}
 
-	l := len(arr[0])
-	f := len(arr)
-	param := make([]T, f)
+	l := len(arr)
 
 	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		if fun(param...) {
+
+		if fun(arr[i]) {
 			return true
 		}
 	}
@@ -691,7 +646,7 @@ func Any[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，决定是否在当前位置进行切分。
-//   - arr: 变长参数，每个元素为类型为 S 的切片（T 类型的切片），所有切片长度需一致。
+//   - arr: T 类型的切片
 //
 // 返回值:
 //   - 一个由 S 类型子切片组成的切片，每个子切片代表原切片中满足分割条件的相邻部分。
@@ -699,33 +654,29 @@ func Any[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
 //     若输入为空或首切片为空，则返回空 S 类型切片的切片
 //
 // 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
 //   - 数组将在元素的右侧进行拆分。
-func ReverseSplit[S ~[]T, T any](fun func(x ...T) bool, arr ...S) [][]T {
+func ReverseSplit[S ~[]T, T any](fun func(x T) bool, arr S) [][]T {
 
-	if len(arr) == 0 || len(arr[0]) == 0 {
+	if len(arr) == 0 {
 		return [][]T{}
 	}
 
-	l := len(arr[0])
-	f := len(arr)
-	param := make([]T, f)
-	result := make([][]T, 0)
+	l := len(arr)
 
 	num := 0
 
+	var result [][]T
+
 	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		if fun(param...) {
-			result = append(result, arr[0][num:i+1])
+
+		if fun(arr[i]) {
+			result = append(result, arr[num:i+1])
 			num = i + 1
 		}
 	}
 
 	if num < l && num >= 0 {
-		result = append(result, arr[0][num:])
+		result = append(result, arr[num:])
 	}
 
 	return result
@@ -736,40 +687,35 @@ func ReverseSplit[S ~[]T, T any](fun func(x ...T) bool, arr ...S) [][]T {
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，决定是否在当前位置进行切分。
-//   - arr: 变长参数，每个元素为类型为 S 的切片（T 类型的切片），所有切片长度需一致。
+//   - arr: T 类型的切片
 //
 // 返回值:
 //   - 一个由 S 类型子切片组成的切片，每个子切片代表原切片中满足分割条件相邻的部分。
 //     若输入为空或首切片为空，则返回空 S 类型切片的切片。
 //
 // 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
 //   - 数组将在元素的左侧进行拆分。
 //   - 数组不会在第一个元素之前被分割。
-func Split[S ~[]T, T any](fun func(x ...T) bool, arr ...S) [][]T {
-	if len(arr) == 0 || len(arr[0]) == 0 {
+func Split[S ~[]T, T any](fun func(x T) bool, arr S) [][]T {
+	if len(arr) == 0 {
 		return [][]T{}
 	}
 
-	l := len(arr[0])
-	f := len(arr)
-	param := make([]T, f)
+	l := len(arr)
 	result := make([][]T, 0)
 
 	num := 0
 
 	for i := 1; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		if fun(param...) {
-			result = append(result, arr[0][num:i])
+
+		if fun(arr[i]) {
+			result = append(result, arr[num:i])
 			num = i
 		}
 	}
 
 	if num < l && num >= 0 {
-		result = append(result, arr[0][num:])
+		result = append(result, arr[num:])
 	}
 
 	return result
@@ -782,39 +728,30 @@ func Split[S ~[]T, T any](fun func(x ...T) bool, arr ...S) [][]T {
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，决定是否采用当前或下一个索引的值。
-//   - arr: 变长参数，每个元素为类型为 S 的切片（T 类型的切片），所有切片长度需一致。
+//   - arr: T 类型的切片
 //
 // 返回值:
 //   - 一个新的切片 S，其中元素根据 `fun` 的判断结果从前一个或当前索引的值中选取。
-//     若输入为空或首切片为空，则返回空 T 类型切片。
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func ReverseFill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []T {
+//     若输入为空，则返回空 T 类型切片。
+//     最后一个元素不判断
+func ReverseFill[S ~[]T, T any](fun func(x T) bool, arr S) []T {
 
-	if len(arr) == 0 || len(arr[0]) == 0 {
+	if len(arr) == 0 {
 		return []T{}
 	}
 
-	if len(arr[0]) == 1 {
-		return append(S{}, arr[0][0])
-	}
+	l := len(arr)
 
-	l := len(arr[0])
-	f := len(arr)
-	param := make([]T, f)
 	result := make([]T, l)
 
-	result[l-1] = arr[0][l-1]
+	result[l-1] = arr[l-1]
 
-	for i := l - 1; i >= 0; i-- {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		if !fun(param...) {
+	for i := l - 2; i >= 0; i-- {
+
+		if !fun(arr[i]) {
 			result[i] = result[i+1]
 		} else {
-			result[i] = arr[0][i]
+			result[i] = arr[i]
 		}
 	}
 
@@ -822,202 +759,136 @@ func ReverseFill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []T {
 }
 
 // Fill 根据提供的条件函数填充新切片。对于每个索引位置，如果条件函数应用于对应位置的元素返回 false，
-// 则新切片中的该位置元素取自前一个索引位置的首个切片的元素；否则，取自当前索引位置的首个切片的元素。
+// 则新切片中的该位置元素取自前一个索引位置的首个切片的元素；否则，取自当前索引位置的原始切片的元素。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，决定是否采用当前索引的值。
-//   - arr: 变长参数，每个元素为类型为 S 的切片（T 类型的切片），所有切片长度需一致。
+//   - arr:  T 类型的切片
 //
 // 返回值:
 //   - 一个新的切片 S，其中元素根据 `fun` 的判断结果从输入切片的相应位置或前一位置选取。
-//     若输入为空或首切片为空，则返回空 T 类型切片。
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func Fill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []T {
-	if len(arr) == 0 || len(arr[0]) == 0 {
+//     若输入为空，则返回空 T 类型切片。
+//     第一个元素不判断
+func Fill[S ~[]T, T any](fun func(x T) bool, arr S) []T {
+	if len(arr) == 0 {
 		return []T{}
 	}
 
-	if len(arr[0]) == 1 {
-		return append(S{}, arr[0][0])
-	}
+	l := len(arr)
 
-	l := len(arr[0])
-	f := len(arr)
-	param := make([]T, f)
 	result := make([]T, l)
 
-	result[0] = arr[0][0]
+	result[0] = arr[0]
 
 	for i := 1; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		if !fun(param...) {
+
+		if !fun(arr[i]) {
 			result[i] = result[i-1]
 		} else {
-			result[i] = arr[0][i]
+			result[i] = arr[i]
 		}
 	}
 	return result
 }
 
 // Filter 根据提供的函数过滤多个同结构切片（类型为 T 的切片）的元素。
-// 它将每个切片的对应元素作为参数传递给函数 `fun`，并仅保留 `fun` 返回真值时的首个切片中的元素。
+// 它将切片的对应元素作为参数传递给函数 `fun`，并仅保留 `fun` 返回真值时的切片中的元素。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数，返回布尔值，指示是否保留当前元素。
-//   - arr: 变长参数，每个元素为 T 类型的切片，所有切片长度需一致。
+//   - arr:  每个元素为 T 类型的切片
 //
 // 返回值:
 //   - 一个新的切片 S，包含根据 `fun` 筛选后的元素。若输入为空或首切片为空，则返回空切片 S。
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func Filter[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []T {
-	if len(arr) == 0 || len(arr[0]) == 0 {
+func Filter[S ~[]T, T any](fun func(x T) bool, arr S) []T {
+	if len(arr) == 0 {
 		return S{}
 	}
-	l := len(arr[0])
-	f := len(arr)
-	param := make([]T, f)
+	l := len(arr)
+
 	result := make([]T, 0)
 
 	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		if fun(param...) {
-			result = append(result, arr[0][i])
+
+		if fun(arr[i]) {
+			result = append(result, arr[i])
 		}
 	}
 	return result
 }
 
-// Filter2 根据提供的函数过滤多个同结构切片（类型为 T 的切片）的元素。
-// 它将每个切片的对应元素作为参数传递给函数 `fun`，并仅保留 `fun`的结果切片 。
+// FilterIndex 根据提供的函数过滤切片（类型为 T 的切片）的元素。
+// 它将切片的对应元素作为参数传递给函数 `fun`，并仅保留 `fun` 返回真值时的位置索引。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数，返回布尔值，指示是否保留当前元素。
-//   - arr: 变长参数，每个元素为 T 类型的切片，所有切片长度需一致。
-//
-// 返回值:
-//   - 一个新的切片 S，包含根据 `fun` 执行后的结果。若输入为空或首切片为空，则返回空切片 []bool。
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func Filter2[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []bool {
-
-	return Map(fun, arr...)
-	// if len(arr) == 0 || len(arr[0]) == 0 {
-	// 	return make([]bool, 0)
-	// }
-	// l := len(arr[0])
-	// f := len(arr)
-	// param := make([]T, f)
-	// result := make([]bool, 0)
-
-	// for i := 0; i < l; i++ {
-	// 	for j := 0; j < f; j++ {
-	// 		param[j] = arr[j][i]
-	// 	}
-	// 	result = append(result, fun(param...))
-	// }
-	// return result
-}
-
-// FilterIndex 根据提供的函数过滤多个同结构切片（类型为 T 的切片）的元素。
-// 它将每个切片的对应元素作为参数传递给函数 `fun`，并仅保留 `fun` 返回真值时的位置索引。
-//
-// 参数:
-//   - fun: 一个函数，接受 T 类型的变长参数，返回布尔值，指示是否保留当前元素。
-//   - arr: 变长参数，每个元素为 T 类型的切片，所有切片长度需一致。
+//   - arr: 每个元素为 T 类型的切片
 //
 // 返回值:
 //   - 一个新的切片 S，包含根据 `fun` 筛选后的元素的索引。若输入为空或首切片为空，则返回空切片 []int。
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func FilterIndex[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []int {
-	if len(arr) == 0 || len(arr[0]) == 0 {
+func FilterIndex[S ~[]T, T any](fun func(x T) bool, arr S) []int {
+	if len(arr) == 0 {
 		return []int{}
 	}
-	l := len(arr[0])
-	f := len(arr)
-	param := make([]T, f)
+	l := len(arr)
+
 	result := make([]int, 0, l)
 
 	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		if fun(param...) {
+		if fun(arr[i]) {
 			result = append(result, i)
 		}
 	}
 	return result
 }
 
-// Map 对多个同结构切片（S，类型为 T 的切片）应用一个函数，将每个切片的对应元素作为参数传递，
+// Map 对切片（S，类型为 T 的切片）应用一个函数 ，
 // 并收集返回值形成一个新的 U 类型切片序列。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数，并返回 U 类型的结果。
-//   - arr: 变长参数，每个元素为类型为 S 的切片，所有切片长度需一致。
+//   - arr:  每个元素为类型为 S 的切片
 //
 // 返回值:
 //   - 一个 U 类型的切片，其元素为对输入切片每相同索引位置的元素应用 `fun` 函数后的结果。
-//     若输入为空或首切片为空，则返回空切片。
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func Map[S ~[]T, T any, U any](fun func(x ...T) U, arr ...S) []U {
-	if len(arr) == 0 || len(arr[0]) == 0 {
+//     若输入为空 ，则返回空切片。
+func Map[S ~[]T, T any, U any](fun func(x T) U, arr S) []U {
+	if len(arr) == 0 {
 		return []U{}
 	}
-	l := len(arr[0])
-	f := len(arr)
-	param := make([]T, f)
+	l := len(arr)
+
 	result := make([]U, l)
 
 	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		result[i] = fun(param...)
+
+		result[i] = fun(arr[i])
 	}
 	return result
 }
 
-// FlatMap 对多个同结构切片（S，类型为 T 的切片）应用一个函数，将每个切片的对应元素作为参数传递：
+// FlatMap 对切片（S，类型为 T 的切片）应用一个函数 ：
 // 并收集返回值形成一个新的 U 类型切片序列。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数，并返回 U 类型的结果。
-//   - arr: 变长参数，每个元素为类型为 S 的切片，所有切片长度需一致。
+//   - arr:  元素为类型为 S 的切片
 //
 // 返回值:
 //   - 一个 U 类型的切片，其元素为对输入切片每相同索引位置的元素应用 `fun` 函数后的结果。
-//     若输入为空或首切片为空，则返回空切片。
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func FlatMap[S ~[]T, T any, U any](fun func(x ...T) []U, arr ...S) []U {
+//     若输入为空，则返回空切片。
+func FlatMap[S ~[]T, T any, U any](fun func(x T) []U, arr S) []U {
 
-	if len(arr) == 0 || len(arr[0]) == 0 {
+	if len(arr) == 0 {
 		return []U{}
 	}
-	l := len(arr[0])
-	f := len(arr)
-	param := make([]T, f)
+	l := len(arr)
+
 	result := make([]U, 0)
 
 	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		result = append(result, fun(param...)...)
+
+		result = append(result, fun(arr[i])...)
 	}
 	return result
 }
@@ -1140,74 +1011,56 @@ func Reverse[S ~[]T, T any](arr S) []T {
 	return res
 }
 
-// Fold 对类型为 S 的多维数组（其中 S 是 T 类型的切片）执行折叠操作，生成一个 U 类型的结果切片。
-// 它接收三个参数：
-//   - fun：一个函数，接受变长参数 T 的切片并返回一个 U 类型的值，用于单个维度的聚合操作。
-//   - acc：一个累积函数，接受两个 U 类型的参数并返回一个 U 类型的值，用于将相邻结果累积。
-//   - arr：变长参数，表示待折叠的多维数组，数组的每个元素也是类型为 S 的切片。
-//
-// 返回值：
-//   - 一个 U 类型的切片，表示经过聚合和累积操作后的结果序列。
-//
-// 示例用途：
-// 可以用来计算多维数组中各维度对应位置的元素经过特定运算后的序列，如多序列的逐元素加法、乘法等。
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func Fold[S ~[]T, T, U any](fun func(x ...T) U, acc func(x, y U) U, arr ...S) []U {
-	if len(arr) == 0 || len(arr[0]) == 0 {
-		return []U{}
-	}
-
-	l := len(arr[0])
-	f := len(arr)
-	param := make(S, f)
-	result := make([]U, l)
-
-	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		result[i] = fun(param...)
-
-		if i > 0 {
-			result[i] = acc(result[i-1], result[i])
-		}
-
-	}
-
-	return result
-}
-
-// Reduce 对切片中的元素应用一个累积函数，并返回该函数处理后的结果。
+// Reduce 对切片中的元素从左到右应用一个累积函数，并返回该函数处理后的结果。
 // 此函数泛型，适用于任何类型的切片和累积函数，只要累积函数的输入输出类型与切片元素类型兼容。
 //
-// Parameters:
+// 参数:
 //
 //   - arr    需要被归约处理的切片。类型为 S，其中 S 是 T 类型元素的切片。
 //
 //   - fun     累积函数，接收两个参数：累积结果（类型为 U）和切片中的当前元素（类型为 T），
 //
-//   - dvalue    初始累积值，类型为 U。
+//   - init    初始累积值，类型为 U。
 //
 //     并返回一个新的累积结果（同样为 U 类型）。此函数定义了如何将单个元素累积到整体结果中。
 //
-// Returns:
-// result    - 应用累积函数后得到的最终结果。类型为 U，累积过程的起始值为 U 的零值。
+// 返回值:
 //
-//	如果切片为空，则直接返回 U 的零值。
+//   - 应用累积函数后得到的最终结果。类型为 U，累积过程的起始值为 U 的零值。
+//
+//     如果切片为空，则直接返回 U 的零值。
 //
 // 注意事项:
 //   - 累积函数 `fun` 应确保对于所有可能的输入都是正确的，并且应当处理好任何潜在的边界条件或错误情况。
 //   - 若 `result` 是引用类型（如切片、map），其初始零值可能影响结果的预期。确保理解并适当处理此类情况。
-func Reduce[S ~[]T, T, U any](fun func(x U, y T) U, dvalue U, arr S) U {
+func Reduce[S ~[]T, T, U any](fun func(x U, y T) U, init U, arr S) U {
 
-	result := dvalue
+	result := init
 
 	if len(arr) == 0 {
 		return result
 	}
 
 	for i := 0; i < len(arr); i++ {
+		result = fun(result, arr[i])
+	}
+
+	return result
+}
+
+// ReduceR 对切片中的元素从右到左应用一个累积函数，并返回该函数处理后的结果。
+// 此函数泛型，适用于任何类型的切片和累积函数，只要累积函数的输入输出类型与切片元素类型兼容。
+func ReduceR[S ~[]T, T, U any](fun func(x U, y T) U, init U, arr S) U {
+
+	result := init
+
+	l := len(arr)
+
+	if l == 0 {
+		return result
+	}
+
+	for i := l - 1; i >= 0; i-- {
 		result = fun(result, arr[i])
 	}
 
@@ -1234,7 +1087,7 @@ func Intersect[S ~[]T, T gotools.Comparable](arr ...S) []T {
 		return arr[0]
 	}
 
-	nums := Map(func(x ...S) int { return len(x[0]) }, arr)
+	nums := Map(func(x S) int { return len(x) }, arr)
 
 	index := FindMin(nums)
 
@@ -1270,7 +1123,7 @@ func mapKeys[K gotools.Comparable, V any](m ...map[K]V) []K {
 		return make([]K, 0)
 	}
 
-	num := Sum(Map(func(x ...map[K]V) int { return len(x[0]) }, m))
+	num := Sum(Map(func(x map[K]V) int { return len(x) }, m))
 
 	keys := make([]K, 0, num)
 
@@ -1534,7 +1387,7 @@ func Choose[S ~[]T, T any](index []int, arr S) []T {
 
 }
 
-// Distinct 移除类型为 S（元素类型为 T）的切片中的重复元素，并返回一个新的无重复元素的切片。
+// Unique 移除类型为 S（元素类型为 T）的切片中的重复元素，并返回一个新的无重复元素的切片。
 // 要求 T 类型实现 gotools.Ordered 接口，以便进行比较操作。
 //
 // 参数:
@@ -1542,7 +1395,7 @@ func Choose[S ~[]T, T any](index []int, arr S) []T {
 //
 // 返回值:
 //   - 返回一个新的 S 类型切片，其中重复的元素已被移除，剩余元素按升序排列。
-func Distinct[S ~[]T, T gotools.Ordered](arr S) []T {
+func Unique[S ~[]T, T gotools.Ordered](arr S) []T {
 
 	if len(arr) == 0 {
 		return []T{}
@@ -1587,43 +1440,31 @@ func Difference[S ~[]T, T gotools.Number](arr S) []T {
 	return res
 }
 
-// Count 计算满足特定条件的元素数量，这些元素来自多个具有相同长度的切片。
+// Count 计算满足特定条件的元素数量
 // 条件由提供的函数 `fun` 定义，该函数接受与输入切片数量相等的参数并返回一个布尔值。
 //
 // 参数:
 //   - fun: 一个 variadic 函数，接受与输入切片数量相同的 T 类型参数，并返回一个布尔值。
 //     当给定的元素组合满足某种条件时，应返回 `true`。
-//   - arr: 变长参数，每个参数为一个 S 类型的切片（元素类型为 T）。所有切片必须具有相同的长度。
+//   - arr:  参数为一个 S 类型的切片（元素类型为 T）
 //
 // 返回值:
 //   - 返回一个整数，表示在所有切片中满足 `fun` 条件的元素组合的数量。
 //
 // 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-//   - 如果没有切片被提供，或者提供的切片为空，则函数返回 0。
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func Count[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
+//   - 如果提供的切片为空，则函数返回 0。
+func Count[S ~[]T, T any](fun func(x T) bool, arr S) int {
 
 	if len(arr) == 0 {
 		return 0
 	}
 
-	if len(arr[0]) == 0 {
-		return 0
-	}
-
-	l := len(arr[0])
-	f := len(arr)
-	param := make([]T, f)
+	l := len(arr)
 
 	num := 0
 	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		if fun(param...) {
+
+		if fun(arr[i]) {
 			num++
 		}
 	}
@@ -1697,13 +1538,13 @@ func HasAll[S ~[]T, T gotools.Comparable](arr S, elems ...T) bool {
 //
 // 返回值:
 //   - 返回一个新的 []T 类型切片，包含输入的所有切片中的元素，保持原有的顺序。
-func Concat[S ~[]T, T any](arr ...S) []T {
+func Union[S ~[]T, T any](arr ...S) []T {
 
 	if len(arr) == 0 {
 		return []T{}
 	}
 
-	num := Map(func(x ...S) int { return len(x[0]) }, arr)
+	num := Map(func(x S) int { return len(x) }, arr)
 
 	res := make([]T, 0, Sum(num))
 
@@ -1800,13 +1641,13 @@ func ToMap[K gotools.Comparable](arr []K) map[K]struct{} {
 	return m
 }
 
-// Unique 去重数组元素
+// Distinct 去重数组元素
 // 参数:
 //   - arr: 一个切片，表示要进行去重的切片。
 //
 // 返回:
 //   - []T: 一个新的切片，表示去重后的切片。
-func Unique[S ~[]T, T gotools.Comparable](arr ...S) []T {
+func Distinct[S ~[]T, T gotools.Comparable](arr ...S) []T {
 	seen := make(map[T]struct{})
 	var result []T
 
