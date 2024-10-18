@@ -109,7 +109,19 @@ func Count[S ~[]T, T any](slice ...S) int {
 }
 
 func Distinct[S ~[]T, T comparable](slice ...S) int {
-	return len(array.Distinct(slice...))
+	seen := make(map[T]struct{})
+	var result int
+
+	for _, vv := range slice {
+		for _, v := range vv {
+			if _, exists := seen[v]; !exists {
+				seen[v] = struct{}{}
+				result++
+			}
+		}
+
+	}
+	return result
 }
 
 // Min 寻找多个切片中的最小元素。

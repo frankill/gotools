@@ -7,6 +7,41 @@ import (
 	"github.com/frankill/gotools/agg"
 )
 
+func TestDistinct(t *testing.T) {
+	// Define test cases
+	tests := []struct {
+		name     string
+		slice    [][]int
+		expected int
+	}{
+		{
+			name:     "Test with single slice",
+			slice:    [][]int{{1, 2, 3, 4, 5, 3}, {4, 5, 6}},
+			expected: 6,
+		},
+		{
+			name:     "Test with multiple slices",
+			slice:    [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			expected: 9,
+		},
+		{
+			name:     "Test with empty slices",
+			slice:    [][]int{{}, {}, {}},
+			expected: 0,
+		},
+	}
+
+	// Run tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := agg.Distinct(tt.slice...)
+			if result != tt.expected {
+				t.Errorf("Expected %d, but got %d", tt.expected, result)
+			}
+		})
+	}
+}
+
 func TestASum(t *testing.T) {
 	// Define test cases
 	tests := []struct {
