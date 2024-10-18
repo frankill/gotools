@@ -1221,3 +1221,71 @@ func TestArrayReduceR(t *testing.T) {
 		t.Errorf("expected %v, got %v", expected, result)
 	}
 }
+
+func TestArrayUniqueCount(t *testing.T) {
+	// 测试空输入
+	arr := []int{}
+	result := array.UniqueCount(arr)
+	expected := 0
+	if result != expected {
+		t.Errorf("expected %v, got %v", expected, result)
+	}
+
+	// 测试单个元素
+	arr = []int{1}
+	result = array.UniqueCount(arr)
+	expected = 1
+	if result != expected {
+		t.Errorf("expected %v, got %v", expected, result)
+	}
+
+	// 测试多个元素
+	arr = []int{1, 2, 2, 3, 3, 3, 4, 4, 4, 4}
+	result = array.UniqueCount(arr)
+	expected = 4
+	if result != expected {
+		t.Errorf("expected %v, got %v", expected, result)
+	}
+
+	// 测试所有元素相同
+	arr = []int{1, 1, 1, 1, 1}
+	result = array.UniqueCount(arr)
+	expected = 1
+	if result != expected {
+		t.Errorf("expected %v, got %v", expected, result)
+	}
+}
+func TestArrayDistinctCount(t *testing.T) {
+	// 测试空输入
+	arr := []int{}
+	result := array.DistinctCount(arr)
+	expected := 0
+	if result != expected {
+		t.Errorf("expected %v, got %v", expected, result)
+	}
+
+	// 测试单个元素
+	arr = []int{1}
+	result = array.DistinctCount(arr)
+	expected = 1
+	if result != expected {
+		t.Errorf("expected %v, got %v", expected, result)
+	}
+
+	// 测试多个元素
+	arr = []int{1, 2, 2, 3, 3, 3, 4, 4, 4, 4}
+	result = array.DistinctCount(arr)
+	expected = 4
+	if result != expected {
+		t.Errorf("expected %v, got %v", expected, result)
+	}
+
+	// 测试所有元素相同
+	arr = []int{1, 1, 1, 1, 1}
+	result = array.DistinctCount(arr)
+	expected = 1
+	if result != expected {
+		t.Errorf("expected %v, got %v", expected, result)
+	}
+
+}

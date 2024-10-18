@@ -1387,6 +1387,37 @@ func Choose[S ~[]T, T any](index []int, arr S) []T {
 
 }
 
+// UniqueCount 用于计算类型为 S（元素类型为 T）的切片中的唯一元素的个数。
+// 要求 T 类型实现 gotools.Ordered 接口，以便进行比较操作。
+//
+// 参数:
+//   - arr: 输入的切片 S，可能包含重复元素。
+//
+// 返回值:
+//   - 返回唯一元素的个数。
+func UniqueCount[S ~[]T, T gotools.Ordered](arr S) int {
+
+	if len(arr) == 0 {
+		return 0
+	}
+	if len(arr) == 1 {
+		return 1
+	}
+
+	res := Sort(func(x, y T) bool { return x < y }, arr)
+
+	result := 1
+	l := len(res)
+
+	for i := 1; i < l; i++ {
+		if arr[i] != arr[i-1] {
+			result++
+		}
+	}
+	return result
+
+}
+
 // Unique 移除类型为 S（元素类型为 T）的切片中的重复元素，并返回一个新的无重复元素的切片。
 // 要求 T 类型实现 gotools.Ordered 接口，以便进行比较操作。
 //
@@ -1641,23 +1672,46 @@ func ToMap[K gotools.Comparable](arr []K) map[K]struct{} {
 	return m
 }
 
+// DistinctCount 去重数组元素的数量
+// 参数:
+//   - arr: 一个切片，表示要进行去重的切片。
+//
+// 返回:
+//   - int: 一个整数，表示去重后的切片的数量。
+func DistinctCount[S ~[]T, T gotools.Comparable](arr S) int {
+
+	seen := make(map[T]struct{})
+	var result int
+
+	for _, v := range arr {
+
+		if _, exists := seen[v]; !exists {
+			seen[v] = struct{}{}
+			result++
+		}
+
+	}
+
+	return result
+}
+
 // Distinct 去重数组元素
 // 参数:
 //   - arr: 一个切片，表示要进行去重的切片。
 //
 // 返回:
 //   - []T: 一个新的切片，表示去重后的切片。
-func Distinct[S ~[]T, T gotools.Comparable](arr ...S) []T {
+func Distinct[S ~[]T, T gotools.Comparable](arr S) []T {
 	seen := make(map[T]struct{})
 	var result []T
 
-	for _, vv := range arr {
-		for _, v := range vv {
-			if _, exists := seen[v]; !exists {
-				seen[v] = struct{}{}
-				result = append(result, v)
-			}
+	for _, v := range arr {
+
+		if _, exists := seen[v]; !exists {
+			seen[v] = struct{}{}
+			result = append(result, v)
 		}
+
 	}
 
 	return result
