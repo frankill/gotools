@@ -192,10 +192,7 @@ func TestAMaxif(t *testing.T) {
 		{
 			name: "Find maximum even number",
 			fun: func(x int) bool {
-				if x%2 == 0 {
-					return true
-				}
-				return false
+				return x%2 == 0
 			},
 			slice:    []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
 			expected: 10,
@@ -203,10 +200,7 @@ func TestAMaxif(t *testing.T) {
 		{
 			name: "Find maximum odd number",
 			fun: func(x int) bool {
-				if x%2 != 0 {
-					return true
-				}
-				return false
+				return x%2 != 0
 			},
 			slice:    []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
 			expected: 9,
