@@ -935,7 +935,7 @@ func TestArrayCount(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := array.Count(tt.fun, tt.arrs)
+			result := array.CountIf(tt.fun, tt.arrs)
 			if result != tt.expected {
 				t.Errorf("ArrayCount() = %v, want %v", result, tt.expected)
 			}

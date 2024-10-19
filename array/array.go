@@ -22,6 +22,19 @@ func FromAny[T any](input ...T) []T {
 	return input
 }
 
+func FromAnyIf[T any](fun func(T any) bool, input ...T) []T {
+
+	res := make([]T, 0, len(input))
+
+	for _, v := range input {
+		if fun(v) {
+			res = append(res, v)
+		}
+	}
+	return res
+
+}
+
 // Rep 生成一个新的切片，该切片由输入切片 `x` 的元素重复 `n` 次组成。
 //
 // 参数:
@@ -1471,7 +1484,11 @@ func Difference[S ~[]T, T gotools.Number](arr S) []T {
 	return res
 }
 
-// Count 计算满足特定条件的元素数量
+func Count[S ~[]T, T any](arr S) int {
+	return len(arr)
+}
+
+// CountIf 计算满足特定条件的元素数量
 // 条件由提供的函数 `fun` 定义，该函数接受与输入切片数量相等的参数并返回一个布尔值。
 //
 // 参数:
@@ -1484,7 +1501,7 @@ func Difference[S ~[]T, T gotools.Number](arr S) []T {
 //
 // 注意:
 //   - 如果提供的切片为空，则函数返回 0。
-func Count[S ~[]T, T any](fun func(x T) bool, arr S) int {
+func CountIf[S ~[]T, T any](fun func(x T) bool, arr S) int {
 
 	if len(arr) == 0 {
 		return 0
