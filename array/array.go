@@ -1000,7 +1000,6 @@ func CompactAny[S ~[]T, T any](fun func(x, y T) bool, arr S) []T {
 // 返回值:
 //   - 反转后的切片 S，与输入切片类型相同。
 //
-// 此函数通过双指针技巧实现切片元素的原地交换，达到反转的目的。
 // 当输入切片为空时，会直接返回同类型的空切片。
 func Reverse[S ~[]T, T any](arr S) []T {
 
