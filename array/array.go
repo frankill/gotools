@@ -1186,188 +1186,6 @@ func EnumerateDense[S ~[]T, T gotools.Comparable](arr S) []int {
 	return result
 }
 
-// func SortByQ[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D) (S, D) {
-
-// 	return ArraySortBy(func(x, y U) bool { return x < y }, arr, order)
-
-// }
-
-// SortTwo 通过自定义比较函数和排序顺序对数组进行排序。
-// 参数:
-//
-//   - fun: 自定义比较函数，接受两个 T 类型的参数并返回一个布尔值。
-//   - arr: 需要排序的数组，类型为 S。
-//   - order: 与 arr 相关的数组，类型为 D，其元素类型与 fun 的参数类型相同。
-//
-// 返回值:
-//
-//   - 返回值是排序后的数组。
-func SortBy[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D) (S, D) {
-
-	la := len(arr)
-	if la == 0 {
-		return S{}, D{}
-	}
-	if la == 1 {
-		return arr, order
-	}
-
-	res := make(S, la)
-	tmp := make(D, la)
-	copy(res, arr)
-	copy(tmp, order)
-
-	for i := 1; i < la; {
-		if i == 0 {
-			i = 2
-		}
-		if i >= la {
-			break
-		}
-		if fun(tmp[i], tmp[i-1]) {
-			tmp[i], tmp[i-1] = tmp[i-1], tmp[i]
-			res[i], res[i-1] = res[i-1], res[i]
-			i--
-			continue
-		}
-		i++
-
-	}
-
-	return res, tmp
-}
-
-// func SortByLQ[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D) {
-// 	ArraySortByL(func(current, before U) bool { return current < before }, arr, order)
-// }
-
-// SortTwoLocal 是一个泛型排序函数，用于对两个关联数组进行排序。
-// 它接受一个比较函数、一个需要排序的数组和一个与之相关的数组，
-// 根据比较函数的规则对相关数组进行排序。
-// 比较函数接收两个元素并返回一个布尔值，表示第一个元素是否应排在第二个元素之前。
-// 注意：这个函数会直接修改输入的数组。
-//
-// 参数:
-//   - fun: 比较函数，用于确定元素的排序顺序。
-//   - arr: 需要排序的数组，类型为 S。
-//   - order: 与 arr 相关的数组，类型为 D，其元素类型与 fun 的参数类型相同。
-//
-// 返回:
-//   - 无返回值，直接修改输入的 arr 和 order 数组。
-func SortByL[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D) {
-	la := len(arr)
-	if la == 0 {
-		return
-	}
-	if la == 1 {
-		return
-	}
-
-	for i := 1; i < la; {
-		if i == 0 {
-			i = 2
-		}
-		if i >= la {
-			break
-		}
-		if fun(order[i], order[i-1]) {
-			order[i], order[i-1] = order[i-1], order[i]
-			arr[i], arr[i-1] = arr[i-1], arr[i]
-			i--
-			continue
-		}
-		i++
-
-	}
-
-}
-
-// Sort 对类型为 S（元素类型为 T）的切片进行自定义排序。
-//
-// 参数:
-//   - fun: 一个比较函数，接受两个 T 类型的参数并返回一个布尔值，指示是否需要交换这两个参数的位置。
-//     当 `fun(x, y)` 返回 `true` 时，在排序过程中 `x` 应该排在 `y` 之前。
-//   - arr: 要排序的切片 S。
-//
-// 返回值:
-//   - 返回一个新的 S 类型切片，其中的元素根据提供的比较函数 `fun` 进行排序。
-func Sort[S ~[]T, T any](fun func(x, y T) bool, arr S) []T {
-
-	la := len(arr)
-	if la == 0 {
-		return []T{}
-	}
-	if la == 1 {
-		return []T{arr[0]}
-	}
-
-	res := make([]T, la)
-	copy(res, arr)
-
-	for i := 1; i < la; {
-		if i == 0 {
-			i = 2
-		}
-		if i >= la {
-			break
-		}
-		if fun(res[i], res[i-1]) {
-			res[i], res[i-1] = res[i-1], res[i]
-			i--
-			continue
-		}
-		i++
-
-	}
-
-	return res
-
-}
-
-// SortQuick 使用快速排序的思路（尽管实现并不完全正确）尝试对类型为 S（元素类型为 T）的切片进行原地排序。
-// 注意：当前实现并非标准快速排序算法，更像是简化冒泡排序变种。
-//
-// 参数:
-//    - arr: 要排序的切片 S，其中元素类型 T 必须是可比较的（实现 gotools.Ordered 接口）。
-// func SortQuick[S ~[]T, T gotools.Ordered](arr S) []T {
-
-// 	return ArraySort(func(x, y T) bool { return x < y }, arr)
-
-// }
-
-// SortLocal 对类型为 S（元素类型为 T）的切片进行原地排序，依据提供的比较函数 `fun`。
-//
-// 参数:
-//   - fun: 自定义比较函数，接受两个 T 类型的参数并返回一个布尔值。
-//     当 `fun(x, y)` 返回 `true`，则在排序时 `x` 应位于 `y` 之前。
-//   - arr: 要排序的本地切片 S，函数会直接修改传入的切片。
-func SortLocal[S ~[]T, T any](fun func(x, y T) bool, arr S) {
-	la := len(arr)
-	if la == 0 {
-		return
-	}
-	if la == 1 {
-		return
-	}
-
-	for i := 1; i < la; {
-		if i == 0 {
-			i = 2
-		}
-		if i >= la {
-			break
-		}
-		if fun(arr[i], arr[i-1]) {
-			arr[i], arr[i-1] = arr[i-1], arr[i]
-			i--
-			continue
-		}
-		i++
-
-	}
-
-}
-
 // Choose 根据提供的索引数组重新排列给定的泛型数组元素。
 // 参数:
 //
@@ -1404,7 +1222,7 @@ func Choose[S ~[]T, T any](index []int, arr S) []T {
 // 要求 T 类型实现 gotools.Ordered 接口，以便进行比较操作。
 //
 // 参数:
-//   - arr: 输入的切片 S，可能包含重复元素。
+//   - arr: 输入的切片 S，可能包含重复元素。要求必须是排序后的切片
 //
 // 返回值:
 //   - 返回唯一元素的个数。
@@ -1417,10 +1235,8 @@ func UniqueCount[S ~[]T, T gotools.Ordered](arr S) int {
 		return 1
 	}
 
-	res := Sort(func(x, y T) bool { return x < y }, arr)
-
 	result := 1
-	l := len(res)
+	l := len(arr)
 
 	for i := 1; i < l; i++ {
 		if arr[i] != arr[i-1] {
@@ -1435,7 +1251,7 @@ func UniqueCount[S ~[]T, T gotools.Ordered](arr S) int {
 // 要求 T 类型实现 gotools.Ordered 接口，以便进行比较操作。
 //
 // 参数:
-//   - arr: 输入的切片 S，可能包含重复元素。
+//   - arr: 输入的切片 S，可能包含重复元素。 要求必须是排序后的切片
 //
 // 返回值:
 //   - 返回一个新的 S 类型切片，其中重复的元素已被移除，剩余元素按升序排列。
@@ -1448,9 +1264,7 @@ func Unique[S ~[]T, T gotools.Ordered](arr S) []T {
 		return []T{arr[0]}
 	}
 
-	res := Sort(func(x, y T) bool { return x < y }, arr)
-
-	return Compact(res)
+	return Compact(arr)
 }
 
 // Difference 计算类型为 S（元素类型为 T）的切片中相邻元素的差值，并返回一个新的切片。
@@ -1922,7 +1736,7 @@ func Flatten[S ~[]T, T any](arr ...S) []T {
 //	InsertAt([]int{1, 2, 3, 4}, 1, 3, 5，7)(0) // => [1 0 2 0 3 0 4]
 func InsertAt[S ~[]T, T any](data S, pos ...int) func(default_x T) []T {
 
-	SortLocal(func(x, y int) bool { return x < y }, pos)
+	SortL(func(x, y int) bool { return x < y }, pos)
 
 	for i := len(pos) - 1; i >= 0; i-- {
 		if pos[i] < len(data)+len(pos)-1 {

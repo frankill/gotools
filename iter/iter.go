@@ -782,7 +782,7 @@ func SortS[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 			// TODO: 优化
 			data := Collect(ch)
-			array.SortLocal(f, data)
+			array.SortL(f, data)
 
 			for _, v := range data {
 				ch_ <- v
@@ -886,7 +886,7 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 		for v := range ch_ {
 
-			array.SortLocal(f, v)
+			array.SortL(f, v)
 
 			p, err := os.MkdirTemp("", "t-*")
 			if err != nil {
