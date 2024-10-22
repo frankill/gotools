@@ -19,7 +19,7 @@ go get github.com/frankill/gotools
 
 ```go
 
-package main
+ package main
 
 import (
 	"fmt"
@@ -87,12 +87,13 @@ func main() {
 			return x[0] == y[0]
 		})(
 			iter.Merge(compare)(
-				iter.SortSimple(compare)(ch2),
-				iter.SortSimple(compare)(ch1),
+				iter.SortS(compare)(ch2),
+				iter.SortS(compare)(ch1),
 			),
 		),
 	)
 }
+
 
 
 
