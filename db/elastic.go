@@ -15,6 +15,40 @@ import (
 	"github.com/olivere/elastic/v7"
 )
 
+// ToTOne 将 ElasticBluk 转换为 T
+func ToTOne[T any](data ElasticBluk[T]) T {
+	return data.Source
+}
+
+// ToT 将 ElasticBluk[T] 转换为 []T
+// 参数:
+//
+//   - data: ElasticBluk[T]
+//
+// 返回:
+//
+//   - []T
+func ToT[T any](data []ElasticBluk[T]) []T {
+
+	res := make([]T, len(data))
+
+	for i, v := range data {
+		res[i] = v.Source
+	}
+
+	return res
+}
+
+// EsSimple 返回一个简单的 Elasticsearch 客户端
+// 参数:
+//
+//   - host: Elasticsearch 地址 ( http://localhost:9200)
+//   - User: Elasticsearch 用户名
+//   - Pwd: Elasticsearch 密码
+//
+// 返回:
+//
+//   - *elastic.Client: Elasticsearch 客户端
 func EsSimple(host ...string) func(User, Pwd string) (*elastic.Client, error) {
 
 	return func(User, Pwd string) (*elastic.Client, error) {
@@ -27,16 +61,31 @@ func EsSimple(host ...string) func(User, Pwd string) (*elastic.Client, error) {
 	}
 }
 
-// EsScriptID returns a function that creates an Elasticsearch stored script
-// with a specified ID and parameters.
+// EsScriptID 返回一个  Elasticsearch 脚本
+// 参数:
+//
+//   - id: 脚本 ID
+//   - data: 脚本参数
+//
+// 返回:
+//
+//   - *elastic.Script: Elasticsearch 脚本
 func EsScriptID(id string) func(data map[string]any) *elastic.Script {
 	return func(doc map[string]any) *elastic.Script {
 		return elastic.NewScriptStored(id).Params(doc)
 	}
 }
 
-// EsScript returns a function that creates an Elasticsearch inline script
-// with a specified language and script content, and parameters.
+// EsScript 返回一个  Elasticsearch 脚本
+// 参数:
+//
+//   - lang: 脚本语言
+//   - script: 脚本内容
+//   - data: 脚本参数
+//
+// 返回:
+//
+//   - *elastic.Script: Elasticsearch 脚本
 func EsScript(lang string, script string) func(data map[string]any) *elastic.Script {
 	return func(data map[string]any) *elastic.Script {
 		if lang == "" {
@@ -49,7 +98,6 @@ func EsScript(lang string, script string) func(data map[string]any) *elastic.Scr
 	}
 }
 
-// ElasticBluk represents a bulk request for Elasticsearch
 type ElasticBluk[U any] struct {
 	Index          string
 	OpType         string // Operation type: "index", "create", "update", "delete", "script"
@@ -62,10 +110,9 @@ type ElasticBluk[U any] struct {
 	ScriptUpsert   any
 }
 
-// 定义一个类型，添加 Index 和 ReturnFields 字段
+// 定义一个 ElasticSearchClient 的结构体
 type ElasticSearchClient[U any] struct {
 	Client *elastic.Client
-	Query  elastic.Query
 }
 
 // 创建 ElasticSearchClient 实例的工厂函数
