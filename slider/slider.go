@@ -104,6 +104,14 @@ func Paste(before int, after int, defaultValue string, data []string) []string {
 //
 // 返回:
 //   - 一个类型为 U 的切片，表示滑动窗口计算后的结果。
+//
+// 注意:
+//
+//   - 如果函数f 返回x 需要使用 array.Copy(x) 复制, 否则结果可能不正确
+//
+//   - a := array.RandomSample(array.Seq(1, 10, 1), 20, true)
+//
+//   - slider.Slide(func(x []int) []int { return array.Copy(x) }, 1, 1, 0, a)
 func Slide[S ~[]T, U, T any](f func(x []T) U, before int, after int, defaultValue T, data S) []U {
 	l := len(data)
 	wl := before + after + 1
@@ -154,7 +162,10 @@ func Slide[S ~[]T, U, T any](f func(x []T) U, before int, after int, defaultValu
 //   - 一个类型为 U 的切片，表示滑动窗口计算后的结果。
 //
 // 注意:
-// 多个切片会分别计算 并最终合并相同索引的元素到一个切片元素中
+//
+//   - 多个切片会分别计算 并最终合并相同索引的元素到一个切片元素中
+//
+//   - 如果函数f 返回x 需要使用 array.Copy(x) 复制, 否则结果可能不正确
 func Pslide[S ~[]T, U, T any](f func(x []T) U, before int, after int, defaultValue T, data ...S) [][]U {
 
 	if len(data) == 0 {
