@@ -174,3 +174,21 @@ func CollectFun[T any, U gotools.Comparable](f func(x T) U) func(ch chan T) []U 
 	}
 
 }
+
+// Walk 对通道中的数据进行遍历操作。
+// 参数:
+//   - f: 一个函数，接受类型为 T 的输入。
+//   - ch: 一个通道，通道中的每个值是类型为 T 的数据。
+//
+// 函数功能:
+//   - 从输入通道 ch 中读取数据，对每个数据应用函数 f。
+func Walk[T any](f func(x T)) func(ch chan T) {
+
+	return func(ch chan T) {
+
+		for v := range ch {
+			f(v)
+		}
+	}
+
+}

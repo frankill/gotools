@@ -75,12 +75,23 @@ func Map[T any, U any](f func(x T) U) func(ch chan T) chan U {
 
 		ch_ := make(chan U, bufferSize)
 
+		var wg sync.WaitGroup
+		wg.Add(parallerNum)
+
 		go func() {
 			defer close(ch_)
-			for v := range ch {
-				ch_ <- f(v)
-			}
+			defer wg.Wait()
+
 		}()
+
+		for num := 0; num < parallerNum; num++ {
+			go func() {
+				defer wg.Done()
+				for v := range ch {
+					ch_ <- f(v)
+				}
+			}()
+		}
 
 		return ch_
 	}
@@ -96,14 +107,26 @@ func Map[T any, U any](f func(x T) U) func(ch chan T) chan U {
 func FlatMap[T any, U any](f func(x T) []U) func(ch chan T) chan U {
 	return func(ch chan T) chan U {
 		ch_ := make(chan U, bufferSize)
+
+		var wg sync.WaitGroup
+		wg.Add(parallerNum)
+
 		go func() {
 			defer close(ch_)
-			for v := range ch {
-				for _, value := range f(v) {
-					ch_ <- value
-				}
-			}
+			defer wg.Wait()
 		}()
+
+		for num := 0; num < parallerNum; num++ {
+			go func() {
+				defer wg.Done()
+				for v := range ch {
+					for _, u := range f(v) {
+						ch_ <- u
+					}
+				}
+			}()
+		}
+
 		return ch_
 	}
 }
@@ -127,24 +150,6 @@ func Distinct[T gotools.Comparable](ch chan T) chan T {
 	return ch_
 }
 
-// Walk 对通道中的数据进行遍历操作。
-// 参数:
-//   - f: 一个函数，接受类型为 T 的输入。
-//   - ch: 一个通道，通道中的每个值是类型为 T 的数据。
-//
-// 函数功能:
-//   - 从输入通道 ch 中读取数据，对每个数据应用函数 f。
-func Walk[T any](f func(x T)) func(ch chan T) {
-
-	return func(ch chan T) {
-
-		for v := range ch {
-			f(v)
-		}
-	}
-
-}
-
 // Filter 过滤通道中的数据，只将符合条件的数据发送到新的通道。
 // 参数:
 //   - f: 一个函数，接受类型为 T 的输入，并返回布尔值。如果返回 true，则将该数据发送到新通道；如果返回 false，则忽略该数据。
@@ -161,15 +166,25 @@ func Filter[T any](f func(x T) bool) func(ch chan T) chan T {
 
 		ch_ := make(chan T, bufferSize)
 
+		var wg sync.WaitGroup
+		wg.Add(parallerNum)
+
 		go func() {
 			defer close(ch_)
-
-			for v := range ch {
-				if f(v) {
-					ch_ <- v
-				}
-			}
+			defer wg.Wait()
 		}()
+
+		for num := 0; num < parallerNum; num++ {
+			go func() {
+				defer wg.Done()
+
+				for v := range ch {
+					if f(v) {
+						ch_ <- v
+					}
+				}
+			}()
+		}
 		return ch_
 	}
 }
@@ -287,19 +302,30 @@ func Partition[T any](f func(x T) bool) func(ch chan T) (chan T, chan T) {
 		ch1 := make(chan T, bufferSize)
 		ch2 := make(chan T, bufferSize)
 
-		go func() {
+		var wg sync.WaitGroup
+		wg.Add(parallerNum)
 
+		go func() {
 			defer close(ch1)
 			defer close(ch2)
-
-			for v := range ch {
-				if f(v) {
-					ch1 <- v
-				} else {
-					ch2 <- v
-				}
-			}
+			defer wg.Wait()
 		}()
+
+		for num := 0; num < parallerNum; num++ {
+			go func() {
+
+				defer wg.Done()
+
+				for v := range ch {
+					if f(v) {
+						ch1 <- v
+					} else {
+						ch2 <- v
+					}
+				}
+			}()
+		}
+
 		return ch1, ch2
 	}
 }
@@ -416,7 +442,7 @@ func Union[T, U any](fn func(x T) U) func(chs ...chan T) chan U {
 	}
 }
 
-// InterSimple 返回两个通道的交集
+// InterS 返回两个通道的交集
 // 参数:
 //   - ch1: 一个通道，通道中的值是类型为 T 的数据。
 //   - ch2: 一个通道，通道中的值是类型为 T 的数据。
@@ -427,29 +453,41 @@ func Union[T, U any](fn func(x T) U) func(chs ...chan T) chan U {
 // 注意:
 // 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
 // 如果第二个通道数据很多，要考虑内存占用问题。
-func InterSimple[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
+func InterS[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
 
-	ch := make(chan T, bufferSize)
+	ch_ := make(chan T, bufferSize)
+	m := array.ToMap(Collect(ch2))
+
+	var wg sync.WaitGroup
+	wg.Add(parallerNum)
 
 	go func() {
-
-		m := array.ToMap(Collect(ch2))
-
-		for v := range ch1 {
-
-			if _, ok := m[v]; ok {
-				ch <- v
-			}
-
-		}
-
+		defer close(ch_)
+		defer wg.Wait()
 	}()
 
-	return ch
+	for num := 0; num < parallerNum; num++ {
+
+		go func() {
+
+			defer wg.Done()
+
+			for v := range ch1 {
+
+				if _, ok := m[v]; ok {
+					ch_ <- v
+				}
+
+			}
+
+		}()
+	}
+
+	return ch_
 
 }
 
-// SubSimple 返回两个通道的差集
+// SubS 返回两个通道的差集
 // 参数:
 //   - ch1: 一个通道，通道中的值是类型为 T 的数据。
 //   - ch2: 一个通道，通道中的值是类型为 T 的数据。
@@ -460,25 +498,35 @@ func InterSimple[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
 // 注意:
 // 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
 // 如果第二个通道数据很多，要考虑内存占用问题。
-func SubSimple[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
+func SubS[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
 
-	ch := make(chan T, bufferSize)
+	ch_ := make(chan T, bufferSize)
+	m := array.ToMap(Collect(ch2))
+
+	var wg sync.WaitGroup
+
+	wg.Add(parallerNum)
+
+	go func() {
+		defer close(ch_)
+		defer wg.Wait()
+	}()
 
 	go func() {
 
-		m := array.ToMap(Collect(ch2))
+		defer wg.Done()
 
 		for v := range ch1 {
 
 			if _, ok := m[v]; !ok {
-				ch <- v
+				ch_ <- v
 			}
 
 		}
 
 	}()
 
-	return ch
+	return ch_
 }
 
 // Cartesian 生成笛卡尔积
