@@ -340,6 +340,7 @@ func FromCsv(path string) func(header bool) (chan []string, chan error) {
 				}
 
 				if err != nil {
+					errs <- err
 					break
 				}
 				ch <- row
