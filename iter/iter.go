@@ -788,6 +788,9 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 			}
 		}()
 
+		tmp := make(chan T)
+		close(tmp)
+
 		for v := range ch_ {
 
 			array.SortL(f, v)
@@ -795,7 +798,7 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 			p, err := os.MkdirTemp("", "t-*")
 			if err != nil {
 				log.Println(err)
-				return make(chan T)
+				return tmp
 			}
 			fn := filepath.Join(p, strconv.Itoa(num)+".gob")
 			file = append(file, fn)
@@ -803,7 +806,7 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 			err = ToGob[T](fn, true)(FromArray[T](v))
 			if err != nil {
 				log.Println(err)
-				return make(chan T)
+				return tmp
 			}
 			num++
 		}
