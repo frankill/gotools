@@ -205,6 +205,7 @@ func Pslide[S ~[]T, U, T any](f func(x []T) U, before int, after int, defaultVal
 //
 // 返回:
 //   - 一个类型为 U 的切片，表示滑动窗口计算后的结果。
+//   - 如果函数f 返回x 需要使用 array.Copy(x) 复制, 否则结果可能不正确
 func SlideIndex[S ~[]T, T, U any](f func(x []T) U, before, after int, index []time.Time, data S) []U {
 	l := len(data)
 
@@ -247,7 +248,8 @@ func SlideIndex[S ~[]T, T, U any](f func(x []T) U, before, after int, index []ti
 //   - 一个类型为 U 的切片，表示滑动窗口计算后的结果。
 //
 // 注意:
-// 多个切片会分别计算 并最终合并相同索引的元素到一个切片元素中
+//   - 多个切片会分别计算 并最终合并相同索引的元素到一个切片元素中
+//   - 如果函数f 返回x 需要使用 array.Copy(x) 复制, 否则结果可能不正确
 func PslideIndex[S ~[]T, U, T any](f func(x []T) U, before int, after int, index []time.Time, data ...S) [][]U {
 
 	if len(data) == 0 {
