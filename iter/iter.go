@@ -442,93 +442,6 @@ func Union[T, U any](fn func(x T) U) func(chs ...chan T) chan U {
 	}
 }
 
-// InterS 返回两个通道的交集
-// 参数:
-//   - ch1: 一个通道，通道中的值是类型为 T 的数据。
-//   - ch2: 一个通道，通道中的值是类型为 T 的数据。
-//
-// 返回:
-//   - 一个通道，通道中的值是类型为 T 的数据，表示两个通道的交集。
-//
-// 注意:
-// 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
-// 如果第二个通道数据很多，要考虑内存占用问题。
-func InterS[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
-
-	ch_ := make(chan T, bufferSize)
-	m := array.ToMap(Collect(ch2))
-
-	var wg sync.WaitGroup
-	wg.Add(parallerNum)
-
-	go func() {
-		defer close(ch_)
-		defer wg.Wait()
-	}()
-
-	for num := 0; num < parallerNum; num++ {
-
-		go func() {
-
-			defer wg.Done()
-
-			for v := range ch1 {
-
-				if _, ok := m[v]; ok {
-					ch_ <- v
-				}
-
-			}
-
-		}()
-	}
-
-	return ch_
-
-}
-
-// SubS 返回两个通道的差集
-// 参数:
-//   - ch1: 一个通道，通道中的值是类型为 T 的数据。
-//   - ch2: 一个通道，通道中的值是类型为 T 的数据。
-//
-// 返回:
-//   - 一个通道，通道中的值是类型为 T 的数据，表示两个通道的差集。
-//
-// 注意:
-// 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
-// 如果第二个通道数据很多，要考虑内存占用问题。
-func SubS[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
-
-	ch_ := make(chan T, bufferSize)
-	m := array.ToMap(Collect(ch2))
-
-	var wg sync.WaitGroup
-
-	wg.Add(parallerNum)
-
-	go func() {
-		defer close(ch_)
-		defer wg.Wait()
-	}()
-
-	go func() {
-
-		defer wg.Done()
-
-		for v := range ch1 {
-
-			if _, ok := m[v]; !ok {
-				ch_ <- v
-			}
-
-		}
-
-	}()
-
-	return ch_
-}
-
 // Cartesian 生成笛卡尔积
 // 参数:
 //   - ch1: 一个通道，通道中的值是类型为 T 的数据。
@@ -1091,6 +1004,31 @@ func Unique[T any](f func(x, y T) bool) func(ch chan T) chan T {
 	}
 }
 
+// Flatten 接收一个通道，该通道发送包含元素 T 的切片 S。
+// 它将所有切片中的元素展平并发送到新的通道中。
+//
+// 参数:
+//   - ch: 一个通道，发送元素为类型 S 的切片，其中 S 是类型 T 的切片。
+//
+// 返回:
+//   - 返回一个新的通道，该通道发送类型为 T 的元素，这些元素是展平后的切片元素。
+func Flatten[S ~[]T, T any](ch chan S) chan T {
+
+	ch_ := make(chan T, bufferSize)
+
+	go func() {
+		defer close(ch_)
+
+		for v := range ch {
+			for _, vv := range v {
+				ch_ <- vv
+			}
+		}
+	}()
+
+	return ch_
+}
+
 // Subtract 返回两个通道的差集
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 的值，返回一个布尔值，表示比较大小 0 相等，-1 小于，1 大于。
@@ -1135,27 +1073,145 @@ func Subtract[T any](f func(x, y T) int) func(ch1 chan T, ch2 chan T) chan T {
 	}
 }
 
-// Flatten 接收一个通道，该通道发送包含元素 T 的切片 S。
-// 它将所有切片中的元素展平并发送到新的通道中。
-//
+// Intersect 返回两个通道的交集
 // 参数:
-//   - ch: 一个通道，发送元素为类型 S 的切片，其中 S 是类型 T 的切片。
+//   - f: 一个函数，接受两个类型为 T 的值，返回一个布尔值，表示比较大小 0 相等，-1 小于，1 大于。
+//   - ch1: 一个通道，用于接收数据。必须排序
+//   - ch2: 一个通道，用于接收数据。必须排序
 //
 // 返回:
-//   - 返回一个新的通道，该通道发送类型为 T 的元素，这些元素是展平后的切片元素。
-func Flatten[S ~[]T, T any](ch chan S) chan T {
+//   - 一个通道，用于接收排序后的数据。
+func Intersect[T any](f func(x, y T) int) func(ch1, ch2 chan T) chan T {
+	return func(ch1, ch2 chan T) chan T {
+		ch_ := make(chan T, bufferSize)
+
+		go func() {
+			defer close(ch_)
+
+			var v1, v2 T
+			var ok1, ok2 bool
+
+			// Get first value from both channels
+			v1, ok1 = <-ch1
+			v2, ok2 = <-ch2
+
+			for ok1 {
+				// Compare values from ch1 and ch2
+				switch {
+				case !ok2: // ch2 is exhausted
+					return
+				case f(v1, v2) < 0: // v1 < v2
+					v1, ok1 = <-ch1
+				case f(v1, v2) > 0: // v1 > v2
+					v2, ok2 = <-ch2
+				default: // v1 == v2
+					ch_ <- v1
+					v1, ok1 = <-ch1
+					v2, ok2 = <-ch2
+				}
+			}
+		}()
+
+		return ch_
+	}
+}
+
+// InterS 返回两个通道的交集
+// 参数:
+//   - ch1: 一个通道，通道中的值是类型为 T 的数据。
+//   - ch2: 一个通道，通道中的值是类型为 T 的数据。
+//
+// 返回:
+//   - 一个通道，通道中的值是类型为 T 的数据，表示两个通道的交集。
+//
+// 注意:
+// 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
+// 如果第二个通道数据很多，要考虑内存占用问题。
+func InterS[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
 
 	ch_ := make(chan T, bufferSize)
+	m := array.ToMap(Collect(ch2))
+
+	var wg sync.WaitGroup
+	wg.Add(parallerNum)
 
 	go func() {
 		defer close(ch_)
-
-		for v := range ch {
-			for _, vv := range v {
-				ch_ <- vv
-			}
-		}
+		defer wg.Wait()
 	}()
+
+	for num := 0; num < parallerNum; num++ {
+
+		go func() {
+
+			defer wg.Done()
+
+			for v := range ch1 {
+
+				if _, ok := m[v]; ok {
+					ch_ <- v
+				}
+
+			}
+
+		}()
+	}
+
+	return ch_
+
+}
+
+// func toMapInt[T gotools.Comparable](arr []T) map[T]int {
+
+// 	result := make(map[T]int, len(arr))
+
+// 	for i := range arr {
+// 		result[arr[i]] = 1
+// 	}
+// 	return result
+// }
+
+// SubS 返回两个通道的差集
+// 参数:
+//   - ch1: 一个通道，通道中的值是类型为 T 的数据。
+//   - ch2: 一个通道，通道中的值是类型为 T 的数据。
+//
+// 返回:
+//   - 一个通道，通道中的值是类型为 T 的数据，表示两个通道的差集。
+//
+// 注意:
+// 由于需要对收集第二个通道的数据，因此可以将较少数据的通道传递给第二个通道。
+// 如果第二个通道数据很多，要考虑内存占用问题。
+func SubS[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
+
+	ch_ := make(chan T, bufferSize)
+	m := array.ToMap(Collect(ch2))
+
+	var wg sync.WaitGroup
+
+	wg.Add(parallerNum)
+
+	go func() {
+		defer close(ch_)
+		defer wg.Wait()
+	}()
+
+	for num := 0; num < parallerNum; num++ {
+
+		go func() {
+
+			defer wg.Done()
+
+			for v := range ch1 {
+
+				if _, ok := m[v]; !ok {
+					ch_ <- v
+				}
+
+			}
+
+		}()
+	}
 
 	return ch_
 }
