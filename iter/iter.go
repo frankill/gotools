@@ -1064,7 +1064,6 @@ func Subtract[T any](f func(x, y T) int) func(ch1 chan T, ch2 chan T) chan T {
 					v2, ok2 = <-ch2
 				default: // v1 == v2
 					v1, ok1 = <-ch1
-
 				}
 			}
 		}()
@@ -1107,7 +1106,6 @@ func Intersect[T any](f func(x, y T) int) func(ch1, ch2 chan T) chan T {
 				default: // v1 == v2
 					ch_ <- v1
 					v1, ok1 = <-ch1
-					v2, ok2 = <-ch2
 				}
 			}
 		}()
