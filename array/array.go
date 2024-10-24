@@ -1079,7 +1079,73 @@ func ReduceR[S ~[]T, T, U any](fun func(x U, y T) U, init U, arr S) U {
 	return result
 }
 
-// Intersect 计算多个切片（类型为 []T，元素类型 T 可比较）的交集。
+// Subtract 计算两个切片（类型为 []T，元素类型 T 可比较）的差集。
+//
+// 参数:
+//   - a: 一个切片。
+//   - b: 一个切片。
+//
+// 返回值:
+//   - 一个新的 []T 类型的切片，包含所有输入切片中不在第二个切片中出现的元素，且元素顺序与它们在第一个切片中出现的顺序一致。
+//     如果没有差集或输入为空，则返回一个空切片。
+func Subtract[S ~[]T, T gotools.Comparable](a, b S) []T {
+
+	var r map[T]struct{}
+	var t []T
+
+	if len(a) > len(b) {
+		r = ToMap[T](b)
+		t = a
+	} else {
+		r = ToMap[T](a)
+		t = b
+	}
+
+	res := []T{}
+	for _, x := range t {
+		if _, ok := r[x]; !ok {
+			res = append(res, x)
+		}
+	}
+
+	return res
+
+}
+
+// Intersect 计算两个切片（类型为 []T，元素类型 T 可比较）的交集。
+//
+// 参数:
+//   - a: 一个切片。
+//   - b: 一个切片。
+//
+// 返回值:
+//   - 一个新的 []T 类型的切片，包含所有输入切片中共有的元素，且元素顺序与它们在第一个切片中出现的顺序一致。
+//     如果没有交集或输入为空，则返回一个空切片。
+func Intersect[S ~[]T, T gotools.Comparable](a, b S) []T {
+
+	var r map[T]struct{}
+	var t []T
+
+	if len(a) > len(b) {
+		r = ToMap[T](b)
+		t = a
+	} else {
+		r = ToMap[T](a)
+		t = b
+	}
+
+	res := []T{}
+	for _, x := range t {
+		if _, ok := r[x]; ok {
+			res = append(res, x)
+		}
+	}
+
+	return res
+
+}
+
+// PIntersect 计算多个切片（类型为 []T，元素类型 T 可比较）的交集。
 //
 // 参数:
 //   - arr: 变长参数，每个参数为一个待求交集的切片。
@@ -1089,74 +1155,51 @@ func ReduceR[S ~[]T, T, U any](fun func(x U, y T) U, init U, arr S) U {
 //     如果没有交集或输入为空，则返回一个空切片。
 //
 // 注意: T 必须实现 gotools.Comparable 接口，允许元素之间的比较操作。
-func Intersect[S ~[]T, T gotools.Comparable](arr ...S) []T {
-	if len(arr) == 0 {
-		return make([]T, 0)
-	}
+// func PIntersect[S ~[]T, T gotools.Comparable](arr ...S) []T {
+// 	if len(arr) == 0 {
+// 		return make([]T, 0)
+// 	}
 
-	// 如果只有一个切片，则直接返回它
-	if len(arr) == 1 {
-		return arr[0]
-	}
+// 	// 如果只有一个切片，则直接返回它
+// 	if len(arr) == 1 {
+// 		return arr[0]
+// 	}
 
-	nums := Map(func(x S) int { return len(x) }, arr)
+// 	nums := Map(func(x S) int { return len(x) }, arr)
 
-	index := FindMin(nums)
+// 	index := FindMin(nums)
 
-	// 使用第一个切片作为基数来收集交集元素
-	intersectionMap := make(map[T][]int, len(arr[index]))
-	for _, item := range arr[index] {
-		intersectionMap[item] = []int{index}
-	}
+// 	// 使用第一个切片作为基数来收集交集元素
+// 	intersectionMap := make(map[T][]int, len(arr[index]))
+// 	for _, item := range arr[index] {
+// 		intersectionMap[item] = []int{index}
+// 	}
 
-	// 遍历剩余的切片，仅保留交集中的元素
-	for k, otherSlice := range arr {
+// 	// 遍历剩余的切片，仅保留交集中的元素
+// 	for k, otherSlice := range arr {
 
-		if k == index {
-			continue
-		}
+// 		if k == index {
+// 			continue
+// 		}
 
-		for _, item := range otherSlice {
-			if _, ok := intersectionMap[item]; ok {
-				intersectionMap[item] = append(intersectionMap[item], k)
-			}
-		}
+// 		for _, item := range otherSlice {
+// 			if _, ok := intersectionMap[item]; ok {
+// 				intersectionMap[item] = append(intersectionMap[item], k)
+// 			}
+// 		}
 
-	}
+// 	}
 
-	result := mapfitler(func(k T, v []int) bool { return len(Distinct(v)) == len(arr) }, intersectionMap)
+// 	res := make([]T, 0, len(intersectionMap))
 
-	return mapKeys(result)
-}
+// 	for k, v := range intersectionMap {
+// 		if DistinctCount(v) == len(arr) {
+// 			res = append(res, k)
+// 		}
+// 	}
 
-func mapKeys[K gotools.Comparable, V any](m ...map[K]V) []K {
-
-	if len(m) == 0 {
-		return make([]K, 0)
-	}
-
-	num := Sum(Map(func(x map[K]V) int { return len(x) }, m))
-
-	keys := make([]K, 0, num)
-
-	for _, v := range m {
-		for k := range v {
-			keys = append(keys, k)
-		}
-	}
-
-	return keys
-}
-
-func mapfitler[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) map[K]V {
-	filtered := make(map[K]V)
-	for k, v := range m {
-		if f(k, v) {
-			filtered[k] = v
-		}
-	}
-	return filtered
-}
+// 	return res
+// }
 
 // EnumerateDense 为输入的数组中每个元素生成一个索引列表，其中的值对应该元素在数组中首次出现的位置。
 // 参数:

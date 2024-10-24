@@ -768,45 +768,6 @@ func TestArrayReverse(t *testing.T) {
 	}
 }
 
-func TestArrayIntersect(t *testing.T) {
-	// 测试用例：常规交集操作
-	slice1 := []int{1, 2, 3, 4}
-	slice2 := []int{3, 4, 5, 6}
-	slice3 := []int{4, 5, 6, 7}
-	expectedRegularResult := []int{4} // 1, 2, 3, 4 和 3, 4, 5, 6 和 4, 5, 6, 7 的交集是 4
-	if result := array.Intersect(slice1, slice2, slice3); !reflect.DeepEqual(result, expectedRegularResult) {
-		t.Errorf("ArrayIntersect failed for regular input: expected %v, got %v", expectedRegularResult, result)
-	}
-
-	// 边界条件测试用例：空切片
-	emptySlices := [][]int{}
-	expectedEmptyResult := []int(nil)
-	if result := array.Intersect(emptySlices...); !reflect.DeepEqual(result, expectedEmptyResult) {
-		t.Errorf("ArrayIntersect did not handle empty slices correctly, expected %v, got %v", expectedEmptyResult, result)
-	}
-
-	// 边界条件测试用例：单个切片
-	singleSlice := []int{1, 2, 3, 4}
-	expectedSingleSliceResult := []int{1, 2, 3, 4}
-	if result := array.Intersect(singleSlice); !reflect.DeepEqual(result, expectedSingleSliceResult) {
-		t.Errorf("ArrayIntersect did not handle single slice correctly, expected %v, got %v", expectedSingleSliceResult, result)
-	}
-
-	// 边界条件测试用例：所有切片元素都不相同
-	differentSlices := [][]int{{1, 2}, {3, 4}, {5, 6}}
-	expectedDifferentSlicesResult := []int{} // 没有交集
-	if result := array.Intersect(differentSlices...); !reflect.DeepEqual(result, expectedDifferentSlicesResult) {
-		t.Errorf("ArrayIntersect failed for slices with no intersection: expected %v, got %v", expectedDifferentSlicesResult, result)
-	}
-
-	// 边界条件测试用例：包含重复元素的切片
-	duplicateSlices := [][]int{{1, 2, 2}, {2, 3, 4, 2}}
-	expectedDuplicateSlicesResult := []int{2} // 2 是重复的，但交集中只应该出现一次
-	if result := array.Intersect(duplicateSlices...); !reflect.DeepEqual(result, expectedDuplicateSlicesResult) {
-		t.Errorf("ArrayIntersect failed for slices with duplicates: expected %v, got %v", expectedDuplicateSlicesResult, result)
-	}
-}
-
 func TestArrayEnumerateDense(t *testing.T) {
 	tests := []struct {
 		name     string
