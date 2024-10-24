@@ -746,7 +746,7 @@ func Fold[S ~[]T, T, U any](fun func(x ...T) U, acc func(x, y U) U, arr ...S) []
 	return result
 }
 
-// PIntersect 计算多个切片（类型为 []T，元素类型 T 可比较）的交集。
+// Intersect 计算多个切片（类型为 []T，元素类型 T 可比较）的交集。
 //
 // 参数:
 //   - arr: 变长参数，每个参数为一个待求交集的切片。
@@ -795,6 +795,54 @@ func Intersect[S ~[]T, T gotools.Comparable](arr ...S) []T {
 
 	for k, v := range intersectionMap {
 		if array.DistinctCount(v) == len(arr) {
+			res = append(res, k)
+		}
+	}
+
+	return res
+}
+
+// Subtract 计算多个切片（类型为 []T，元素类型 T 可比较）的交集。
+//
+// 参数:
+//   - arr: 变长参数，每个参数为一个待求交集的切片。
+//
+// 返回值:
+//   - 一个新的 []T 类型的切片，包含所有输入切片中共有的元素，且元素顺序与它们在第一个切片中出现的顺序一致。
+//     如果没有交集或输入为空，则返回一个空切片。
+//
+// 注意: T 必须实现 gotools.Comparable 接口，允许元素之间的比较操作。
+func Subtract[S ~[]T, T gotools.Comparable](arr ...S) []T {
+	if len(arr) == 0 {
+		return make([]T, 0)
+	}
+
+	// 如果只有一个切片，则直接返回它
+	if len(arr) == 1 {
+		return arr[0]
+	}
+
+	// 使用第一个切片作为基数来收集交集元素
+	intersectionMap := make(map[T]int, len(arr[0]))
+	for _, item := range arr[0] {
+		intersectionMap[item] = 1
+	}
+
+	// 遍历剩余的切片，仅保留交集中的元素
+	for k := range arr[1:] {
+
+		for _, item := range arr[1:][k] {
+			if _, ok := intersectionMap[item]; ok {
+				intersectionMap[item]++
+			}
+		}
+
+	}
+
+	res := make([]T, 0)
+
+	for k, v := range intersectionMap {
+		if v == 1 {
 			res = append(res, k)
 		}
 	}
