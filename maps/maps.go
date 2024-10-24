@@ -59,20 +59,16 @@ func OfCount[K gotools.Comparable, V any](f func(V) K, data []V) map[K]int {
 // 使用场景:
 //
 //   - 当需要单独处理或传递映射的键集合时，此函数非常有用。
-func Keys[K gotools.Comparable, V any](m ...map[K]V) []K {
+func Keys[K gotools.Comparable, V any](m map[K]V) []K {
 
 	if len(m) == 0 {
 		return make([]K, 0)
 	}
 
-	num := array.Sum(array.Map(func(x map[K]V) int { return len(x) }, m))
+	keys := make([]K, 0, len(m))
 
-	keys := make([]K, 0, num)
-
-	for _, v := range m {
-		for k := range v {
-			keys = append(keys, k)
-		}
+	for k := range m {
+		keys = append(keys, k)
 	}
 
 	return keys
@@ -93,20 +89,16 @@ func Keys[K gotools.Comparable, V any](m ...map[K]V) []K {
 // 返回值:
 //
 //   - 一个类型为[]V的切片，包含了map m中所有值的副本。
-func Values[K gotools.Comparable, V any](m ...map[K]V) []V {
+func Values[K gotools.Comparable, V any](m map[K]V) []V {
 
 	if len(m) == 0 {
 		return make([]V, 0)
 	}
 
-	num := array.Sum(array.Map(func(x map[K]V) int { return len(x) }, m))
+	values := make([]V, 0, len(m))
 
-	values := make([]V, 0, num)
-
-	for _, v := range m {
-		for k := range v {
-			values = append(values, v[k])
-		}
+	for k := range m {
+		values = append(values, m[k])
 	}
 
 	return values
@@ -590,9 +582,7 @@ func Merge[K gotools.Comparable, V any](data ...map[K]V) map[K]V {
 		return make(map[K]V)
 	}
 
-	num := array.Distinct(Keys(data...))
-
-	res := make(map[K]V, len(num))
+	res := make(map[K]V, len(data[0]))
 
 	for k, v := range data[0] {
 		res[k] = v
@@ -659,7 +649,7 @@ func Intersect[V []U, K, U gotools.Comparable](data ...map[K]V) pair.Pair[[][]K,
 			tmp = append(tmp, data[k][v])
 		}
 
-		if dd := array.Intersect(tmp...); len(dd) > 0 {
+		if dd := array.PIntersect(tmp...); len(dd) > 0 {
 			res.First = append(res.First, rf[i])
 			res.Second = append(res.Second, dd)
 		}
