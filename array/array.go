@@ -1145,62 +1145,6 @@ func Intersect[S ~[]T, T gotools.Comparable](a, b S) []T {
 
 }
 
-// PIntersect 计算多个切片（类型为 []T，元素类型 T 可比较）的交集。
-//
-// 参数:
-//   - arr: 变长参数，每个参数为一个待求交集的切片。
-//
-// 返回值:
-//   - 一个新的 []T 类型的切片，包含所有输入切片中共有的元素，且元素顺序与它们在第一个切片中出现的顺序一致。
-//     如果没有交集或输入为空，则返回一个空切片。
-//
-// 注意: T 必须实现 gotools.Comparable 接口，允许元素之间的比较操作。
-func PIntersect[S ~[]T, T gotools.Comparable](arr ...S) []T {
-	if len(arr) == 0 {
-		return make([]T, 0)
-	}
-
-	// 如果只有一个切片，则直接返回它
-	if len(arr) == 1 {
-		return arr[0]
-	}
-
-	nums := Map(func(x S) int { return len(x) }, arr)
-
-	index := FindMin(nums)
-
-	// 使用第一个切片作为基数来收集交集元素
-	intersectionMap := make(map[T][]int, len(arr[index]))
-	for _, item := range arr[index] {
-		intersectionMap[item] = []int{index}
-	}
-
-	// 遍历剩余的切片，仅保留交集中的元素
-	for k, otherSlice := range arr {
-
-		if k == index {
-			continue
-		}
-
-		for _, item := range otherSlice {
-			if _, ok := intersectionMap[item]; ok {
-				intersectionMap[item] = append(intersectionMap[item], k)
-			}
-		}
-
-	}
-
-	res := make([]T, 0, len(intersectionMap))
-
-	for k, v := range intersectionMap {
-		if DistinctCount(v) == len(arr) {
-			res = append(res, k)
-		}
-	}
-
-	return res
-}
-
 // EnumerateDense 为输入的数组中每个元素生成一个索引列表，其中的值对应该元素在数组中首次出现的位置。
 // 参数:
 //
