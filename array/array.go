@@ -1079,7 +1079,7 @@ func ReduceR[S ~[]T, T, U any](fun func(x U, y T) U, init U, arr S) U {
 	return result
 }
 
-// Subtract 计算两个切片（类型为 []T，元素类型 T 可比较）的差集。
+// SubS 计算两个切片（类型为 []T，元素类型 T 可比较）的差集。
 //
 // 参数:
 //   - a: 一个切片。
@@ -1088,7 +1088,7 @@ func ReduceR[S ~[]T, T, U any](fun func(x U, y T) U, init U, arr S) U {
 // 返回值:
 //   - 一个新的 []T 类型的切片，包含所有输入切片中不在第二个切片中出现的元素，且元素顺序与它们在第一个切片中出现的顺序一致。
 //     如果没有差集或输入为空，则返回一个空切片。
-func Subtract[S ~[]T, T gotools.Comparable](a, b S) []T {
+func SubS[S ~[]T, T gotools.Comparable](a, b S) []T {
 
 	var r map[T]struct{}
 	var t []T
@@ -1112,7 +1112,82 @@ func Subtract[S ~[]T, T gotools.Comparable](a, b S) []T {
 
 }
 
-// Intersect 计算两个切片（类型为 []T，元素类型 T 可比较）的交集。
+// Subtract 计算两个切片（类型为 []T，元素类型 T 任何类型）的差集。
+//
+// 参数:
+//   - f: 一个函数，用于将元素转换为可比较的类型。
+//   - a: 一个切片。
+//   - b: 一个切片。
+//
+// 返回值:
+//   - 一个新的 []T 类型的切片，包含所有输入切片中不在第二个切片中出现的元素，且元素顺序与它们在第一个切片中出现的顺序一致。
+//     如果没有差集或输入为空，则返回一个空切片。
+func Subtract[S ~[]T, T any, U gotools.Comparable](f func(x T) U, a, b S) []T {
+
+	r := make(map[U]struct{})
+	var t []T
+
+	if len(a) > len(b) {
+		for _, x := range b {
+			r[f(x)] = struct{}{}
+		}
+		t = a
+	} else {
+		for _, x := range a {
+			r[f(x)] = struct{}{}
+		}
+		t = b
+	}
+
+	res := []T{}
+	for _, x := range t {
+		if _, ok := r[f(x)]; !ok {
+			res = append(res, x)
+		}
+	}
+
+	return res
+
+}
+
+// Intersect 计算两个切片（类型为 []T，元素类型 T 任意类型）的交集。
+//
+// 参数:
+//   - f: 一个函数，用于将元素转换为可比较的类型。
+//   - a: 一个切片。
+//   - b: 一个切片。
+//
+// 返回值:
+//   - 一个新的 []T 类型的切片，包含所有输入切片中共有的元素，且元素顺序与它们在第一个切片中出现的顺序一致。
+//     如果没有交集或输入为空，则返回一个空切片。
+func Intersect[S ~[]T, T any, U gotools.Comparable](f func(x T) U, a, b S) []T {
+
+	r := make(map[U]struct{})
+	var t []T
+
+	if len(a) > len(b) {
+		for _, x := range b {
+			r[f(x)] = struct{}{}
+		}
+		t = a
+	} else {
+		for _, x := range a {
+			r[f(x)] = struct{}{}
+		}
+		t = b
+	}
+
+	res := []T{}
+	for _, x := range t {
+		if _, ok := r[f(x)]; ok {
+			res = append(res, x)
+		}
+	}
+
+	return res
+}
+
+// InterS 计算两个切片（类型为 []T，元素类型 T 可比较）的交集。
 //
 // 参数:
 //   - a: 一个切片。
@@ -1121,7 +1196,7 @@ func Subtract[S ~[]T, T gotools.Comparable](a, b S) []T {
 // 返回值:
 //   - 一个新的 []T 类型的切片，包含所有输入切片中共有的元素，且元素顺序与它们在第一个切片中出现的顺序一致。
 //     如果没有交集或输入为空，则返回一个空切片。
-func Intersect[S ~[]T, T gotools.Comparable](a, b S) []T {
+func InterS[S ~[]T, T gotools.Comparable](a, b S) []T {
 
 	var r map[T]struct{}
 	var t []T
@@ -1357,7 +1432,7 @@ func HasAny[S ~[]T, T gotools.Comparable](arr S, elems ...T) bool {
 		return false
 	}
 
-	return len(Intersect(arr, elems)) > 0
+	return len(InterS(arr, elems)) > 0
 }
 
 // HasAll 检查类型为 S（元素类型为 T）的切片是否包含指定的所有元素。
@@ -1374,7 +1449,7 @@ func HasAll[S ~[]T, T gotools.Comparable](arr S, elems ...T) bool {
 		return false
 	}
 
-	res := Intersect(arr, elems)
+	res := InterS(arr, elems)
 
 	return len(res) == len(ToMap(elems))
 }
@@ -1534,7 +1609,7 @@ func Distinct[S ~[]T, T gotools.Comparable](arr S) []T {
 	return result
 }
 
-// Merge 通过比较函数对两个切片进行合并，返回一个新的切片, 要求传入切片必须排序
+// Merge 通过比较函数对多个切片进行合并，返回一个新的切片, 要求传入切片必须排序
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 的值，返回一个布尔值
 //     当 `fun(x, y)` 返回 `true`，则在排序时 `x` 应位于 `y` 之前。
