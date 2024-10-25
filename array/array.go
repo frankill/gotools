@@ -1090,19 +1090,10 @@ func ReduceR[S ~[]T, T, U any](fun func(x U, y T) U, init U, arr S) U {
 //     如果没有差集或输入为空，则返回一个空切片。
 func SubS[S ~[]T, T gotools.Comparable](a, b S) []T {
 
-	var r map[T]struct{}
-	var t []T
-
-	if len(a) > len(b) {
-		r = ToMap[T](b)
-		t = a
-	} else {
-		r = ToMap[T](a)
-		t = b
-	}
+	r := ToMap[T](b)
 
 	res := []T{}
-	for _, x := range t {
+	for _, x := range a {
 		if _, ok := r[x]; !ok {
 			res = append(res, x)
 		}
@@ -1125,22 +1116,13 @@ func SubS[S ~[]T, T gotools.Comparable](a, b S) []T {
 func Subtract[S ~[]T, T any, U gotools.Comparable](f func(x T) U, a, b S) []T {
 
 	r := make(map[U]struct{})
-	var t []T
 
-	if len(a) > len(b) {
-		for _, x := range b {
-			r[f(x)] = struct{}{}
-		}
-		t = a
-	} else {
-		for _, x := range a {
-			r[f(x)] = struct{}{}
-		}
-		t = b
+	for _, x := range b {
+		r[f(x)] = struct{}{}
 	}
 
 	res := []T{}
-	for _, x := range t {
+	for _, x := range a {
 		if _, ok := r[f(x)]; !ok {
 			res = append(res, x)
 		}
@@ -1163,22 +1145,13 @@ func Subtract[S ~[]T, T any, U gotools.Comparable](f func(x T) U, a, b S) []T {
 func Intersect[S ~[]T, T any, U gotools.Comparable](f func(x T) U, a, b S) []T {
 
 	r := make(map[U]struct{})
-	var t []T
 
-	if len(a) > len(b) {
-		for _, x := range b {
-			r[f(x)] = struct{}{}
-		}
-		t = a
-	} else {
-		for _, x := range a {
-			r[f(x)] = struct{}{}
-		}
-		t = b
+	for _, x := range b {
+		r[f(x)] = struct{}{}
 	}
 
 	res := []T{}
-	for _, x := range t {
+	for _, x := range a {
 		if _, ok := r[f(x)]; ok {
 			res = append(res, x)
 		}
@@ -1198,19 +1171,10 @@ func Intersect[S ~[]T, T any, U gotools.Comparable](f func(x T) U, a, b S) []T {
 //     如果没有交集或输入为空，则返回一个空切片。
 func InterS[S ~[]T, T gotools.Comparable](a, b S) []T {
 
-	var r map[T]struct{}
-	var t []T
-
-	if len(a) > len(b) {
-		r = ToMap[T](b)
-		t = a
-	} else {
-		r = ToMap[T](a)
-		t = b
-	}
+	r := ToMap[T](b)
 
 	res := []T{}
-	for _, x := range t {
+	for _, x := range a {
 		if _, ok := r[x]; ok {
 			res = append(res, x)
 		}

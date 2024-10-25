@@ -757,6 +757,7 @@ func Fold[S ~[]T, T, U any](fun func(x ...T) U, acc func(x, y U) U, arr ...S) []
 //
 // 注意: T 必须实现 gotools.Comparable 接口，允许元素之间的比较操作。
 func Intersect[S ~[]T, T gotools.Comparable](arr ...S) []T {
+
 	if len(arr) == 0 {
 		return make([]T, 0)
 	}
@@ -766,36 +767,39 @@ func Intersect[S ~[]T, T gotools.Comparable](arr ...S) []T {
 		return arr[0]
 	}
 
-	nums := array.Map(func(x S) int { return len(x) }, arr)
-
-	index := array.FindMin(nums)
-
 	// 使用第一个切片作为基数来收集交集元素
-	intersectionMap := make(map[T][]int, len(arr[index]))
-	for _, item := range arr[index] {
-		intersectionMap[item] = []int{index}
+	intersectionMap := make(map[T]*count, len(arr[0]))
+	for _, item := range arr[0] {
+		if v, ok := intersectionMap[item]; !ok {
+			intersectionMap[item] = &count{
+				Key:   1,
+				Count: 1,
+			}
+		} else {
+			v.Count++
+			v.Key++
+
+		}
 	}
 
-	// 遍历剩余的切片，仅保留交集中的元素
-	for k, otherSlice := range arr {
+	for k := range arr[1:] {
 
-		if k == index {
-			continue
-		}
-
-		for _, item := range otherSlice {
-			if _, ok := intersectionMap[item]; ok {
-				intersectionMap[item] = append(intersectionMap[item], k)
+		for _, item := range arr[1:][k] {
+			if v, ok := intersectionMap[item]; ok {
+				v.Count++
 			}
 		}
 
 	}
 
-	res := make([]T, 0, len(intersectionMap))
+	res := make([]T, 0)
 
 	for k, v := range intersectionMap {
-		if array.DistinctCount(v) == len(arr) {
-			res = append(res, k)
+
+		if v.Count > v.Key {
+			for i := 0; i < v.Key; i++ {
+				res = append(res, k)
+			}
 		}
 	}
 
@@ -823,17 +827,25 @@ func Subtract[S ~[]T, T gotools.Comparable](arr ...S) []T {
 	}
 
 	// 使用第一个切片作为基数来收集交集元素
-	intersectionMap := make(map[T]int, len(arr[0]))
+	intersectionMap := make(map[T]*count, len(arr[0]))
 	for _, item := range arr[0] {
-		intersectionMap[item] = 1
+		if v, ok := intersectionMap[item]; !ok {
+			intersectionMap[item] = &count{
+				Key:   1,
+				Count: 1,
+			}
+		} else {
+			v.Count++
+			v.Key++
+
+		}
 	}
 
-	// 遍历剩余的切片，仅保留交集中的元素
 	for k := range arr[1:] {
 
 		for _, item := range arr[1:][k] {
-			if _, ok := intersectionMap[item]; ok {
-				intersectionMap[item]++
+			if v, ok := intersectionMap[item]; ok {
+				v.Count++
 			}
 		}
 
@@ -842,10 +854,18 @@ func Subtract[S ~[]T, T gotools.Comparable](arr ...S) []T {
 	res := make([]T, 0)
 
 	for k, v := range intersectionMap {
-		if v == 1 {
-			res = append(res, k)
+
+		if v.Count == v.Key {
+			for i := 0; i < v.Key; i++ {
+				res = append(res, k)
+			}
 		}
 	}
 
 	return res
+}
+
+type count struct {
+	Key   int
+	Count int
 }
