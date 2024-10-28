@@ -650,7 +650,7 @@ func Intersect[V []U, K, U gotools.Comparable](data ...map[K]V) pair.Pair[[][]K,
 			tmp = append(tmp, data[k][v])
 		}
 
-		if dd := operation.Intersect(tmp...); len(dd) > 0 {
+		if dd := operation.InterS(tmp...); len(dd) > 0 {
 			res.First = append(res.First, rf[i])
 			res.Second = append(res.Second, dd)
 		}
