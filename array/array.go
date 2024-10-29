@@ -481,14 +481,14 @@ func FindMax[S ~[]T, T gotools.Ordered](arr S) int {
 	return index
 }
 
-// FindLast 查找切片中最后一个使条件函数 `fun` 返回 true 的元素组合所在的索引位置。
+// FindLast 查找切片中最后一个使条件函数 `fun` 返回 true 的元素所在的索引位置。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
 //   - arr:   T 类型的切片
 //
 // 返回值:
-//   - 最后一个满足条件的元素组合在原数组中的起始索引位置。
+//   - 最后一个满足条件的元素在原数组中的起始索引位置。
 //     如果没有找到满足条件的组合，则返回   - 1。
 //     如果输入切片数组为空，则直接返回   - 1。
 func FindLast[S ~[]T, T any](fun func(x T) bool, arr S) int {
@@ -509,14 +509,14 @@ func FindLast[S ~[]T, T any](fun func(x T) bool, arr S) int {
 	return result
 }
 
-// FindFirst 查找切片中第一个使条件函数 `fun` 返回 true 的元素组合所在的索引位置。
+// FindFirst 查找切片中第一个使条件函数 `fun` 返回 true 的元素所在的索引位置。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
 //   - arr:   T 类型的切片
 //
 // 返回值:
-//   - 第一个满足条件的元素组合在原数组中的起始索引位置。
+//   - 第一个满足条件的元素在原数组中的起始索引位置。
 //     如果没有找到满足条件的组合，则返回   - 1。
 //     如果输入切片数组为空，则直接返回   - 1。
 func FindFirst[S ~[]T, T any](fun func(x T) bool, arr S) int {
@@ -539,14 +539,14 @@ func FindFirst[S ~[]T, T any](fun func(x T) bool, arr S) int {
 	return result
 }
 
-// Last 查找切片中最后一个使条件函数 `fun` 返回 true 的元素组合，并返回该组合的第一个元素。
+// Last 查找切片中最后一个使条件函数 `fun` 返回 true 的元素，并返回该组合的第一个元素。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
 //   - arr:  T 类型的切片
 //
 // 返回值:
-//   - 最后一个满足条件的元素组合中的第一个元素。
+//   - 最后一个满足条件的元素中的第一个元素。
 //     如果没有找到满足条件的组合，则返回 T 类型的零值。
 //     如果输入切片数组为空，则直接返回 T 类型的零值。
 func Last[S ~[]T, T any](fun func(x T) bool, arr S) T {
@@ -568,14 +568,14 @@ func Last[S ~[]T, T any](fun func(x T) bool, arr S) T {
 	return result
 }
 
-// First 查找切片中第一个使条件函数 `fun` 返回 true 的元素组合，并返回该组合的第一个元素。
+// First 查找切片中第一个使条件函数 `fun` 返回 true 的元素，并返回该组合的第一个元素。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
 //   - arr:  T 类型的切片
 //
 // 返回值:
-//   - 第一个满足条件的元素组合中的第一个元素。
+//   - 第一个满足条件的元素中的第一个元素。
 //     如果没有找到满足条件的组合，则返回 T 类型的零值。
 //     如果输入切片数组为空，则直接返回 T 类型的零值。
 func First[S ~[]T, T any](fun func(x T) bool, arr S) T {
@@ -598,14 +598,14 @@ func First[S ~[]T, T any](fun func(x T) bool, arr S) T {
 	return result
 }
 
-// All 检查切片中所有元素组合是否都满足提供的条件函数。
+// All 检查切片中所有元素是否都满足提供的条件函数。
 //
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回布尔值，用于测试一组元素是否满足条件。
 //   - arr: T 类型的切片
 //
 // 返回值:
-//   - 如果所有元素组合均使得 `fun` 返回 true，则返回 true；只要有一个不满足则返回 false。
+//   - 如果所有元素均使得 `fun` 返回 true，则返回 true；只要有一个不满足则返回 false。
 //     如果输入切片数组为空，则直接返回 false
 func All[S ~[]T, T any](fun func(x T) bool, arr S) bool {
 
@@ -633,7 +633,7 @@ func All[S ~[]T, T any](fun func(x T) bool, arr S) bool {
 //   - arr: T 类型的切片
 //
 // 返回值:
-//   - 如果至少有一个元素组合使得 `fun` 返回 true，则返回 true；否则返回 false。
+//   - 如果至少有一个元素使得 `fun` 返回 true，则返回 true；否则返回 false。
 //     如果输入切片数组为空，则直接返回 false。
 func Any[S ~[]T, T any](fun func(x T) bool, arr S) bool {
 
@@ -1332,11 +1332,11 @@ func Count[S ~[]T, T any](arr S) int {
 //
 // 参数:
 //   - fun: 一个 variadic 函数，接受与输入切片数量相同的 T 类型参数，并返回一个布尔值。
-//     当给定的元素组合满足某种条件时，应返回 `true`。
+//     当给定的元素满足某种条件时，应返回 `true`。
 //   - arr:  参数为一个 S 类型的切片（元素类型为 T）
 //
 // 返回值:
-//   - 返回一个整数，表示在所有切片中满足 `fun` 条件的元素组合的数量。
+//   - 返回一个整数，表示在所有切片中满足 `fun` 条件的元素的数量。
 //
 // 注意:
 //   - 如果提供的切片为空，则函数返回 0。
