@@ -611,6 +611,68 @@ func SortS[T any](f func(x, y T) bool) func(ch chan T) chan T {
 	}
 }
 
+func shift[T any](x []T) []T {
+
+	for i := 0; i < len(x)-1; i++ {
+		x[i] = x[i+1]
+	}
+	return x[:len(x)-1]
+
+}
+
+// Slider 滑动窗口函数
+// 参数:
+//   - f: 一个函数，接受一个类型为 T 的值，返回一个类型为 U 的值。
+//   - before: 滑动窗口的前置元素数量。
+//   - after: 滑动窗口的后置元素数量。
+//   - defaultValue: 滑动窗口中的默认值。
+//
+// 返回:
+//   - 一个函数，接受一个通道，返回一个通道，用于接收滑动窗口的元素。
+func Slider[T, U any](f func(x ...T) U, before, after int, defaultValue T) func(ch chan T) chan U {
+	return func(ch chan T) chan U {
+		out := make(chan U, bufferSize)
+		go func() {
+			defer close(out)
+
+			num := 0
+			cap := before + after + 1
+			tmp := make([]T, 0, cap)
+
+			for v := range ch {
+
+			loop:
+				if num < before {
+					tmp = append(tmp, defaultValue)
+					num++
+					goto loop
+				}
+
+				tmp = append(tmp, v)
+				num++
+
+				if num == cap {
+					out <- f(tmp...)
+					tmp = shift(tmp)
+
+					num--
+				}
+
+			}
+
+			if num > 0 {
+				for i := 0; i < after; i++ {
+					tmp = append(tmp, defaultValue)
+					out <- f(tmp...)
+					tmp = shift(tmp)
+				}
+			}
+
+		}()
+		return out
+	}
+}
+
 // Merge 合并排序多个通道，按照func(x, y T) bool进行排序
 // 参数:
 //   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个布尔值，表示是否满足排序条件。
