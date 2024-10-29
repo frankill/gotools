@@ -613,9 +613,8 @@ func SortS[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 func shift[T any](x []T) []T {
 
-	for i := 0; i < len(x)-1; i++ {
-		x[i] = x[i+1]
-	}
+	copy(x, x[1:])
+
 	return x[:len(x)-1]
 
 }
