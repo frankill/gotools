@@ -636,23 +636,23 @@ func Slider[T, U any](f func(x ...T) U, before, after int, defaultValue T) func(
 
 			num := 0
 			cap := before + after + 1
-			tmp := make([]T, 0, cap)
+			windows := make([]T, 0, cap)
 
 			for v := range ch {
 
 			loop:
 				if num < before {
-					tmp = append(tmp, defaultValue)
+					windows = append(windows, defaultValue)
 					num++
 					goto loop
 				}
 
-				tmp = append(tmp, v)
+				windows = append(windows, v)
 				num++
 
 				if num == cap {
-					out <- f(tmp...)
-					tmp = shift(tmp)
+					out <- f(windows...)
+					windows = shift(windows)
 
 					num--
 				}
@@ -661,9 +661,9 @@ func Slider[T, U any](f func(x ...T) U, before, after int, defaultValue T) func(
 
 			if num > 0 {
 				for i := 0; i < after; i++ {
-					tmp = append(tmp, defaultValue)
-					out <- f(tmp...)
-					tmp = shift(tmp)
+					windows = append(windows, defaultValue)
+					out <- f(windows...)
+					windows = shift(windows)
 				}
 			}
 
