@@ -630,11 +630,12 @@ func shift[T any](x []T) []T {
 //   - 一个函数，接受一个通道，返回一个通道，用于接收滑动窗口的元素。
 func Slider[T, U any](f func(x ...T) U, before, after int, defaultValue T) func(ch chan T) chan U {
 	return func(ch chan T) chan U {
-		out := make(chan U, bufferSize)
+		out := make(chan U, 100)
 		go func() {
 			defer close(out)
 
 			num := 0
+			count := 0
 			cap := before + after + 1
 			windows := make([]T, 0, cap)
 
@@ -649,6 +650,7 @@ func Slider[T, U any](f func(x ...T) U, before, after int, defaultValue T) func(
 
 				windows = append(windows, v)
 				num++
+				count++
 
 				if num == cap {
 					out <- f(windows...)
@@ -659,12 +661,15 @@ func Slider[T, U any](f func(x ...T) U, before, after int, defaultValue T) func(
 
 			}
 
-			if num > 0 {
-				for i := 0; i < after; i++ {
-					windows = append(windows, defaultValue)
-					out <- f(windows...)
-					windows = shift(windows)
-				}
+			for i := num; i < cap-1; i++ {
+				windows = append(windows, defaultValue)
+			}
+
+			r := min(count, after)
+			for i := 0; i < r; i++ {
+				windows = append(windows, defaultValue)
+				out <- f(windows...)
+				windows = shift(windows)
 			}
 
 		}()

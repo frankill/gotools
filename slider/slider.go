@@ -114,11 +114,9 @@ func Paste(before int, after int, defaultValue string, data []string) []string {
 //   - slider.Slide(func(x []int) []int { return array.Copy(x) }, 1, 1, 0, a)
 func Slider[S ~[]T, U, T any](f func(x ...T) U, before int, after int, defaultValue T, data S) []U {
 	l := len(data)
-	wl := before + after + 1
-	if before+1 > l || after+1 > l {
-		return []U{} // 如果窗口大小大于数据长度，返回空结果
-	}
-	windows := make([]T, 0, wl)
+	cap := before + after + 1
+
+	windows := make([]T, 0, cap)
 	result := make([]U, 0, l)
 	num := 0
 
@@ -134,7 +132,7 @@ func Slider[S ~[]T, U, T any](f func(x ...T) U, before int, after int, defaultVa
 		windows = append(windows, data[i])
 		num++
 
-		if num == wl {
+		if num == cap {
 			result = append(result, f(windows...))
 			windows = shift(windows)
 			num--
@@ -142,8 +140,14 @@ func Slider[S ~[]T, U, T any](f func(x ...T) U, before int, after int, defaultVa
 
 	}
 
+	for i := num; i < cap-1; i++ {
+		windows = append(windows, defaultValue)
+	}
+
+	r := min(after, l)
+
 	if num > 0 {
-		for i := 0; i < after; i++ {
+		for i := 0; i < r; i++ {
 			windows = append(windows, defaultValue)
 			result = append(result, f(windows...))
 			windows = shift(windows)
