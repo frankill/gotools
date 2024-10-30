@@ -24,7 +24,7 @@ func FromAny[T any](input ...T) []T {
 
 func FromAnyIf[T any](fun func(T any) bool, input ...T) []T {
 
-	res := make([]T, 0, len(input))
+	res := make([]T, 0)
 
 	for _, v := range input {
 		if fun(v) {
@@ -33,6 +33,58 @@ func FromAnyIf[T any](fun func(T any) bool, input ...T) []T {
 	}
 	return res
 
+}
+
+// Lag 生成一个新的切片，该切片由输入切片 `arr` 第n个元素前面的元素组成。缺少部分使用 `def` 填充。
+//
+// 参数:
+//   - arr: 类型为 `[]T` 的输入切片，包含类型为 `T` 的元素。
+//   - n: 指定 `arr` 中的第 `n` 个元素前面的元素组成新的切片。
+//   - def: 用于填充缺失的元素。
+//
+// 返回:
+//   - 一个类型为 `[]T` 的新切片，包含 `arr` 的前 `n` 个元素。
+func Lag[T any](arr []T, n int, def T) []T {
+
+	if len(arr) < n {
+		return make([]T, 0)
+	}
+
+	res := make([]T, len(arr))
+
+	for i := 0; i < n; i++ {
+		res[i] = def
+	}
+
+	copy(res[n:], arr[:len(arr)-n])
+
+	return res
+}
+
+// Lead 生成一个新的切片，该切片由输入切片 `arr` 第n个元素后面的元素组成。缺少部分使用 `def` 填充。
+//
+// 参数:
+//   - arr: 类型为 `[]T` 的输入切片，包含类型为 `T` 的元素。
+//   - n: 指定 `arr` 中的第 `n` 个元素后面的元素组成新的切片。
+//   - def: 用于填充缺失的元素。
+//
+// 返回:
+//   - 一个类型为 `[]T` 的新切片，包含输入切片 `arr` 中第 `n` 个元素后面的元素。
+func Lead[T any](arr []T, n int, def T) []T {
+
+	if len(arr) < n {
+		return make([]T, 0)
+	}
+
+	res := make([]T, len(arr))
+
+	copy(res, arr[n:])
+
+	for i := n + 1; i < len(arr); i++ {
+		res[i] = def
+	}
+
+	return res
 }
 
 // Rep 生成一个新的切片，该切片由输入切片 `x` 的元素重复 `n` 次组成。
