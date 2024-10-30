@@ -778,6 +778,14 @@ func Flatten[S ~[]T, T any](ch chan S) chan T {
 	return ch_
 }
 
+// Lead 将通道数据提前n位，最后缺失的n位用def填充
+//
+// 参数:
+//   - def: 用于填充缺失的元素
+//   - n: 提前的位数
+//
+// 返回:
+//   - 返回一个新的通道，该通道发送类型为 T 的元素，这些元素是提前的切片元素
 func Lead[T any](def T, n int) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
@@ -804,6 +812,14 @@ func Lead[T any](def T, n int) func(ch chan T) chan T {
 	}
 }
 
+// Lag 将通道数据后推n位，最前缺失的n位用def填充
+//
+// 参数:
+//   - def: 用于填充缺失的元素
+//   - n: 后推的位数
+//
+// 返回:
+//   - 返回一个新的通道，该通道发送类型为 T 的元素，这些元素是后推的切片元素
 func Lag[T any](def T, n int) func(ch chan T) chan T {
 
 	return func(ch chan T) chan T {
