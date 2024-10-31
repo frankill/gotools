@@ -39,7 +39,7 @@ func TestOperatorMap(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 调用待测试函数
-			result := operation.Operator(tc.fun, tc.arr...)
+			result := operation.Pmap(tc.fun, tc.arr...)
 
 			// 检查结果是否与预期相同
 			if !reflect.DeepEqual(result, tc.expected) {
