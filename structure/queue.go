@@ -10,11 +10,15 @@ type (
 	}
 )
 
-func NewQueue[T any](data T) *Queue[T] {
+func NewQueue[T any](data ...T) *Queue[T] {
 
-	n := node[T]{data, nil}
+	n := &Queue[T]{nil, nil, 0, sync.RWMutex{}}
 
-	return &Queue[T]{&n, &n, 1, sync.RWMutex{}}
+	for _, v := range data {
+		n.Push(v)
+	}
+
+	return n
 }
 
 func (q *Queue[T]) Len() int64 {
