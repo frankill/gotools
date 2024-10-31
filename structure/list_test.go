@@ -10,7 +10,7 @@ import (
 
 func TestListOperations(t *testing.T) {
 	// 创建一个新的跳表
-	list := structure.NewList(0.5, structure.Compare[int])
+	list := structure.NewList(0.5, structure.Compare[int], false)
 
 	// 测试 Push 方法
 
@@ -27,7 +27,7 @@ func TestListOperations(t *testing.T) {
 	}
 
 	// 测试 Get 方法
-	val, found := list.Get(6)
+	val, found := list.Exist(6)
 	if !found || val != 6 {
 		t.Errorf("Expected to find value 6, got %v (found: %v)", val, found)
 	}
@@ -39,7 +39,7 @@ func TestListOperations(t *testing.T) {
 	}
 
 	// 测试 Get 方法，确认已删除
-	_, found = list.Get(6)
+	_, found = list.Exist(6)
 	if found {
 		t.Errorf("Expected value 6 to be deleted, but found it")
 	}

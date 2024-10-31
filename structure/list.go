@@ -11,11 +11,12 @@ import (
 // skip list
 type (
 	List[T gotools.Comparable] struct {
-		root *skipnode[T]
-		num  int
-		gen  *rand.Rand
-		pre  float64
-		fun  Slf[T]
+		root   *skipnode[T]
+		num    int
+		gen    *rand.Rand
+		pre    float64
+		fun    Slf[T]
+		repeat bool
 	}
 	skipnode[T gotools.Comparable] struct {
 		value T
@@ -24,12 +25,12 @@ type (
 	Slf[T gotools.Comparable] func(a, b T) bool
 )
 
-func NewList[T gotools.Comparable](pre float64, fun Slf[T]) *List[T] {
+func NewList[T gotools.Comparable](pre float64, fun Slf[T], repeat bool) *List[T] {
 	gen := rand.New(rand.NewSource(time.Now().UnixNano()))
 	var a T
 	// 初始化根节点为类型零值
 	n := &skipnode[T]{a, make([]*skipnode[T], 0)}
-	res := &List[T]{n, 0, gen, pre, fun}
+	res := &List[T]{n, 0, gen, pre, fun, repeat}
 
 	return res
 }
@@ -38,7 +39,7 @@ func (s *List[T]) Len() int {
 	return s.num
 }
 
-func (s *List[T]) Get(value T) (T, bool) {
+func (s *List[T]) Exist(value T) (T, bool) {
 	var a T
 	if s.num == 0 {
 		return a, false
@@ -97,9 +98,12 @@ func (s *List[T]) Push(data T) {
 	// 获取当前要插入节点不同层级的前置节点
 	prev := s.getPrevious(data)
 
-	// 去除重复输入的值
-	if len(prev) > 0 && prev[0].next[0] != nil && prev[0].next[0].value == data {
-		return
+	// 是否去除重复输入的值
+
+	if !s.repeat {
+		if len(prev) > 0 && prev[0].next[0] != nil && prev[0].next[0].value == data {
+			return
+		}
 	}
 
 	h := len(s.root.next)
@@ -165,6 +169,20 @@ func (s *List[T]) Pop(data T) (T, bool) {
 	s.num--
 	return cur.value, true
 
+}
+
+func (s *List[T]) ToArr() []T {
+
+	data := make([]T, 0, s.num)
+
+	cur := s.root
+
+	for cur.next[0] != nil {
+		data = append(data, cur.next[0].value)
+		cur = cur.next[0]
+	}
+
+	return data
 }
 
 func (s *List[T]) Clear() {
