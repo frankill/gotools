@@ -121,6 +121,20 @@ func (s *List[T]) Push(data T) {
 	s.num++
 }
 
+func (s *List[T]) FromArr(data []T) {
+
+	for _, v := range data {
+		s.Push(v)
+	}
+}
+
+func (s *List[T]) FromChan(data chan T) {
+
+	for v := range data {
+		s.Push(v)
+	}
+}
+
 func (s *List[T]) Pop(data T) (T, bool) {
 
 	prev := s.getPrevious(data)
@@ -151,6 +165,11 @@ func (s *List[T]) Pop(data T) (T, bool) {
 
 	return cur.value, true
 
+}
+
+func (s *List[T]) Clear() {
+	s.root = &skipnode[T]{}
+	s.num = 0
 }
 
 func (s *List[T]) getPrevious(value T) []*skipnode[T] {

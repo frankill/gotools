@@ -33,7 +33,7 @@ func TestQueueOperations(t *testing.T) {
 	}
 
 	// 测试 ToArray 方法
-	arr := queue.ToArray()
+	arr := queue.ToArr()
 	expected := []int{2, 3}
 	for i := 0; i < len(expected); i++ {
 		if arr[i] != expected[i] {

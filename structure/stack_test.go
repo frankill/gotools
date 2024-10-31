@@ -25,7 +25,7 @@ func TestStackOperations(t *testing.T) {
 
 	// Test To_arr method
 	expectedArr := []int{2, 1}
-	arr := stack.ToArray()
+	arr := stack.ToArr()
 
 	if !reflect.DeepEqual(arr, expectedArr) {
 		t.Errorf("Expected stack elements in array form to be %v, got %v", expectedArr, arr)

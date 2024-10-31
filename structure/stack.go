@@ -57,11 +57,51 @@ func (s *Stack[T]) Push(data T) {
 	s.num++
 }
 
-func (s *Stack[T]) ToArray() []T {
+func (s *Stack[T]) FromArr(data []T) {
+
+	for _, v := range data {
+		s.Push(v)
+	}
+}
+
+func (s *Stack[T]) FromChan(data chan T) {
+
+	for v := range data {
+		s.Push(v)
+	}
+}
+
+func (s *Stack[T]) Clear() {
+
+	s.top = nil
+	s.num = 0
+}
+
+func (s *Stack[T]) IsEmpty() bool {
+
+	return s.num == 0
+}
+
+func (s *Stack[T]) ToArr() []T {
 
 	res := make([]T, 0, s.num)
 	for current := s.top; current != nil; current = current.next {
 		res = append(res, current.value)
 	}
+	return res
+}
+
+func (s *Stack[T]) ToChan() chan T {
+
+	res := make(chan T, 10)
+	go func() {
+
+		defer close(res)
+		for current := s.top; current != nil; current = current.next {
+			res <- current.value
+		}
+
+	}()
+
 	return res
 }

@@ -38,6 +38,33 @@ func (q *Queue[T]) Push(data T) {
 
 }
 
+func (q *Queue[T]) FromArr(data []T) {
+
+	for _, v := range data {
+		q.Push(v)
+	}
+
+}
+
+func (q *Queue[T]) FromChan(ch chan T) {
+
+	for v := range ch {
+		q.Push(v)
+	}
+}
+
+func (q *Queue[T]) Empty() bool {
+
+	return q.num == 0
+}
+
+func (q *Queue[T]) Clear() {
+
+	q.start = nil
+	q.end = nil
+	q.num = 0
+}
+
 func (q *Queue[T]) Pop() (T, bool) {
 
 	if q.num == 0 {
@@ -65,7 +92,7 @@ func (q *Queue[T]) Peek() (T, bool) {
 	return q.start.value, true
 }
 
-func (q *Queue[T]) ToArray() []T {
+func (q *Queue[T]) ToArr() []T {
 
 	res := make([]T, q.num)
 	i := 0
@@ -73,5 +100,17 @@ func (q *Queue[T]) ToArray() []T {
 		res[i] = current.value
 		i++
 	}
+	return res
+}
+
+func (q *Queue[T]) ToChan() chan T {
+
+	res := make(chan T, 10)
+	go func() {
+		defer close(res)
+		for current := q.start; current != nil; current = current.next {
+			res <- current.value
+		}
+	}()
 	return res
 }
