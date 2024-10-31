@@ -932,6 +932,34 @@ func Map[S ~[]T, T any, U any](fun func(x T) U, arr S) []U {
 	return result
 }
 
+// Map2 用于将一个函数应用于两个切片的每个元素。
+// 参数:
+//
+//	f - 一个函数，接受两个类型为 T 和 V 的参数，返回一个类型为 R 的值。
+//	s - 一个包含 T 类型元素的切片。
+//	v - 一个包含 V 类型元素的切片。
+//
+// 返回:
+//
+//	一个包含 R 类型元素的切片。
+func Map2[S ~[]T, T any, U ~[]V, V any, R any](f func(x T, y V) R, s S, v U) []R {
+
+	res := make([]R, len(s))
+
+	lm := max(len(s), len(v))
+
+	ls := len(s)
+	lv := len(v)
+
+	for i := 0; i < lm; i++ {
+
+		res[i] = f(s[i%ls], v[i%lv])
+
+	}
+
+	return res
+}
+
 // FlatMap 对切片（S，类型为 T 的切片）应用一个函数 ：
 // 并收集返回值形成一个新的 U 类型切片序列。
 //

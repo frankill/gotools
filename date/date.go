@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/frankill/gotools/fn"
+	"github.com/frankill/gotools/array"
 )
 
 // FloorMonth 将日期向下取整到月份
@@ -187,7 +187,7 @@ func Zone(zone string) func(d ...time.Time) []time.Time {
 
 	return func(d ...time.Time) []time.Time {
 
-		return fn.Lapply(func(x time.Time) time.Time {
+		return array.Map(func(x time.Time) time.Time {
 			if zone == "" {
 				zone = "Asia/Shanghai"
 			}
@@ -206,7 +206,7 @@ func Zone(zone string) func(d ...time.Time) []time.Time {
 //   - 一个 []int64，表示转换后的 Unix 时间戳。
 func ToUnix(d ...string) []int64 {
 
-	return fn.Lapply(func(x string) int64 {
+	return array.Map(func(x string) int64 {
 		t, _ := time.Parse("2006-01-02 15:04:05", x)
 		return t.Unix()
 	}, d)
@@ -220,7 +220,7 @@ func ToUnix(d ...string) []int64 {
 // 返回:
 //   - 一个 []int64，表示转换后的 Unix 时间戳。
 func ToUnix2(d ...time.Time) []int64 {
-	return fn.Lapply(func(x time.Time) int64 {
+	return array.Map(func(x time.Time) int64 {
 		return x.Unix()
 	}, d)
 }
@@ -234,7 +234,7 @@ func ToUnix2(d ...time.Time) []int64 {
 //   - 一个 []int64，表示转换后的 Unix 时间戳。
 func ToUnixMilli(d ...string) []int64 {
 
-	return fn.Lapply(func(x string) int64 {
+	return array.Map(func(x string) int64 {
 		t, _ := time.Parse("2006-01-02 15:04:05", x)
 		return t.UnixMilli()
 	}, d)
@@ -249,7 +249,7 @@ func ToUnixMilli(d ...string) []int64 {
 //   - 一个 []int64，表示转换后的 Unix 时间戳。
 func ToUnixNano(d ...string) []int64 {
 
-	return fn.Lapply(func(x string) int64 {
+	return array.Map(func(x string) int64 {
 		t, _ := time.Parse("2006-01-02 15:04:05", x)
 		return t.UnixNano()
 	}, d)
@@ -264,7 +264,7 @@ func ToUnixNano(d ...string) []int64 {
 //   - 一个 []time.Time 对象，表示转换后的时间。
 func ToTime(d ...string) []time.Time {
 
-	return fn.Lapply(func(x string) time.Time {
+	return array.Map(func(x string) time.Time {
 		t, _ := time.Parse("2006-01-02 15:04:05", x)
 		return t
 	}, d)
@@ -279,7 +279,7 @@ func ToTime(d ...string) []time.Time {
 //   - 一个 []string，表示转换后的字符串。
 func ToStr(d ...time.Time) []string {
 
-	return fn.Lapply(func(x time.Time) string {
+	return array.Map(func(x time.Time) string {
 		return x.Format("2006-01-02 15:04:05")
 	}, d)
 }
@@ -293,7 +293,7 @@ func ToStr(d ...time.Time) []string {
 //   - 一个 []string，表示转换后的字符串。
 func ToYMD(d ...time.Time) []string {
 
-	return fn.Lapply(func(x time.Time) string {
+	return array.Map(func(x time.Time) string {
 		return x.Format("20060102")
 	}, d)
 }
@@ -307,7 +307,7 @@ func ToYMD(d ...time.Time) []string {
 //   - 一个 []string，表示转换后的日期字符串。
 func UnixToStr(unix ...int64) []string {
 
-	return fn.Lapply(func(x int64) string {
+	return array.Map(func(x int64) string {
 		return time.Unix(x, 0).Format("2006-01-02 15:04:05")
 	}, unix)
 }
@@ -321,7 +321,7 @@ func UnixToStr(unix ...int64) []string {
 //   - 一个 []time.Time 对象，表示转换后的时间。
 func UnixToTime(unix ...int64) []time.Time {
 
-	return fn.Lapply(func(x int64) time.Time {
+	return array.Map(func(x int64) time.Time {
 		return time.Unix(x, 0)
 	}, unix)
 }
@@ -336,7 +336,7 @@ func UnixToTime(unix ...int64) []time.Time {
 //   - 一个 []time.Time 对象，表示生成的日期列表。
 func Days(t time.Time, d ...int) []time.Time {
 
-	return fn.Lapply(func(x int) time.Time {
+	return array.Map(func(x int) time.Time {
 		return t.AddDate(0, 0, x)
 	}, d)
 }
@@ -350,7 +350,7 @@ func Days(t time.Time, d ...int) []time.Time {
 // 返回:
 //   - 一个 []time.Time 对象，表示生成的日期列表。
 func Months(t time.Time, d ...int) []time.Time {
-	return fn.Lapply(func(x int) time.Time {
+	return array.Map(func(x int) time.Time {
 		return t.AddDate(0, x, 0)
 	}, d)
 }
@@ -364,7 +364,7 @@ func Months(t time.Time, d ...int) []time.Time {
 // 返回:
 //   - 一个 []time.Time 对象，表示生成的日期列表。
 func Years(t time.Time, d ...int) []time.Time {
-	return fn.Lapply(func(x int) time.Time {
+	return array.Map(func(x int) time.Time {
 		return t.AddDate(x, 0, 0)
 	}, d)
 }
@@ -378,7 +378,7 @@ func Years(t time.Time, d ...int) []time.Time {
 //   - 一个 []time.Time 对象，表示转换后的时间。
 func YMD(d ...string) []time.Time {
 
-	return fn.Lapply(func(x string) time.Time {
+	return array.Map(func(x string) time.Time {
 		t, _ := time.Parse("2006-01-02", x)
 		return t
 	}, d)
@@ -393,7 +393,7 @@ func YMD(d ...string) []time.Time {
 //   - 一个 []time.Time 对象，表示转换后的时间。
 func YMDHMS(d ...string) []time.Time {
 
-	return fn.Lapply(func(x string) time.Time {
+	return array.Map(func(x string) time.Time {
 		t, _ := time.Parse("2006-01-02 15:04:05", x)
 		return t
 	}, d)

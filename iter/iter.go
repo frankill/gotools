@@ -9,7 +9,6 @@ import (
 
 	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/array"
-	"github.com/frankill/gotools/fn"
 	"github.com/frankill/gotools/pair"
 )
 
@@ -659,7 +658,7 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 			num++
 		}
 
-		fs := fn.Lapply(func(x string) chan T {
+		fs := array.Map(func(x string) chan T {
 
 			c, errs := FromGob[T](x, true)
 			go ErrorCH(errs)

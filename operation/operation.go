@@ -186,7 +186,7 @@ func Neq[S ~[]T, T gotools.Comparable](a, b S) []bool {
 //
 //	一个切片
 func Not(a []bool) []bool {
-	return fn.Lapply(func(x bool) bool { return !x }, a)
+	return array.Map(func(x bool) bool { return !x }, a)
 }
 
 // Operator 对一组切片应用指定的函数，每个切片元素按位置组合后作为函数的参数。

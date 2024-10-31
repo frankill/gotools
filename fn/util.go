@@ -70,71 +70,12 @@ func Println[T any](data T) {
 	fmt.Println(data)
 }
 
-// Lapply 用于将一个函数应用于一个切片的每个元素。
-// 参数:
-//
-//	f - 一个函数，接受一个类型为 T 的参数，返回一个类型为 U 的值。
-//	s - 一个包含 T 类型元素的切片。
-//
-// 返回:
-//
-//	一个包含 U 类型元素的切片。
-func Lapply[S ~[]T, T any, U any](f func(x T) U, s S) []U {
-	res := make([]U, len(s))
-
-	for i := 0; i < len(s); i++ {
-		res[i] = f(s[i])
-	}
-
-	return res
-}
-
-// Lapply2 用于将一个函数应用于两个切片的每个元素。
-// 参数:
-//
-//	f - 一个函数，接受两个类型为 T 和 V 的参数，返回一个类型为 R 的值。
-//	s - 一个包含 T 类型元素的切片。
-//	v - 一个包含 V 类型元素的切片。
-//
-// 返回:
-//
-//	一个包含 R 类型元素的切片。
 func Lapply2[S ~[]T, T any, U ~[]V, V any, R any](f func(x T, y V) R, s S, v U) []R {
 
 	res := make([]R, len(s))
 
 	for i := 0; i < len(s); i++ {
 		res[i] = f(s[i], v[i])
-	}
-
-	return res
-}
-
-// Papply 用于将一个函数应用于一个切片的每个元素。
-// 参数:
-//
-//	f - 一个函数，接受一组类型为any 的参数，返回一个类型为 R 的值。
-//	args - 一个包含any 类型元素的切片。
-//
-// 返回:
-//
-//	一个包含R 类型元素的切片。
-func Papply[R any](f func(x ...any) R, args ...[]any) []R {
-
-	if len(args) == 0 {
-		return []R{}
-	}
-
-	res := make([]R, len(args[0]))
-	ar := make([]any, len(args))
-
-	for i := 0; i < len(args[0]); i++ {
-
-		for j := 0; j < len(args); j++ {
-			ar[j] = args[j][i]
-		}
-
-		res[i] = f(ar...)
 	}
 
 	return res
