@@ -1,18 +1,15 @@
 package structure
 
-import "sync"
-
 type (
 	Queue[T any] struct {
 		start, end *node[T]
 		num        int64
-		mutex      sync.RWMutex
 	}
 )
 
 func NewQueue[T any](data ...T) *Queue[T] {
 
-	n := &Queue[T]{nil, nil, 0, sync.RWMutex{}}
+	n := &Queue[T]{nil, nil, 0}
 
 	for _, v := range data {
 		n.Push(v)
@@ -22,16 +19,11 @@ func NewQueue[T any](data ...T) *Queue[T] {
 }
 
 func (q *Queue[T]) Len() int64 {
-	q.mutex.RLock()
-	defer q.mutex.RUnlock()
 
 	return q.num
 }
 
 func (q *Queue[T]) Push(data T) {
-
-	q.mutex.Lock()
-	defer q.mutex.Unlock()
 
 	n := &node[T]{data, nil}
 
@@ -47,9 +39,6 @@ func (q *Queue[T]) Push(data T) {
 }
 
 func (q *Queue[T]) Pop() (T, bool) {
-
-	q.mutex.Lock()
-	defer q.mutex.Unlock()
 
 	if q.num == 0 {
 		var a T
@@ -68,8 +57,6 @@ func (q *Queue[T]) Pop() (T, bool) {
 	return n.value, true
 }
 func (q *Queue[T]) Peek() (T, bool) {
-	q.mutex.RLock()
-	defer q.mutex.RUnlock()
 
 	if q.num == 0 {
 		var a T
@@ -79,8 +66,6 @@ func (q *Queue[T]) Peek() (T, bool) {
 }
 
 func (q *Queue[T]) ToArray() []T {
-	q.mutex.RLock()
-	defer q.mutex.RUnlock()
 
 	res := make([]T, q.num)
 	i := 0
