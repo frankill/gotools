@@ -162,7 +162,7 @@ func (s *List[T]) Pop(data T) (T, bool) {
 			break
 		}
 	}
-
+	s.num--
 	return cur.value, true
 
 }
