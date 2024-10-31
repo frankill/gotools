@@ -9,7 +9,7 @@ import (
 	"github.com/frankill/gotools"
 )
 
-// FromAny函数接受任意类型的输入参数，并将它们转换为切片。
+// From 函数接受任意类型的输入参数，并将它们转换为切片。
 //
 // 参数:
 //
@@ -18,11 +18,21 @@ import (
 // 返回:
 //
 //   - 一个包含输入值的切片
-func FromAny[T any](input ...T) []T {
+func From[T any](input ...T) []T {
 	return input
 }
 
-func FromAnyIf[T any](fun func(T any) bool, input ...T) []T {
+// FromIf 函数接受一个函数和任意数量的输入参数，根据函数的返回值决定是否将输入值添加到切片中。
+//
+// 参数:
+//
+//   - fun: 一个函数，接受 T 类型的变长参数并返回 bool，用于判断是否添加到切片中。
+//   - input: 可变长度参数，表示要转换为切片的输入值
+//
+// 返回:
+//
+//   - 一个包含输入值的切片
+func FromIf[T any](fun func(T any) bool, input ...T) []T {
 
 	res := make([]T, 0)
 
@@ -33,6 +43,40 @@ func FromAnyIf[T any](fun func(T any) bool, input ...T) []T {
 	}
 	return res
 
+}
+
+// FromConvert 函数接受一个函数和任意数量的输入参数，根据函数的返回值决定是否将输入值添加到切片中。
+//
+// 参数:
+//
+//   - fun: 一个函数，接受 T 类型的变长参数并返回 U 类型的结果，用于添加到切片中。
+//   - input: 可变长度参数，表示要转换为切片的输入值
+//
+// 返回:
+//
+//   - 一个包含输入值的切片
+func FromConvert[T, U any](fun func(T) U, input ...T) []U {
+
+	res := make([]U, 0)
+
+	for _, v := range input {
+		res = append(res, fun(v))
+	}
+	return res
+}
+
+// ForEach 逐元素执行函数。
+//
+// 参数:
+//
+//   - fun: 用于逐元素执行的函数。
+//   - input: 可变长度参数，表示要执行函数的输入值。
+//
+// 返回:
+func ForEach[S ~[]T, T any](fun func(T), input S) {
+	for _, v := range input {
+		fun(v)
+	}
 }
 
 // Lag 生成一个新的切片，该切片由输入切片 `arr` 第n个元素前面的元素组成。缺少部分使用 `def` 填充。
