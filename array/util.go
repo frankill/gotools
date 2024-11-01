@@ -339,3 +339,46 @@ func Repeat[T any](x T, n int) []T {
 	}
 	return result
 }
+
+// Cycle 用于实现循环队列。
+type Cycle[T any] struct {
+	index int
+	len   int
+	data  []T
+}
+
+// Index 返回循环队列的当前索引。
+func (c *Cycle[T]) Index() int {
+	return c.index
+}
+
+// Len 返回循环队列的长度。
+func (c *Cycle[T]) Len() int {
+	return c.len
+}
+
+// 创建一个新的循环队列。
+func NewCycle[T any](length int) *Cycle[T] {
+	data := make([]T, length)
+	return &Cycle[T]{
+		index: 0,
+		len:   len(data),
+		data:  data,
+	}
+}
+
+// Push 将元素 d 添加到循环队列的index位置,并更新index
+func (c *Cycle[T]) Push(d T) {
+
+	if c.index == c.len {
+		c.index = 0
+	}
+
+	c.data[c.index%c.len] = d
+	c.index++
+}
+
+// Pop 从循环队列的index位置取出元素
+func (c *Cycle[T]) Pop() T {
+	return c.data[c.index%c.len]
+}
