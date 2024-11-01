@@ -61,22 +61,22 @@ func (s *List[T]) Exist(value T) (T, bool) {
 	return a, false
 }
 
-func (s *List[T]) Foreach(value T) {
-	cur := s.root
-	h := len(cur.next)
+// func (s *List[T]) Foreach(value T) {
+// 	cur := s.root
+// 	h := len(cur.next)
 
-	count := 0
-	data := make([]T, 0)
-	for i := h - 1; i >= 0; i-- {
-		for cur.next[i] != nil && s.fun(cur.next[i].value, value) {
-			count++
-			data = append(data, cur.next[i].value)
-			cur = cur.next[i]
-		}
-	}
-	fmt.Println("gotools.Comparable times", count)
-	fmt.Println("search node data", data)
-}
+// 	count := 0
+// 	data := make([]T, 0)
+// 	for i := h - 1; i >= 0; i-- {
+// 		for cur.next[i] != nil && s.fun(cur.next[i].value, value) {
+// 			count++
+// 			data = append(data, cur.next[i].value)
+// 			cur = cur.next[i]
+// 		}
+// 	}
+// 	fmt.Println("gotools.Comparable times", count)
+// 	fmt.Println("search node data", data)
+// }
 
 func (s *List[T]) Levels() {
 	cur := s.root
