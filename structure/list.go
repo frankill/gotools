@@ -185,6 +185,18 @@ func (s *List[T]) ToArr() []T {
 	return data
 }
 
+func (s *List[T]) ToChan() chan T {
+
+	res := make(chan T, 10)
+	go func() {
+		defer close(res)
+		for current := s.root.next[0]; current != nil; current = current.next[0] {
+			res <- current.value
+		}
+	}()
+	return res
+}
+
 func (s *List[T]) Clear() {
 	s.root = &skipnode[T]{}
 	s.num = 0
