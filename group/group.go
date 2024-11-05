@@ -4,7 +4,6 @@ import (
 	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/array"
 	"github.com/frankill/gotools/maps"
-	"github.com/frankill/gotools/operation"
 	"github.com/frankill/gotools/pair"
 )
 
@@ -24,7 +23,7 @@ type Retentionfun[T any] func(x []T) bool
 //   - 闭包函数返回一个映射，除第一个条件外，条件成对应用：如果第一个和第二个为真，则第二个结果为真，如果第一个和第三个为真，则第三个结果为真，等等
 func Retention[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) func(fun ...Retentionfun[S]) map[U][]bool {
 
-	group := Data(by, data)
+	group := By(by, data)
 
 	return func(fun ...Retentionfun[S]) map[U][]bool {
 
@@ -52,7 +51,7 @@ func Retention[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) func(f
 
 }
 
-// Count 对数据进行分组计数。
+// CountBy 对数据进行分组计数。
 //
 // 此函数接收两个参数：
 //   - by：B 类型，代表分组的依据，B 是一个切片类型，其元素类型 U 必须可比较（实现 gotools.Comparable 接口）。
@@ -60,9 +59,9 @@ func Retention[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) func(f
 //
 // 返回值：map[U]int
 // 函数返回一个 map[U]int，其中键 U 是分组的依据值，值 int 表示该组在 data 中出现的次数。
-func Count[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]int {
+func CountBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]int {
 
-	group := Data(by, data)
+	group := By(by, data)
 
 	res := make(map[U]int, len(group))
 	for k, v := range group {
@@ -72,7 +71,7 @@ func Count[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C
 
 }
 
-// Distinct 对数据进行分组并计算每个组的唯一元素数量。
+// DistinctBy 对数据进行分组并计算每个组的唯一元素数量。
 //
 // 参数：
 //   - by[B ~[]U]：一个切片，其元素作为分组的依据。
@@ -80,9 +79,9 @@ func Count[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C
 //
 // 返回值：
 //   - map[U]int：一个映射，键为 by 中的分组依据值，值为对应组内唯一元素的数量。
-func Distinct[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]int {
+func DistinctBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]int {
 
-	group := Data(by, data)
+	group := By(by, data)
 
 	res := make(map[U]int, len(group))
 
@@ -92,83 +91,7 @@ func Distinct[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, dat
 	return res
 }
 
-type Groupfun[T any] func(x []T) T
-type GroupFilterfun[K gotools.Comparable, T any] func(x K, y []T) []bool
-
-// Generate 是一个函数，用于根据给定的分组条件和数据，生成一个函数，该函数接受一个 Groupfun 类型的参数，并返回一个映射。
-// 该函数将根据给定的分组条件将数据分组，并对每个分组应用给定的函数，并将结果存储在映射中。
-//
-// 参数：
-//   - by: 分组条件，类型为 B，必须是可比较类型的切片。
-//   - data: 数据，类型为 C，必须是可比较类型的切片。
-//
-// 返回值：
-//
-//	一个函数，该函数接受一个 Groupfun 类型的参数，并返回一个映射。
-//	该映射的键类型为 U，值类型为 S。
-func Apply[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) func(fun Groupfun[S]) map[U]S {
-
-	group := Data(by, data)
-
-	return func(fun Groupfun[S]) map[U]S {
-
-		res := make(map[U]S, len(group))
-		for k, v := range group {
-			res[k] = fun(v)
-		}
-		return res
-
-	}
-}
-
-// GenerateFilter 根据指定的分组规则（by）和数据集（data），
-// 生成一个过滤器函数。此过滤器函数允许用户自定义过滤逻辑（通过 GroupFilterfun），
-// 并返回根据该逻辑处理后的分组,数据。
-//
-// 参数:
-//   - by: 分组依据的元素切片，类型为B，约束为可比较的切片。
-//   - data: 需要分组和过滤的原始数据切片，类型为C。
-//
-// 返回值:
-//   - 一个函数，接受一个GroupFilterfun类型的参数用于定制过滤条件，
-//     并返回过滤后的分组，数据 （类型为 []U 和 []S）。
-func GenerateFilter[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) func(fun GroupFilterfun[U, S]) ([]U, []S) {
-
-	id := array.Seq(0, len(data), 1)
-	group := Pair(by, data, id)
-
-	return func(fun GroupFilterfun[U, S]) ([]U, []S) {
-
-		value := make([]S, 0, len(data))
-		valueby := make([]U, 0, len(by))
-
-		numberid := make([]int, 0, len(data))
-
-		for k, v := range group {
-
-			farr := fun(k, v.First)
-
-			vv := operation.Filter(func(x ...any) bool { return x[1].(bool) }, array.ToAny(v.First), array.ToAny(farr))
-
-			value = append(value, array.ToGeneric[S](vv)...)
-
-			valueby = append(valueby, array.Repeat(k, len(vv))...)
-
-			numberid = append(numberid, operation.Filter(func(x ...int) bool { return x[1] > 0 }, v.Second, array.Toint(farr))...)
-
-		}
-
-		numberids := array.Copy(numberid)
-
-		array.SortByL(gotools.ASCInt, value, numberid)
-		array.SortByL(gotools.ASCInt, valueby, numberids)
-
-		return valueby, value
-
-	}
-}
-
-// GroupMax 根据指定的分组键对数据进行分组处理，并计算每个组中的最大值。
+// MaxBy 根据指定的分组键对数据进行分组处理，并计算每个组中的最大值。
 // 参数说明：
 //   - by(B): 分组依据的键列表，类型为切片，元素需可比较。
 //   - data(C): 待分组的数据列表，类型为切片，元素需要能排序。
@@ -181,9 +104,9 @@ func GenerateFilter[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) f
 //   - C: 类型为切片，元素类型为 S，要求 S 类型实现了 Ordered 接口，表明元素可排序。
 //   - U: 可比较类型，用于分组键的元素类型。
 //   - S: Ordered 类型，数据元素类型，需支持排序操作以便找出最大值。
-func Max[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]S {
+func MaxBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]S {
 
-	group := Data(by, data)
+	group := By(by, data)
 
 	res := make(map[U]S, len(group))
 
@@ -193,7 +116,7 @@ func Max[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) 
 	return res
 }
 
-// GroupMin 根据提供的分组条件和数据集，对数据进行分组，并计算每个组的最小值。
+// MinBy 根据提供的分组条件和数据集，对数据进行分组，并计算每个组的最小值。
 // 参数说明：
 //   - by(B): 分组的依据，类型为切片U的别名。
 //   - data(C): 待分组和计算最小值的数据集，类型为切片S的别名。
@@ -210,9 +133,9 @@ func Max[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) 
 // 注意：
 //   - 确保U类型的元素可以相互比较。
 //   - S类型的元素需要支持排序操作。
-func Min[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]S {
+func MinBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]S {
 
-	group := Data(by, data)
+	group := By(by, data)
 
 	res := make(map[U]S, len(group))
 
@@ -222,7 +145,7 @@ func Min[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) 
 	return res
 }
 
-// Sum 对数据进行分组求和。
+// SumBy 对数据进行分组求和。
 //
 // 参数:
 //   - by: B 类型，表示分组依据的键值列表，B 应为切片类型。
@@ -236,9 +159,9 @@ func Min[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) 
 //
 // 返回值:
 //   - map[U]S: 返回一个以 U 类型为键，S 类型为值的映射，表示每个分组的键与该组数据的总和。
-func Sum[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Number](by B, data C) map[U]S {
+func SumBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Number](by B, data C) map[U]S {
 
-	group := Data(by, data)
+	group := By(by, data)
 
 	res := make(map[U]S, len(group))
 
@@ -248,7 +171,7 @@ func Sum[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Number](by B, data C) m
 	return res
 }
 
-// GroupArrayPair 根据一个关键数组将两个数据数组分组。
+// PairBy 根据一个关键数组将两个数据数组分组。
 //   - by: 用于分组的键值数组，类型为 B，需要与 frist 的元素类型 T 可比较。
 //   - frist: 需要被分组的第一个数据数组，类型为 D，元素类型为 U。
 //   - second: 需要被分组的第二个数据数组，类型为 O，元素类型为 S。
@@ -256,7 +179,7 @@ func Sum[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Number](by B, data C) m
 // 返回值：
 //   - 一个映射，键为 T 类型（与 by 数组相同），值为 Pair 类型，包含两个分组后的数组（类型为 []U 和 []S）。
 //     此函数利用泛型，可适用于不同类型的数组。如果输入的 frist、by 或 second 为空，将直接返回空映射。
-func Pair[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S, U any](by B, frist D, second O) map[T]pair.Pair[[]U, []S] {
+func PairBy[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S, U any](by B, frist D, second O) map[T]pair.Pair[[]U, []S] {
 
 	res := map[T]pair.Pair[[]U, []S]{}
 
@@ -287,7 +210,7 @@ func Pair[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S, U any](by B, frist D,
 	return res
 }
 
-// Array 将数据切片 D 按照键值切片 B 进行分组，返回一个映射。
+// By 将数据切片 D 按照键值切片 B 进行分组，返回一个映射。
 // 键 T 必须是可比较的类型，D 和 B 分别是元素类型为 U 和 T 的切片，U 可以为任意类型。
 // 如果输入数据切片 data 或键值切片 by 为空，则直接返回空映射。
 //
@@ -297,7 +220,7 @@ func Pair[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S, U any](by B, frist D,
 //
 // 返回值:
 //   - map[T][]U: 一个映射，键为 T 类型的分组标识，值为对应分组内的 U 类型元素切片。
-func Data[D ~[]U, B ~[]T, T gotools.Comparable, U any](by B, data D) map[T][]U {
+func By[D ~[]U, B ~[]T, T gotools.Comparable, U any](by B, data D) map[T][]U {
 	res := map[T][]U{}
 
 	if len(data) == 0 {
@@ -337,7 +260,7 @@ func ByFunc[D ~[]U, T gotools.Comparable, U any](f func(U) T, data D) map[T][]U 
 	return res
 }
 
-//	函数根据输入的切片 by 对数据进行分组，返回一个映射，映射的键是 by 中的唯一元素，值是对应元素在原切片中的索引集合。
+//	Index 函数根据输入的切片 by 对数据进行分组，返回一个映射，映射的键是 by 中的唯一元素，值是对应元素在原切片中的索引集合。
 //
 // by: 需要分组的切片
 //
@@ -353,7 +276,7 @@ func ByFunc[D ~[]U, T gotools.Comparable, U any](f func(U) T, data D) map[T][]U 
 //
 //	输出:
 //	map[1:[0] 2:[1 2] 3:[3 4 5] 4:[6 7 8 9]]
-func Location[B ~[]T, T gotools.Comparable](by B) map[T][]int {
+func Index[B ~[]T, T gotools.Comparable](by B) map[T][]int {
 	res := map[T][]int{}
 
 	if len(by) == 0 {
@@ -364,6 +287,19 @@ func Location[B ~[]T, T gotools.Comparable](by B) map[T][]int {
 
 	for i := 0; i < len(by); i++ {
 		res[by[i]] = append(res[by[i]], data[i])
+	}
+	return res
+}
+
+func Count[B ~[]T, T gotools.Comparable](by B) map[T]int {
+
+	if len(by) == 0 {
+		return map[T]int{}
+	}
+
+	res := map[T]int{}
+	for i := 0; i < len(by); i++ {
+		res[by[i]]++
 	}
 	return res
 }
@@ -384,10 +320,10 @@ func Location[B ~[]T, T gotools.Comparable](by B) map[T][]int {
 func ByOrder[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, U any](by B, data D, order O) map[T][]U {
 
 	if len(order) == 0 {
-		return Data(by, data)
+		return By(by, data)
 	}
 
-	group := Pair(by, data, order)
+	group := PairBy(by, data, order)
 
 	res := make(map[T][]U, len(group))
 
@@ -403,10 +339,10 @@ func ByOrder[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, U 
 func ByOrderDesc[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, U any](by B, data D, order O) map[T][]U {
 
 	if len(order) == 0 {
-		return Data(by, data)
+		return By(by, data)
 	}
 
-	group := Pair(by, data, order)
+	group := PairBy(by, data, order)
 
 	res := make(map[T][]U, len(group))
 
@@ -485,7 +421,7 @@ func RowNumberDesc[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B
 func MaxValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) []S {
 
 	id := array.Seq(0, len(data), 1)
-	group := Pair(by, data, id)
+	group := PairBy(by, data, id)
 
 	value := make([]S, 0, len(data))
 	numberid := make([]int, 0, len(data))
@@ -513,7 +449,7 @@ func MaxValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, dat
 func MinValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) []S {
 
 	id := array.Seq(0, len(data), 1)
-	group := Pair(by, data, id)
+	group := PairBy(by, data, id)
 
 	value := make([]S, 0, len(data))
 	numberid := make([]int, 0, len(data))
@@ -541,7 +477,7 @@ func MinValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, dat
 func FirstValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 
 	id := array.Seq(0, len(data), 1)
-	group := Pair(by, data, id)
+	group := PairBy(by, data, id)
 
 	value := make([]S, 0, len(data))
 	numberid := make([]int, 0, len(data))
@@ -567,7 +503,7 @@ func FirstValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 func LastValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 
 	id := array.Seq(0, len(data), 1)
-	group := Pair(by, data, id)
+	group := PairBy(by, data, id)
 
 	value := make([]S, 0, len(data))
 	numberid := make([]int, 0, len(data))

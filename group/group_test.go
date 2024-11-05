@@ -45,60 +45,6 @@ func TestRetention(t *testing.T) {
 	}
 }
 
-func TestGroupGenerateFilter(t *testing.T) {
-	// Test case 1: Empty data slice
-
-	f := func(x int, y []int) []bool { return array.Map(func(x int) bool { return x%2 == 0 }, y) }
-
-	data := []int{}
-	by := []int{1, 2, 3}
-	expected := []int{}
-	result, _ := group.GenerateFilter(by, data)(f)
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v", expected, result)
-	}
-
-	// Test case 2: Grouped and filtered data
-	data = []int{1, 2, 3, 4, 5, 6}
-	by = []int{1, 2, 3, 1, 2, 3}
-	expected = []int{2, 1, 3}
-	result, _ = group.GenerateFilter(by, data)(f)
-
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v", expected, result)
-	}
-
-}
-
-func TestGroupGenerate(t *testing.T) {
-	// 定义测试用例
-	tests := []struct {
-		name string
-		by   []int
-		data []string
-		fun  group.Groupfun[string]
-		want map[int]string
-	}{
-		{
-			name: "Group by first character",
-			by:   []int{0, 2, 2, 1},
-			data: []string{"apple", "banana", "cherry", "date"},
-			fun:  func(s []string) string { return s[0] },
-			want: map[int]string{0: "apple", 1: "date", 2: "banana"},
-		},
-		// TODO: 添加更多测试用例
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := group.Apply(tt.by, tt.data)(tt.fun)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GroupGenerate() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestGroupCount(t *testing.T) {
 	// Define test cases
 	tests := []struct {
@@ -121,7 +67,7 @@ func TestGroupCount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call the function under test
-			result := group.Count(tt.by, tt.data)
+			result := group.CountBy(tt.by, tt.data)
 
 			// Check if the result matches the expected value
 			if len(result) != len(tt.expected) {
@@ -158,7 +104,7 @@ func TestGroupDistinct(t *testing.T) {
 
 	// Run test cases
 	for _, tt := range tests {
-		result := group.Distinct(tt.by, tt.data)
+		result := group.DistinctBy(tt.by, tt.data)
 
 		// Check if the result matches the expected result
 		if len(result) != len(tt.expect) {
@@ -199,7 +145,7 @@ func TestGroupMax(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call the function
-			result := group.Max(tt.by, tt.data)
+			result := group.MaxBy(tt.by, tt.data)
 
 			// Check if the result is equal to the expected result
 			if len(result) != len(tt.expected) {
@@ -238,7 +184,7 @@ func TestGroupMin(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := group.Min(tt.by, tt.data); !reflect.DeepEqual(got, tt.want) {
+			if got := group.MinBy(tt.by, tt.data); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GroupMin() = %v, want %v", got, tt.want)
 			}
 		})
@@ -266,7 +212,7 @@ func TestGroupSum(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call the function under test
-			result := group.Sum(tt.by, tt.data)
+			result := group.SumBy(tt.by, tt.data)
 
 			// Check if the result matches the expected value
 			if len(result) != len(tt.expected) {
@@ -309,7 +255,7 @@ func TestGroupArrayPair(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := group.Pair(tt.by, tt.first, tt.second); !reflect.DeepEqual(got, tt.want) {
+			if got := group.PairBy(tt.by, tt.first, tt.second); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GroupArrayPair() = %v, want %v", got, tt.want)
 			}
 		})
@@ -320,7 +266,7 @@ func TestGroupArray(t *testing.T) {
 	data1 := []int{1, 2, 3}
 	by1 := []int{0, 0, 1}
 	expected1 := map[int][]int{0: {1, 2}, 1: {3}}
-	result1 := group.Data(by1, data1)
+	result1 := group.By(by1, data1)
 	if !reflect.DeepEqual(result1, expected1) {
 		t.Errorf("Test case 1 failed. Expected %v, got %v", expected1, result1)
 	}
@@ -329,7 +275,7 @@ func TestGroupArray(t *testing.T) {
 	data3 := [][]float64{}
 	by3 := []float64{}
 	expected3 := map[float64][][]float64{}
-	result3 := group.Data(by3, data3)
+	result3 := group.By(by3, data3)
 	if !reflect.DeepEqual(result3, expected3) {
 		t.Errorf("Test case 3 failed. Expected %v, got %v", expected3, result3)
 	}
@@ -338,7 +284,7 @@ func TestGroupArray(t *testing.T) {
 	data4 := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
 	by4 := []int{0, 0, 2}
 	expected4 := map[int][][]int{0: {{1, 2, 3}, {4, 5, 6}}, 2: {{7, 8, 9}}}
-	result4 := group.Data(by4, data4)
+	result4 := group.By(by4, data4)
 	if !reflect.DeepEqual(result4, expected4) {
 		t.Errorf("Test case 4 failed. Expected %v, got %v", expected4, result4)
 	}
