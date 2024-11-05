@@ -248,18 +248,17 @@ func createdoc[U any](doc ElasticBluk[U]) elastic.BulkableRequest {
 	}
 }
 
-// 查询分片数量并执行 Query
-// 用于查询分片数量
+// QueryIterShard  查询分片数量并执行 Query
 // 参数:
 //
-//	index: 索引名称
+//	index: 索引名称 不能使用别名
 //	q: 查询条件 , 支持 string 和 *query.EsQuery, elastic.Query
 //
 // 返回:
 //
 //	chan ElasticBluk[U]: 查询结果通道
 //	chan error: 错误通道
-func (es *ElasticSearchClient[U]) QueryIter(index string, q any) (chan ElasticBluk[U], chan error) {
+func (es *ElasticSearchClient[U]) QueryIterShard(index string, q any) (chan ElasticBluk[U], chan error) {
 
 	stringChan := make(chan ElasticBluk[U], 100)
 	errors := make(chan error, 1)
@@ -347,6 +346,84 @@ func (es *ElasticSearchClient[U]) QueryIter(index string, q any) (chan ElasticBl
 		}
 
 		wg.Wait()
+
+	}()
+
+	// 返回通道和   错误通道
+	return stringChan, errors
+}
+
+// QueryIter
+// 参数:
+//
+//	index: 索引名称
+//	q: 查询条件 , 支持 string 和 *query.EsQuery, elastic.Query
+//
+// 返回:
+//
+//	chan ElasticBluk[U]: 查询结果通道
+//	chan error: 错误通道
+func (es *ElasticSearchClient[U]) QueryIter(index string, q any) (chan ElasticBluk[U], chan error) {
+
+	stringChan := make(chan ElasticBluk[U], 100)
+	errors := make(chan error, 1)
+
+	var q_ elastic.Query
+
+	switch v := q.(type) {
+	case elastic.Query:
+		q_ = v
+	case *query.EsQuery:
+		q_ = v.Build()
+	case string:
+		q_ = elastic.NewRawStringQuery(v)
+	default:
+		log.Panicln("unsupported query type")
+	}
+
+	go func() {
+		defer close(stringChan)
+		defer close(errors)
+
+		svc := es.Client.Scroll(index).KeepAlive("30m").Size(10000).Query(q_)
+
+		defer svc.Clear(context.Background())
+
+		for {
+			res, err := svc.Do(context.Background())
+
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				errors <- err
+				break
+			}
+			if res == nil {
+				break
+			}
+			if res.Hits == nil {
+				break
+			}
+			if res.Hits.TotalHits.Value == 0 {
+				break
+			}
+			for _, hit := range res.Hits.Hits {
+				var results U
+				err := json.Unmarshal(hit.Source, &results)
+				if err != nil {
+					errors <- err
+					continue
+				}
+
+				stringChan <- ElasticBluk[U]{
+					Index:   hit.Index,
+					Id:      hit.Id,
+					Routing: hit.Routing,
+					Source:  results,
+				}
+			}
+		}
 
 	}()
 
