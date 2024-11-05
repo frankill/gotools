@@ -291,6 +291,12 @@ func Index[B ~[]T, T gotools.Comparable](by B) map[T][]int {
 	return res
 }
 
+// Count 函数根据输入的切片 by 对数据进行分组，返回一个映射，映射的键是 by 中的唯一元素，值是对应元素在原切片中出现的次数。
+//
+// by: 需要分组的切片
+//
+// 返回值:
+//   - map[T]int: 包含分组信息的映射
 func Count[B ~[]T, T gotools.Comparable](by B) map[T]int {
 
 	if len(by) == 0 {
