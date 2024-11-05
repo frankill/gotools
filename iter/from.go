@@ -216,7 +216,7 @@ func FromElasticSearch[T any](client *elastic.Client) func(index string, query a
 
 		con := db.NewElasticSearchClient[T](client)
 
-		return con.QueryAnyIter(index, query)
+		return con.QueryIter(index, query)
 
 	}
 }
@@ -674,7 +674,7 @@ func FromMysqlStr(con string) func(query *query.SQLBuilder) (chan []string, chan
 
 	return func(query *query.SQLBuilder) (chan []string, chan error) {
 
-		return db.NewMysqlDB(con).QueryAnyIter(query)()
+		return db.NewMysqlDB(con).QueryIter(query)()
 
 	}
 }
@@ -694,7 +694,7 @@ func FromCKStr(ck *db.CKinfo) func(query *query.SQLBuilder) (chan []string, chan
 
 	return func(query *query.SQLBuilder) (chan []string, chan error) {
 
-		return db.NewCK(ck).QueryAnyIter(query)()
+		return db.NewCK(ck).QueryIter(query)()
 	}
 }
 

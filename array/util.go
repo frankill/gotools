@@ -80,7 +80,7 @@ func ToGeneric[T any](arr []any) []T {
 	return result
 }
 
-// ArrayToAny 将类型为 S（元素类型为 T）的切片转换为任意类型切片。
+// ToAny 将类型为 S（元素类型为 T）的切片转换为任意类型切片。
 // 要求 T 类型实现 `any` 接口。
 //
 // 参数:
@@ -94,6 +94,24 @@ func ToAny[S ~[]T, T any](arr S) []any {
 
 	for i := 0; i < len(arr); i++ {
 		res = append(res, arr[i])
+	}
+	return res
+}
+
+// ToZero 将类型为 S（元素类型为 T）的切片转换为 map[T]int 类型。
+// 要求 T 类型实现 `Comparable` 接口。
+//
+// 参数:
+//   - arr: 要转换的切片 S。
+//
+// 返回值:
+//   - 返回一个 map[T]int 类型的映射， 包含输入的所有元素，键为元素，值为 0。
+func ToZero[S ~[]T, T gotools.Comparable](arr S) map[T]int {
+
+	res := make(map[T]int)
+
+	for i := 0; i < len(arr); i++ {
+		res[arr[i]] = 0
 	}
 	return res
 }

@@ -239,7 +239,7 @@ func (m *DB) QueryTwo(query *query.SQLBuilder) func() (map[string]string, error)
 
 }
 
-// QueryAny 方法执行一个 SQL 查询语句，并返回查询结果的所有列数据。
+// QueryArr 方法执行一个 SQL 查询语句，并返回查询结果的所有列数据。
 // 参数:
 //
 //	sql - *SQLBuilder 类型的结构体，用于构建 SQL 查询语句。
@@ -247,7 +247,7 @@ func (m *DB) QueryTwo(query *query.SQLBuilder) func() (map[string]string, error)
 // 返回:
 //
 //	一个函数，无参数，返回查询结果的所有列数据和可能的错误。
-func (m *DB) QueryAny(query *query.SQLBuilder) func() ([][]string, error) {
+func (m *DB) QueryArr(query *query.SQLBuilder) func() ([][]string, error) {
 
 	query_ := query.Build()
 
@@ -298,7 +298,7 @@ func (m *DB) QueryAny(query *query.SQLBuilder) func() ([][]string, error) {
 
 }
 
-// QueryAnyIter 方法执行一个 SQL 查询语句，并通过一个通道逐行返回查询结果的所有列数据。
+// QueryIter 方法执行一个 SQL 查询语句，并通过一个通道逐行返回查询结果的所有列数据。
 // 参数:
 //
 //	sql - *SQLBuilder 类型的结构体，用于构建 SQL 查询语句。
@@ -306,7 +306,7 @@ func (m *DB) QueryAny(query *query.SQLBuilder) func() ([][]string, error) {
 // 返回:
 //
 //	一个函数，返回一个通道，用于发送查询结果的每一行数据，以及可能的错误。
-func (m *DB) QueryAnyIter(query *query.SQLBuilder) func() (chan []string, chan error) {
+func (m *DB) QueryIter(query *query.SQLBuilder) func() (chan []string, chan error) {
 
 	return func() (chan []string, chan error) {
 		query_ := query.Build()

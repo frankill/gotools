@@ -259,7 +259,7 @@ func createdoc[U any](doc ElasticBluk[U]) elastic.BulkableRequest {
 //
 //	chan ElasticBluk[U]: 查询结果通道
 //	chan error: 错误通道
-func (es *ElasticSearchClient[U]) QueryAnyIter(index string, q any) (chan ElasticBluk[U], chan error) {
+func (es *ElasticSearchClient[U]) QueryIter(index string, q any) (chan ElasticBluk[U], chan error) {
 
 	stringChan := make(chan ElasticBluk[U], 100)
 	errors := make(chan error, 1)
