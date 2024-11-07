@@ -557,7 +557,7 @@ func TestMapToPairsArray2(t *testing.T) {
 		Second: []int{1, 2, 3, 4, 5},
 	}
 
-	result := maps.ToPairsArray2(testData)
+	result := maps.ToPairs(testData)
 	if !reflect.DeepEqual(result, expectedPairs) {
 		t.Errorf("MapToPairsArray2(%v) = %v; want %v", testData, result, expectedPairs)
 	}

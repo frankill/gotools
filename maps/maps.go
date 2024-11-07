@@ -275,7 +275,7 @@ func FromArray2[V ~[]S, T gotools.Comparable, S any](f func(x S) T, value V) map
 // 返回值:
 //
 //   - 一个由Pair[K, V]组成的切片(slice)，每个Pair包含映射中的一对键值对。
-func ToArrayPairs[K gotools.Comparable, V any](m map[K]V) []pair.Pair[K, V] {
+func ToPairs[K gotools.Comparable, V any](m map[K]V) []pair.Pair[K, V] {
 
 	pairs := make([]pair.Pair[K, V], 0, len(m))
 
@@ -508,7 +508,7 @@ func All[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) bool {
 	return true
 }
 
-// ToPairsArray2 将一个带有多个值的映射表转换为键与值的二维数组对。
+// ToPairs2 将一个带有多个值的映射表转换为键与值的二维数组对。
 // 此函数接收一个映射表 m，其中键 K 是可比较的任意类型，值 S 是 V 类型元素的切片。
 // 函数返回一个 Pair 结构体实例，其中 First 是 K 类型的切片，Second 是 V 类型的切片，
 // 这些切片包含了原始映射表中所有的键和值，按照映射表中的键值对顺序排列。
@@ -520,7 +520,7 @@ func All[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) bool {
 // 返回:
 //
 //   - Pair[[]K, []V]: 包含两个切片的 Pair 结构体，First 切片包含映射表的所有键，Second 切片包含映射表的所有值。
-func ToPairsArray2[K gotools.Comparable, S ~[]V, V any](m map[K]S) pair.Pair[[]K, []V] {
+func ToPairs2[K gotools.Comparable, S ~[]V, V any](m map[K]S) pair.Pair[[]K, []V] {
 
 	pairs := pair.Pair[[]K, []V]{}
 
