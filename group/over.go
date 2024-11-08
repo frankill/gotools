@@ -64,7 +64,7 @@ func RowNumberDesc[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B
 func MaxValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) []S {
 
 	id := array.Seq(0, len(data), 1)
-	group := PairBy(by, data, id)
+	group := Pair(by, data, id)
 
 	value := make([]S, 0, len(data))
 	numberid := make([]int, 0, len(data))
@@ -92,7 +92,7 @@ func MaxValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, dat
 func MinValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) []S {
 
 	id := array.Seq(0, len(data), 1)
-	group := PairBy(by, data, id)
+	group := Pair(by, data, id)
 
 	value := make([]S, 0, len(data))
 	numberid := make([]int, 0, len(data))
@@ -120,7 +120,7 @@ func MinValue[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, dat
 func FirstValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 
 	id := array.Seq(0, len(data), 1)
-	group := PairBy(by, data, id)
+	group := Pair(by, data, id)
 
 	value := make([]S, 0, len(data))
 	numberid := make([]int, 0, len(data))
@@ -146,7 +146,7 @@ func FirstValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 func LastValue[B ~[]U, C ~[]S, U gotools.Comparable, S any](by B, data C) []S {
 
 	id := array.Seq(0, len(data), 1)
-	group := PairBy(by, data, id)
+	group := Pair(by, data, id)
 
 	value := make([]S, 0, len(data))
 	numberid := make([]int, 0, len(data))

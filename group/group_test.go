@@ -67,7 +67,7 @@ func TestGroupCount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call the function under test
-			result := group.CountBy(tt.by, tt.data)
+			result := group.Count2(tt.by, tt.data)
 
 			// Check if the result matches the expected value
 			if len(result) != len(tt.expected) {
@@ -104,7 +104,7 @@ func TestGroupDistinct(t *testing.T) {
 
 	// Run test cases
 	for _, tt := range tests {
-		result := group.DistinctBy(tt.by, tt.data)
+		result := group.Distinct(tt.by, tt.data)
 
 		// Check if the result matches the expected result
 		if len(result) != len(tt.expect) {
@@ -145,7 +145,7 @@ func TestGroupMax(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call the function
-			result := group.MaxBy(tt.by, tt.data)
+			result := group.Max(tt.by, tt.data)
 
 			// Check if the result is equal to the expected result
 			if len(result) != len(tt.expected) {
@@ -184,7 +184,7 @@ func TestGroupMin(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := group.MinBy(tt.by, tt.data); !reflect.DeepEqual(got, tt.want) {
+			if got := group.Min(tt.by, tt.data); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GroupMin() = %v, want %v", got, tt.want)
 			}
 		})
@@ -212,7 +212,7 @@ func TestGroupSum(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call the function under test
-			result := group.SumBy(tt.by, tt.data)
+			result := group.Sum(tt.by, tt.data)
 
 			// Check if the result matches the expected value
 			if len(result) != len(tt.expected) {
@@ -255,7 +255,7 @@ func TestGroupArrayPair(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := group.PairBy(tt.by, tt.first, tt.second); !reflect.DeepEqual(got, tt.want) {
+			if got := group.Pair(tt.by, tt.first, tt.second); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GroupArrayPair() = %v, want %v", got, tt.want)
 			}
 		})

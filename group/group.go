@@ -6,7 +6,7 @@ import (
 	"github.com/frankill/gotools/pair"
 )
 
-// CountBy 对数据进行分组计数。
+// Count2 对数据进行分组计数。
 //
 // 此函数接收两个参数：
 //   - by：B 类型，代表分组的依据，B 是一个切片类型，其元素类型 U 必须可比较（实现 gotools.Comparable 接口）。
@@ -14,7 +14,7 @@ import (
 //
 // 返回值：map[U]int
 // 函数返回一个 map[U]int，其中键 U 是分组的依据值，值 int 表示该组在 data 中出现的次数。
-func CountBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]int {
+func Count2[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]int {
 
 	group := By(by, data)
 
@@ -26,7 +26,7 @@ func CountBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data
 
 }
 
-// DistinctBy 对数据进行分组并计算每个组的唯一元素数量。
+// Distinct 对数据进行分组并计算每个组的唯一元素数量。
 //
 // 参数：
 //   - by[B ~[]U]：一个切片，其元素作为分组的依据。
@@ -34,7 +34,7 @@ func CountBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data
 //
 // 返回值：
 //   - map[U]int：一个映射，键为 by 中的分组依据值，值为对应组内唯一元素的数量。
-func DistinctBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]int {
+func Distinct[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]int {
 
 	group := By(by, data)
 
@@ -46,7 +46,7 @@ func DistinctBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, d
 	return res
 }
 
-// MaxBy 根据指定的分组键对数据进行分组处理，并计算每个组中的最大值。
+// Max 根据指定的分组键对数据进行分组处理，并计算每个组中的最大值。
 // 参数说明：
 //   - by(B): 分组依据的键列表，类型为切片，元素需可比较。
 //   - data(C): 待分组的数据列表，类型为切片，元素需要能排序。
@@ -59,7 +59,7 @@ func DistinctBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, d
 //   - C: 类型为切片，元素类型为 S，要求 S 类型实现了 Ordered 接口，表明元素可排序。
 //   - U: 可比较类型，用于分组键的元素类型。
 //   - S: Ordered 类型，数据元素类型，需支持排序操作以便找出最大值。
-func MaxBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]S {
+func Max[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]S {
 
 	group := By(by, data)
 
@@ -71,7 +71,7 @@ func MaxBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C
 	return res
 }
 
-// MinBy 根据提供的分组条件和数据集，对数据进行分组，并计算每个组的最小值。
+// Min 根据提供的分组条件和数据集，对数据进行分组，并计算每个组的最小值。
 // 参数说明：
 //   - by(B): 分组的依据，类型为切片U的别名。
 //   - data(C): 待分组和计算最小值的数据集，类型为切片S的别名。
@@ -88,7 +88,7 @@ func MaxBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C
 // 注意：
 //   - 确保U类型的元素可以相互比较。
 //   - S类型的元素需要支持排序操作。
-func MinBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]S {
+func Min[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]S {
 
 	group := By(by, data)
 
@@ -100,7 +100,7 @@ func MinBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C
 	return res
 }
 
-// SumBy 对数据进行分组求和。
+// Sum 对数据进行分组求和。
 //
 // 参数:
 //   - by: B 类型，表示分组依据的键值列表，B 应为切片类型。
@@ -114,7 +114,7 @@ func MinBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C
 //
 // 返回值:
 //   - map[U]S: 返回一个以 U 类型为键，S 类型为值的映射，表示每个分组的键与该组数据的总和。
-func SumBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Number](by B, data C) map[U]S {
+func Sum[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Number](by B, data C) map[U]S {
 
 	group := By(by, data)
 
@@ -127,7 +127,7 @@ func SumBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Number](by B, data C)
 
 }
 
-// PairBy 根据一个关键数组将两个数据数组分组。
+// Pair 根据一个关键数组将两个数据数组分组。
 //   - by: 用于分组的键值数组，类型为 B，需要与 frist 的元素类型 T 可比较。
 //   - frist: 需要被分组的第一个数据数组，类型为 D，元素类型为 U。
 //   - second: 需要被分组的第二个数据数组，类型为 O，元素类型为 S。
@@ -135,7 +135,7 @@ func SumBy[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Number](by B, data C)
 // 返回值：
 //   - 一个映射，键为 T 类型（与 by 数组相同），值为 Pair 类型，包含两个分组后的数组（类型为 []U 和 []S）。
 //     此函数利用泛型，可适用于不同类型的数组。如果输入的 frist、by 或 second 为空，将直接返回空映射。
-func PairBy[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S, U any](by B, frist D, second O) map[T]pair.Pair[[]U, []S] {
+func Pair[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S, U any](by B, frist D, second O) map[T]pair.Pair[[]U, []S] {
 
 	res := map[T]pair.Pair[[]U, []S]{}
 
@@ -194,7 +194,7 @@ func By[D ~[]U, B ~[]T, T gotools.Comparable, U any](by B, data D) map[T][]U {
 	return res
 }
 
-// ByFunc 根据给定的函数进行分组计算。
+// ByFn 根据给定的函数进行分组计算。
 //
 // 参数:
 //   - by: 与 data 中元素对应的分组键值切片。
@@ -213,6 +213,23 @@ func ByFn[B ~[]T, D ~[]U, T gotools.Comparable, R, U any](fn func([]U) R, by B, 
 		res[k] = fn(v)
 	}
 	return res
+
+}
+
+// ByFun2 根据给定的函数进行分组计算。
+//
+// 参数:
+//   - fn : 用于计算分组数据的函数。
+//   - fn1: 用于计算分组数据的函数。
+//   - data: 要进行分组的元素数据切片。
+//
+// 返回值:
+//   - map[T]R: 一个映射，键为 T 类型的分组标识，值为对应分组内的 R 类型元素切片。
+func ByFun2[D ~[]S, T gotools.Comparable, S, R any](fn func(S) T, fn1 func([]S) R, data D) map[T]R {
+
+	by := array.Map(fn, data)
+
+	return ByFn(fn1, by, data)
 
 }
 
@@ -285,7 +302,7 @@ func ByOrder[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, U 
 		return By(by, data)
 	}
 
-	group := PairBy(by, data, order)
+	group := Pair(by, data, order)
 
 	res := make(map[T][]U, len(group))
 
@@ -304,7 +321,7 @@ func ByOrderDesc[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered
 		return By(by, data)
 	}
 
-	group := PairBy(by, data, order)
+	group := Pair(by, data, order)
 
 	res := make(map[T][]U, len(group))
 
