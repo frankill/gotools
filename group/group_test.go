@@ -312,7 +312,7 @@ func TestGroupArrayByOrder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// 调用待测试的函数
-			got := group.ByOrder(tt.by, tt.data, tt.order)
+			got := group.Order(tt.by, tt.data, tt.order)
 
 			// 比较结果
 			if !reflect.DeepEqual(got, tt.want) {

@@ -18,7 +18,7 @@ import (
 func RowNumber[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, order C) []int {
 	id := array.Seq(0, len(by), 1)
 
-	group := ByOrder(by, id, order)
+	group := Order(by, id, order)
 
 	sortid := make([]int, 0, len(by))
 	numberid := make([]int, 0, len(by))
@@ -36,7 +36,7 @@ func RowNumber[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, or
 func RowNumberDesc[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, order C) []int {
 	id := array.Seq(0, len(by), 1)
 
-	group := ByOrderDesc(by, id, order)
+	group := OrderDesc(by, id, order)
 
 	sortid := make([]int, 0, len(by))
 	numberid := make([]int, 0, len(by))

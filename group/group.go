@@ -264,6 +264,46 @@ func Index[B ~[]T, T gotools.Comparable](by B) map[T][]int {
 	return res
 }
 
+func IndexAsc[B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered](by B, order O) map[T][]int {
+
+	data := array.Seq(0, len(by), 1)
+
+	if len(order) == 0 {
+		return By(by, data)
+	}
+
+	group := Pair(by, data, order)
+
+	res := make(map[T][]int, len(group))
+
+	for k, v := range group {
+		array.SortByL(gotools.ASCGeneric, v.First, v.Second)
+		res[k] = v.First
+	}
+
+	return res
+}
+
+func IndexDesc[B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered](by B, order O) map[T][]int {
+
+	data := array.Seq(0, len(by), 1)
+
+	if len(order) == 0 {
+		return By(by, data)
+	}
+
+	group := Pair(by, data, order)
+
+	res := make(map[T][]int, len(group))
+
+	for k, v := range group {
+		array.SortByL(gotools.DESCGeneric, v.First, v.Second)
+		res[k] = v.First
+	}
+
+	return res
+}
+
 // Count 函数根据输入的切片 by 对数据进行分组，返回一个映射，映射的键是 by 中的唯一元素，值是对应元素在原切片中出现的次数。
 //
 // by: 需要分组的切片
@@ -283,7 +323,7 @@ func Count[B ~[]T, T gotools.Comparable](by B) map[T]int {
 	return res
 }
 
-// ArrayByOrder 根据给定的排序规则对数组进行分组操作。
+// Order 根据给定的排序规则对数组进行分组操作。
 //
 // 参数说明：
 //   - data(D): 待分组的数据，类型为 D，要求 D 是 U 类型的切片。
@@ -296,7 +336,7 @@ func Count[B ~[]T, T gotools.Comparable](by B) map[T]int {
 // 注意：
 //   - 当 order 为空时，直接调用 GroupArray 进行分组。
 //   - 若 order 提供了排序依据，函数首先依据 by 和 order 进行分组及排序，然后将排序后的数据作为结果值。
-func ByOrder[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, U any](by B, data D, order O) map[T][]U {
+func Order[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, U any](by B, data D, order O) map[T][]U {
 
 	if len(order) == 0 {
 		return By(by, data)
@@ -314,8 +354,8 @@ func ByOrder[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, U 
 	return res
 }
 
-// ArrayByOrderDesc GroupArrayByOrder倒序版
-func ByOrderDesc[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, U any](by B, data D, order O) map[T][]U {
+// OrderDesc Order倒序版
+func OrderDesc[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, U any](by B, data D, order O) map[T][]U {
 
 	if len(order) == 0 {
 		return By(by, data)
