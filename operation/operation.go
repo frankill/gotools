@@ -223,6 +223,44 @@ func Pmap[S ~[]T, T, U any](fun func(x ...T) U, arr ...S) []U {
 	return res
 }
 
+// Pfilter 对一组切片应用指定的函数，每个切片元素按位置组合后作为函数的参数。
+// 此泛型函数接受一个变长参数列表 `arr`，其中每个参数都是类型 S 的切片（S 必须是切片类型）,
+// 和一个函数 `fun`，该函数接受变长参数列表 x...T 并返回布尔值，用于测试一组元素是否满足条件。
+// 函数返回一个类型为 []T 的切片，包含所有满足给定函数 `fun` 的切片元素组合。
+//
+// 参数:
+//
+//   - fun: 一个函数，接受变长参数列表 x...T 并返回布尔值，用于测试一组元素是否满足条件。
+//   - arr: 变长参数列表，每个参数都是类型 S 的切片，S 必须是切片类型。
+//
+// 返回:
+//
+//   - 类型为 []T 的切片，包含所有满足给定函数 `fun` 的切片元素组合。
+func Pfilter[S ~[]T, T, U any](fun func(x ...T) bool, arr ...S) []T {
+
+	if len(arr) == 0 {
+		return make([]T, 0)
+	}
+
+	la := array.Map(func(x S) int { return len(x) }, arr)
+	lm := array.Max(la)
+
+	res := make([]T, lm)
+
+	parm := make([]T, len(arr))
+	for i := 0; i < lm; i++ {
+		for j := 0; j < len(arr); j++ {
+			parm[j] = arr[j][i%la[j]]
+		}
+		if fun(parm...) {
+			res[i] = arr[0][i]
+		}
+
+	}
+
+	return res
+}
+
 // FindLast 查找类型为 S（元素类型为 T）的切片数组中最后一个使条件函数 `fun` 返回 true 的元素组合所在的索引位置。
 //
 // 参数:

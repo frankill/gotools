@@ -905,7 +905,7 @@ func Filter[S ~[]T, T any](fun func(x T) bool, arr S) []T {
 	return result
 }
 
-// FilterIndex 根据提供的函数过滤切片（类型为 T 的切片）的元素。
+// FilterIndex 根据提供的函数过滤切片（类型为 T 的切片）的元素索引。
 // 它将切片的对应元素作为参数传递给函数 `fun`，并仅保留 `fun` 返回真值时的位置索引。
 //
 // 参数:
