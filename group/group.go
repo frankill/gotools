@@ -265,6 +265,13 @@ func Index[B ~[]T, T gotools.Comparable](by B) map[T][]int {
 }
 
 // IndexAsc 函数根据输入的切片 by 对数据进行分组，返回一个映射，映射的键是 by 中的唯一元素，值是对应元素在原切片中的升序索引集合。
+//
+// 参数:
+//   - by: 需要分组的切片
+//   - order: 排序依据的切片
+//
+// 返回值:
+//   - map[T][]int: 包含分组信息的映射
 func IndexAsc[B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered](by B, order O) map[T][]int {
 
 	data := array.Seq(0, len(by), 1)
@@ -286,6 +293,13 @@ func IndexAsc[B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered](by B, ord
 }
 
 // IndexDesc 函数根据输入的切片 by 对数据进行分组，返回一个映射，映射的键是 by 中的唯一元素，值是对应元素在原切片中的降序索引集合。
+//
+// 参数:
+//   - by: 需要分组的切片
+//   - order: 排序依据的切片
+//
+// 返回值:
+//   - map[T][]int: 包含分组信息的映射
 func IndexDesc[B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered](by B, order O) map[T][]int {
 
 	data := array.Seq(0, len(by), 1)
