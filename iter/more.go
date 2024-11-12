@@ -7,6 +7,14 @@ import (
 	"github.com/frankill/gotools/array"
 )
 
+// More 按照某个函数进行连接,接受两个通道，通道元素一一对应进行处理
+// 参数:
+//   - f: 一个函数，接受两个类型为 T 和 U 的值，返回一个类型为 R 的值。
+//   - ch1: 一个通道，用于接收第一个数据
+//   - ch2: 一个通道，用于接收第二个数据
+//
+// 返回:
+//   - 一个通道，用于接收连接后的数据
 func More[T, U, R any](f func(x T, y U) R) func(ch1 chan T, ch2 chan U) chan R {
 
 	return func(ch1 chan T, ch2 chan U) chan R {
@@ -39,7 +47,7 @@ func More[T, U, R any](f func(x T, y U) R) func(ch1 chan T, ch2 chan U) chan R {
 
 // Subtract 返回两个通道的差集
 // 参数:
-//   - f: 一个函数，接受两个类型为 T 的值，返回一个布尔值，表示比较大小 0 相等，-1 小于，1 大于。
+//   - f: 一个函数，接受两个类型为 T 的值，返回一个int，表示比较大小 0 相等，-1 小于，1 大于。
 //   - ch1: 一个通道，用于接收数据。必须排序
 //   - ch2: 一个通道，用于接收数据。必须排序
 //
@@ -82,7 +90,7 @@ func Subtract[T any](f func(x, y T) int) func(ch1 chan T, ch2 chan T) chan T {
 
 // Intersect 返回两个通道的交集
 // 参数:
-//   - f: 一个函数，接受两个类型为 T 的值，返回一个布尔值，表示比较大小 0 相等，-1 小于，1 大于。
+//   - f: 一个函数，接受两个类型为 T 的值，返回一个int，表示比较大小 0 相等，-1 小于，1 大于。
 //   - ch1: 一个通道，用于接收数据。必须排序
 //   - ch2: 一个通道，用于接收数据。必须排序
 //
