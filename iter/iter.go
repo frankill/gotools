@@ -629,28 +629,23 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 		num := 0
 		file := []string{}
 
-		defer func() {
-			for _, v := range file {
-				os.Remove(v)
-			}
-		}()
-
 		tmp := make(chan T)
 		close(tmp)
+
+		p, err := os.MkdirTemp("", "t-*")
+		if err != nil {
+			log.Println(err)
+			return tmp
+		}
 
 		for v := range ch_ {
 
 			array.SortL(f, v)
 
-			p, err := os.MkdirTemp("", "t-*")
-			if err != nil {
-				log.Println(err)
-				return tmp
-			}
 			fn := filepath.Join(p, strconv.Itoa(num)+".gob")
 			file = append(file, fn)
 
-			err = ToGob[T](fn, true)(FromArray[T](v))
+			err = ToGob[T](fn, true)(FromArray(v))
 			if err != nil {
 				log.Println(err)
 				return tmp
