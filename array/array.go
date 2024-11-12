@@ -1829,27 +1829,6 @@ func Cartesian[S ~[]T, T any](arr ...S) [][]T {
 // 	return array.Zip(res...)
 // }
 
-// Flatten 从多维数组中拆分成单维数组
-// 参数:
-//   - arr: 一个多维数组，表示要拆分的多维数组。
-//
-// 返回:
-//   - []T: 一个单维数组，表示拆分后的单维数组。
-func Flatten[S ~[]T, T any](arr ...S) []T {
-
-	if len(arr) == 0 {
-		return []T{}
-	}
-
-	res := make([]T, 0, Len(arr))
-
-	for i := 0; i < len(arr); i++ {
-		res = append(res, arr[i]...)
-	}
-
-	return res
-}
-
 // InsertAt 在指定多个位置插入数据，当前位置的数据顺延到下一个位置
 // 参数:
 //   - data: 一个切片，表示要插入的数据
