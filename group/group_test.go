@@ -67,7 +67,7 @@ func TestGroupCount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call the function under test
-			result := group.Count2(tt.by, tt.data)
+			result := group.Count(tt.by)
 
 			// Check if the result matches the expected value
 			if len(result) != len(tt.expected) {

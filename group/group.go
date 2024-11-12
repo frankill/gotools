@@ -14,17 +14,17 @@ import (
 //
 // 返回值：map[U]int
 // 函数返回一个 map[U]int，其中键 U 是分组的依据值，值 int 表示该组在 data 中出现的次数。
-func Count2[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]int {
+// func Count2[B ~[]U, C ~[]S, U gotools.Comparable, S gotools.Ordered](by B, data C) map[U]int {
 
-	group := By(by, data)
+// 	group := By(by, data)
 
-	res := make(map[U]int, len(group))
-	for k, v := range group {
-		res[k] = len(v)
-	}
-	return res
+// 	res := make(map[U]int, len(group))
+// 	for k, v := range group {
+// 		res[k] = len(v)
+// 	}
+// 	return res
 
-}
+// }
 
 // Distinct 对数据进行分组并计算每个组的唯一元素数量。
 //
