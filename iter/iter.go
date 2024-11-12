@@ -424,7 +424,7 @@ func Cartesian[T, U any](ch1 chan T, ch2 chan U) chan pair.Pair[T, U] {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	for i := 0; i < 2; i++ {
+	for i := 0; i < parallerNum; i++ {
 		go func() {
 			defer wg.Done()
 			for v1 := range ch1 {
