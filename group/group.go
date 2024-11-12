@@ -216,7 +216,7 @@ func ByFn[B ~[]T, D ~[]U, T gotools.Comparable, R, U any](fn func([]U) R, by B, 
 
 }
 
-// ByFun2 根据给定的函数进行分组计算。
+// ByFn2 根据给定的函数进行分组计算。
 //
 // 参数:
 //   - fn : 用于计算分组数据的函数。
@@ -225,7 +225,7 @@ func ByFn[B ~[]T, D ~[]U, T gotools.Comparable, R, U any](fn func([]U) R, by B, 
 //
 // 返回值:
 //   - map[T]R: 一个映射，键为 T 类型的分组标识，值为对应分组内的 R 类型元素切片。
-func ByFun2[D ~[]S, T gotools.Comparable, S, R any](fn func(S) T, fn1 func([]S) R, data D) map[T]R {
+func ByFn2[D ~[]S, T gotools.Comparable, S, R any](fn func(S) T, fn1 func([]S) R, data D) map[T]R {
 
 	by := array.Map(fn, data)
 
