@@ -432,18 +432,9 @@ func Mean[S ~[]T, T gotools.Number](arr S) T {
 //
 // 返回值:
 //   - 切片中元素的总数。
-func Len[S ~[]T, T any](arr ...S) int {
+func Len[S ~[]T, T any](arr S) int {
 
-	if len(arr) == 0 {
-		return 0
-	}
-
-	var num int
-
-	for _, v := range arr {
-		num += len(v)
-	}
-	return num
+	return len(arr)
 
 }
 
@@ -455,12 +446,10 @@ func Len[S ~[]T, T any](arr ...S) int {
 // 返回值:
 //   - 切片中所有元素的和。
 //     如果切片为空，则返回 T 类型的零值（对于数值类型通常是 0）。
-func Sum[S ~[]T, T gotools.Number](arr ...S) T {
+func Sum[S ~[]T, T gotools.Number](arr S) T {
 	var result T
 	for _, v := range arr {
-		for _, vv := range v {
-			result += vv
-		}
+		result += v
 	}
 	return result
 }
@@ -473,20 +462,15 @@ func Sum[S ~[]T, T gotools.Number](arr ...S) T {
 // 返回值:
 //   - 切片中的最大元素。
 //     如果切片为空，则返回 T 类型的默认值（这可能是未定义的行为，具体取决于 T 的类型）。
-func Max[S ~[]T, T gotools.Ordered](arr ...S) T {
+func Max[S ~[]T, T gotools.Ordered](arr S) T {
 	var result T
 	if len(arr) == 0 {
 		return result
 	}
-	if len(arr[0]) == 0 {
-		return result
-	}
 
-	result = arr[0][0]
+	result = arr[0]
 	for _, v := range arr {
-		for _, vv := range v {
-			result = max(result, vv)
-		}
+		result = max(result, v)
 	}
 	return result
 }
@@ -499,20 +483,15 @@ func Max[S ~[]T, T gotools.Ordered](arr ...S) T {
 // 返回值:
 //   - 切片中的最小元素。
 //     如果切片为空，则返回 T 类型的默认值（这可能是未定义的行为，具体取决于 T 的类型）。
-func Min[S ~[]T, T gotools.Ordered](arr ...S) T {
+func Min[S ~[]T, T gotools.Ordered](arr S) T {
 	var result T
 	if len(arr) == 0 {
 		return result
 	}
-	if len(arr[0]) == 0 {
-		return result
-	}
 
-	result = arr[0][0]
+	result = arr[0]
 	for _, v := range arr {
-		for _, vv := range v {
-			result = min(result, vv)
-		}
+		result = min(result, v)
 	}
 	return result
 }
