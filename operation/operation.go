@@ -23,8 +23,8 @@ func ForEach[S ~[]T, T any](fun func(x ...T), arr ...S) {
 	la := array.Map(func(x S) int { return len(x) }, arr)
 	lm := array.Max(la)
 
+	parm := make([]T, len(arr))
 	for i := 0; i < lm; i++ {
-		parm := make([]T, len(arr))
 		for j := 0; j < len(arr); j++ {
 			parm[j] = arr[j][i%la[j]]
 		}
@@ -212,8 +212,8 @@ func Pmap[S ~[]T, T, U any](fun func(x ...T) U, arr ...S) []U {
 
 	res := make([]U, lm)
 
+	parm := make([]T, len(arr))
 	for i := 0; i < lm; i++ {
-		parm := make([]T, len(arr))
 		for j := 0; j < len(arr); j++ {
 			parm[j] = arr[j][i%la[j]]
 		}
@@ -244,8 +244,8 @@ func FindLast[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 	la := array.Map(func(x S) int { return len(x) }, arr)
 	lm := array.Max(la)
 
+	parm := make([]T, len(arr))
 	for i := 0; i < lm; i++ {
-		parm := make([]T, len(arr))
 		for j := 0; j < len(arr); j++ {
 			parm[j] = arr[j][i%la[j]]
 		}
@@ -279,8 +279,8 @@ func FindFirst[S ~[]T, T any](fun func(x ...T) bool, arr ...S) int {
 	la := array.Map(func(x S) int { return len(x) }, arr)
 	lm := array.Max(la)
 
+	parm := make([]T, len(arr))
 	for i := 0; i < lm; i++ {
-		parm := make([]T, len(arr))
 		for j := 0; j < len(arr); j++ {
 			parm[j] = arr[j][i%la[j]]
 		}
@@ -315,8 +315,8 @@ func Last[S ~[]T, T any](fun func(x ...T) bool, arr ...S) T {
 	la := array.Map(func(x S) int { return len(x) }, arr)
 	lm := array.Max(la)
 
+	parm := make([]T, len(arr))
 	for i := 0; i < lm; i++ {
-		parm := make([]T, len(arr))
 		for j := 0; j < len(arr); j++ {
 			parm[j] = arr[j][i%la[j]]
 		}
@@ -353,8 +353,8 @@ func First[S ~[]T, T any](fun func(x ...T) bool, arr ...S) T {
 	la := array.Map(func(x S) int { return len(x) }, arr)
 	lm := array.Max(la)
 
+	parm := make([]T, len(arr))
 	for i := 0; i < lm; i++ {
-		parm := make([]T, len(arr))
 		for j := 0; j < len(arr); j++ {
 			parm[j] = arr[j][i%la[j]]
 		}
@@ -386,8 +386,8 @@ func All[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
 	la := array.Map(func(x S) int { return len(x) }, arr)
 	lm := array.Max(la)
 
+	parm := make([]T, len(arr))
 	for i := 0; i < lm; i++ {
-		parm := make([]T, len(arr))
 		for j := 0; j < len(arr); j++ {
 			parm[j] = arr[j][i%la[j]]
 		}
@@ -419,8 +419,8 @@ func Any[S ~[]T, T any](fun func(x ...T) bool, arr ...S) bool {
 	la := array.Map(func(x S) int { return len(x) }, arr)
 	lm := array.Max(la)
 
+	parm := make([]T, len(arr))
 	for i := 0; i < lm; i++ {
-		parm := make([]T, len(arr))
 		for j := 0; j < len(arr); j++ {
 			parm[j] = arr[j][i%la[j]]
 		}
