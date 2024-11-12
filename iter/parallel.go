@@ -71,7 +71,7 @@ func (p *Pipeline[T]) Run() {
 }
 
 var (
-	parallerNum = 2
+	parallerNum = 1
 )
 
 func SetParallel(parallel int) {
