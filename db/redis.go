@@ -12,6 +12,7 @@ type Redis[T any] struct {
 	client *redis.Client
 	clear  bool
 	ctx    context.Context
+	stop   chan error
 }
 
 func NewRedisClient[T any](host, pwd string, db int) *Redis[T] {
@@ -20,10 +21,28 @@ func NewRedisClient[T any](host, pwd string, db int) *Redis[T] {
 		Password: pwd,
 		DB:       db, // 默认数据库
 	})
-
-	return &Redis[T]{
+	con := &Redis[T]{
 		client: rdb,
+		stop:   make(chan error, 1),
 	}
+
+	go func() {
+		defer func() {
+			close(con.stop)
+		}()
+		for {
+			s := con.client.Ping()
+
+			if s.Err() != nil {
+				con.stop <- s.Err()
+				return
+			}
+
+			time.Sleep(time.Second * 10)
+		}
+	}()
+
+	return con
 }
 
 func (r *Redis[T]) Context(ctx context.Context) *Redis[T] {
@@ -62,6 +81,9 @@ func (r *Redis[T]) PushList(key string, data chan T) error {
 		case <-r.ctx.Done():
 			return nil
 
+		case err := <-r.stop:
+			return err
+
 		case item, ok := <-data:
 
 			if !ok {
@@ -99,6 +121,9 @@ func (r *Redis[T]) PushListStr(key string, data chan string) error {
 
 		case <-r.ctx.Done():
 			return nil
+
+		case err := <-r.stop:
+			return err
 
 		case item, ok := <-data:
 
@@ -150,6 +175,10 @@ func (r *Redis[T]) PopList(key string, num int) (chan T, chan error) {
 			}
 
 			select {
+
+			case err := <-r.stop:
+				errs <- err
+				return
 
 			case <-r.ctx.Done():
 				return
@@ -219,6 +248,10 @@ func (r *Redis[T]) PopListStr(key string, num int) (chan string, chan error) {
 			select {
 
 			case <-r.ctx.Done():
+				return
+
+			case err := <-r.stop:
+				errs <- err
 				return
 
 			default:

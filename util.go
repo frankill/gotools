@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 type Number interface {
@@ -71,4 +72,8 @@ func SysStop() context.Context {
 	}()
 
 	return ctx
+}
+
+func Clear(i int) {
+	time.Sleep(time.Second * time.Duration(i))
 }
