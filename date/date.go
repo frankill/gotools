@@ -8,6 +8,9 @@ import (
 	"github.com/frankill/gotools/array"
 )
 
+// time 中需要注意的就是解析，字符串解析时会把字符串当作utc时间解析，需要注意时区转换
+// 时间戳转日期 会将时间戳转换为本地时区
+
 // FloorMonth 将日期向下取整到月份
 //
 // 参数:
@@ -28,6 +31,17 @@ func FloorMonth(t time.Time) time.Time {
 //   - 一个 time.Time 对象，表示向下取整后的日期。
 func FloorYear(t time.Time) time.Time {
 	return floor(t, "year", 0)
+}
+
+// FloorDay 将日期向下取整到天
+//
+// 参数:
+//   - t: 要向下取整的日期对象。
+//
+// 返回:
+//   - 一个 time.Time 对象，表示向下取整后的日期。
+func FloorDay(t time.Time) time.Time {
+	return floor(t, "day", 0)
 }
 
 // Floor 将时间向下取整到指定的时间单位
@@ -103,6 +117,17 @@ func CeilingYear(t time.Time) time.Time {
 	return ceiling(t, "year", 0)
 }
 
+// CeilingDay 将日期向上取整到天
+//
+// 参数:
+//   - t: 要向上取整的日期对象。
+//
+// 返回:
+//   - 一个 time.Time 对象，表示向上取整后的日期。
+func CeilingDay(t time.Time) time.Time {
+	return ceiling(t, "day", 0)
+}
+
 // Floor 将时间向上取整到指定的时间单位
 //
 // 参数:
@@ -143,7 +168,7 @@ func ceiling(t time.Time, unit string, weekStart int) time.Time {
 		return time.Date(year, month, lastDayOfMonth, 23, 59, 59, 0, t.Location())
 	case "days", "day":
 		// Days are handled at the current day, so we do nothing.
-		return t
+		return time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 0, t.Location())
 	case "hours", "hour", "h":
 		if t.Minute() == 0 && t.Second() == 0 && t.Nanosecond() == 0 {
 			return t
@@ -204,6 +229,9 @@ func Zone(zone string) func(d ...time.Time) []time.Time {
 //
 // 返回:
 //   - 一个 []int64，表示转换后的 Unix 时间戳。
+//
+// 说明 :
+//   - 日期字符串应为 "2006-01-02 15:04:05" 格式。 字符串日期按utc时间解析
 func ToUnix(d ...string) []int64 {
 
 	return array.Map(func(x string) int64 {
@@ -247,6 +275,9 @@ func ToUnixMilli(d ...string) []int64 {
 //
 // 返回:
 //   - 一个 []int64，表示转换后的 Unix 时间戳。
+//
+// 说明 :
+//   - 日期字符串应为 "2006-01-02 15:04:05" 格式。 字符串日期按utc时间解析
 func ToUnixNano(d ...string) []int64 {
 
 	return array.Map(func(x string) int64 {
@@ -262,6 +293,9 @@ func ToUnixNano(d ...string) []int64 {
 //
 // 返回:
 //   - 一个 []time.Time 对象，表示转换后的时间。
+//
+// 说明 :
+//   - 日期字符串应为 "2006-01-02 15:04:05" 格式。 字符串日期按utc时间解析
 func ToTime(d ...string) []time.Time {
 
 	return array.Map(func(x string) time.Time {
@@ -305,6 +339,9 @@ func ToYMD(d ...time.Time) []string {
 //
 // 返回:
 //   - 一个 []string，表示转换后的日期字符串。
+//
+// 说明:
+//   - Unix 时间戳转换为 "2006-01-02 15:04:05" 格式的本地时间字符串
 func UnixToStr(unix ...int64) []string {
 
 	return array.Map(func(x int64) string {
@@ -319,6 +356,9 @@ func UnixToStr(unix ...int64) []string {
 //
 // 返回:
 //   - 一个 []time.Time 对象，表示转换后的时间。
+//
+// 说明:
+//   - Unix 时间戳转换为 "2006-01-02 15:04:05" 格式的本地时间
 func UnixToTime(unix ...int64) []time.Time {
 
 	return array.Map(func(x int64) time.Time {
@@ -376,6 +416,9 @@ func Years(t time.Time, d ...int) []time.Time {
 //
 // 返回:
 //   - 一个 []time.Time 对象，表示转换后的时间。
+//
+// 说明 :
+//   - 日期字符串按utc时间解析
 func YMD(d ...string) []time.Time {
 
 	return array.Map(func(x string) time.Time {
@@ -391,6 +434,9 @@ func YMD(d ...string) []time.Time {
 //
 // 返回:
 //   - 一个 []time.Time 对象，表示转换后的时间。
+//
+// 说明 :
+//   - 日期字符串按utc时间解析
 func YMDHMS(d ...string) []time.Time {
 
 	return array.Map(func(x string) time.Time {
