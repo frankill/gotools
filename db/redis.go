@@ -82,6 +82,41 @@ func (r *Redis[T]) PushList(key string, data chan T) error {
 
 }
 
+func (r *Redis[T]) PushListStr(key string, data chan string) error {
+
+	if r.ctx == nil {
+		r.ctx = context.Background()
+	}
+	defer func() {
+		if r.clear {
+			r.Close()
+		}
+
+	}()
+
+	for {
+		select {
+
+		case <-r.ctx.Done():
+			return nil
+
+		case item, ok := <-data:
+
+			if !ok {
+				return nil
+			}
+
+			itemBytes := []byte(item)
+
+			_, err := r.client.RPush(key, itemBytes).Result()
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+}
+
 func (r *Redis[T]) PopList(key string, num int) (chan T, chan error) {
 
 	if r.ctx == nil {
@@ -139,6 +174,68 @@ func (r *Redis[T]) PopList(key string, num int) (chan T, chan error) {
 				}
 
 				ch <- item
+
+				n++
+			}
+		}
+
+	}()
+
+	return ch, errs
+}
+
+func (r *Redis[T]) PopListStr(key string, num int) (chan string, chan error) {
+
+	if r.ctx == nil {
+		r.ctx = context.Background()
+	}
+
+	ch := make(chan string, 100)
+	errs := make(chan error, 3)
+
+	go func() {
+
+		defer close(ch)
+		defer close(errs)
+
+		defer func() {
+			if r.clear {
+				r.Close()
+			}
+		}()
+
+		if num == 0 {
+			return
+		}
+
+		n := 0
+
+		for {
+
+			if num > 0 && n >= num {
+				return
+			}
+
+			select {
+
+			case <-r.ctx.Done():
+				return
+
+			default:
+
+				value, err := r.client.LPop(key).Result()
+
+				if err == redis.Nil {
+					time.Sleep(time.Second * 10)
+					continue
+				}
+
+				if err != nil {
+					errs <- err
+					return
+				}
+
+				ch <- value
 
 				n++
 			}
