@@ -19,83 +19,41 @@ go get github.com/frankill/gotools
 
 ```go
 
- package main
+package main
 
 import (
 	"fmt"
-	"strconv"
 
+	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/iter"
+	"github.com/frankill/gotools/operation"
+	"github.com/frankill/gotools/query"
 )
-
-func compare(x, y []string) bool {
-	xn, _ := strconv.Atoi(x[0])
-	yn, _ := strconv.Atoi(y[0])
-	return xn < yn
-}
 
 func main() {
 
-	data := []struct {
-		Number int
-		Label  string
-	}{
-		{2, "test"},
-		{4, "test"},
-		{6, "test"},
-		{6, "test1"},
-		{10, "test"},
-		{12, "test"},
-		{13, "test"},
-	}
+	defer gotools.Clear(1)
 
-	iter.ToCsv("pipe.csv", false)(
-		iter.FromArray2(func(x struct {
-			Number int
-			Label  string
-		}) []string {
-			return []string{strconv.Itoa(x.Number), x.Label}
-		})(data),
-	)
+	MysqlTest := ""
 
-	data = []struct {
-		Number int
-		Label  string
-	}{
-		{1, "test"},
-		{6, "test"},
-		{10, "test1"},
-		{14, "test13"},
-		{15, "test1"},
-		{17, "1"},
-	}
+	q1 := query.NewSQLBuilder().From("test")
 
-	iter.ToCsv("pipe_1.csv", false)(
-		iter.FromArray2(func(x struct {
-			Number int
-			Label  string
-		}) []string {
-			return []string{strconv.Itoa(x.Number), x.Label}
-		})(data),
-	)
+	q2 := query.NewSQLBuilder().SQL("select * from test ")
 
-	ch1, _ := iter.FromCsv("pipe.csv")(false)
-	ch2, _ := iter.FromCsv("pipe_1.csv")(false)
+	d1, _ := iter.FromMysql[user](MysqlTest)(q1)
 
-	iter.Walk(func(x []string) { fmt.Println(x) })(
-		iter.Unique(func(x, y []string) bool {
-			return x[0] == y[0]
-		})(
-			iter.Merge(compare)(
-				iter.SortS(compare)(ch2),
-				iter.SortS(compare)(ch1),
-			),
-		),
-	)
+	d2, _ := iter.FromMysql[user](MysqlTest)(q2)
+
+	res := operation.Eq(iter.Collect(d1), iter.Collect(d2))
+
+	fmt.Println(res)
 }
 
-
-
+type user struct {
+	ID    string `mysql:"id"`
+	Phone string `mysql:"phone"`
+	Name  string `mysql:"name"`
+}
 
 
 ```
