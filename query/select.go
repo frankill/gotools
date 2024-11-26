@@ -274,6 +274,11 @@ func (sb *SQLBuilder) Offset(offset int) *SQLBuilder {
 
 // Build 方法用于构建最终的 SQL 查询语句
 func (sb *SQLBuilder) Build() string {
+
+	if sb.sql != "" {
+		return sb.sql
+	}
+
 	var sql strings.Builder
 
 	// 构建 SELECT 子句
