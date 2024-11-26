@@ -185,7 +185,7 @@ func Transform[S ~[]F, D ~[]T, F gotools.Comparable, T any](x S, array_from S, a
 
 	res := make([]T, la)
 
-	dict := ToMas(array_from, array_to)
+	dict := ToMap2(array_from, array_to)
 
 	for i := 0; i < la; i++ {
 		res[i] = default_value
@@ -197,7 +197,7 @@ func Transform[S ~[]F, D ~[]T, F gotools.Comparable, T any](x S, array_from S, a
 
 }
 
-// ToMas 根据两个数组创建一个映射。
+// ToMap2 根据两个数组创建一个映射。
 // 它接受两个参数：key和value，它们分别是K和V类型的数组。
 // 函数返回一个map[T]S类型的映射，其中T和S是K和V数组元素的类型。
 // 该函数的目的是通过索引匹配将key数组的元素作为映射的键，value数组的元素作为对应的值。
@@ -214,7 +214,7 @@ func Transform[S ~[]F, D ~[]T, F gotools.Comparable, T any](x S, array_from S, a
 //
 //   - K和V的类型参数必须是数组类型，且K的元素类型必须是可比较的。
 //   - 这个函数假设key和value数组的长度是相同的，以便进行索引匹配。
-func ToMas[K ~[]T, V ~[]S, T gotools.Comparable, S any](key K, value V) map[T]S {
+func ToMap2[K ~[]T, V ~[]S, T gotools.Comparable, S any](key K, value V) map[T]S {
 
 	dict := make(map[T]S, len(key))
 
