@@ -16,7 +16,7 @@ import (
 //   - 一个整数切片，表示在 'lookup_array' 中找到的每个 'lookup_value' 元素的第一个匹配项的索引，如果没有找到匹配项则返回 -1。
 func MatchZero[A ~[]T, T gotools.Comparable](lookup_value A, lookup_array A) []int {
 
-	return Pmap(func(x ...T) int {
+	return Map(func(x ...T) int {
 		return FindFirst(func(y ...T) bool {
 			return y[0] == x[0]
 		}, lookup_array)

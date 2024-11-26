@@ -188,7 +188,7 @@ func Not(a []bool) []bool {
 	return array.Map(func(x bool) bool { return !x }, a)
 }
 
-// Pmap 对一组切片应用指定的函数，每个切片元素按位置组合后作为函数的参数。
+// Map 对一组切片应用指定的函数，每个切片元素按位置组合后作为函数的参数。
 // 此泛型函数接受一个变长参数列表 `arr`，其中每个参数都是类型 S 的切片（S 必须是切片类型），
 // 和一个函数 `fun`，该函数接受变长参数列表 x...T 并返回类型 U 的结果。
 // 函数返回一个类型为 []U 的切片，其中包含应用给定函数 `fun` 到所有切片元素组合上的结果。
@@ -201,7 +201,7 @@ func Not(a []bool) []bool {
 // 返回:
 //
 //   - 类型为 []U 的切片，包含应用给定函数 `fun` 到所有切片元素组合上的结果。
-func Pmap[S ~[]T, T, U any](fun func(x ...T) U, arr ...S) []U {
+func Map[S ~[]T, T, U any](fun func(x ...T) U, arr ...S) []U {
 
 	if len(arr) == 0 {
 		return make([]U, 0)
@@ -218,44 +218,6 @@ func Pmap[S ~[]T, T, U any](fun func(x ...T) U, arr ...S) []U {
 			parm[j] = arr[j][i%la[j]]
 		}
 		res[i] = fun(parm...)
-	}
-
-	return res
-}
-
-// Pfilter 对一组切片应用指定的函数，每个切片元素按位置组合后作为函数的参数。
-// 此泛型函数接受一个变长参数列表 `arr`，其中每个参数都是类型 S 的切片（S 必须是切片类型）,
-// 和一个函数 `fun`，该函数接受变长参数列表 x...T 并返回布尔值，用于测试一组元素是否满足条件。
-// 函数返回一个类型为 []T 的切片，包含所有满足给定函数 `fun` 的切片元素组合。
-//
-// 参数:
-//
-//   - fun: 一个函数，接受变长参数列表 x...T 并返回布尔值，用于测试一组元素是否满足条件。
-//   - arr: 变长参数列表，每个参数都是类型 S 的切片，S 必须是切片类型。
-//
-// 返回:
-//
-//   - 类型为 []T 的切片，包含所有满足给定函数 `fun` 的切片元素组合。
-func Pfilter[S ~[]T, T, U any](fun func(x ...T) bool, arr ...S) []T {
-
-	if len(arr) == 0 {
-		return make([]T, 0)
-	}
-
-	la := array.Map(func(x S) int { return len(x) }, arr)
-	lm := array.Max(la)
-
-	res := make([]T, lm)
-
-	parm := make([]T, len(arr))
-	for i := 0; i < lm; i++ {
-		for j := 0; j < len(arr); j++ {
-			parm[j] = arr[j][i%la[j]]
-		}
-		if fun(parm...) {
-			res[i] = arr[0][i]
-		}
-
 	}
 
 	return res
@@ -658,7 +620,7 @@ func Fill[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []T {
 // 。
 func Filter[S ~[]T, T any](fun func(x ...T) bool, arr ...S) []T {
 	if len(arr) == 0 || len(arr[0]) == 0 {
-		return S{}
+		return []T{}
 	}
 	l := len(arr[0])
 	f := len(arr)
