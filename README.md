@@ -2,17 +2,18 @@
 
 ## 简介
 
-`gotools` 提供数据的流处理iter, array的隐式循环操作，etl的读取  
+`gotools` 提供数据的流处理iter, array,map的隐式循环操作   
 
 ## 特性
 
-- **泛型支持**：利用 Go 1.18+ 泛型，确保函数在多种数据类型间通用。
-- **效率** ： 凑合用吧，操作简化就行
-- **数据源** ： txt,csv,table,json, msyql , elasticsearch,clickhouse,gob,gzip
+- **泛型支持**：利用 Go 1.18+ 泛型，确保函数在多种数据类型间通用
+- **数据源** ： txt,csv,table,json,msyql,elasticsearch,clickhouse,gob,gzip
 
 ## 安装
 ```bash
-go get github.com/frankill/gotools
+
+	go get github.com/frankill/gotools
+
 ```
 
 ## 快速示例
