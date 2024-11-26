@@ -27,6 +27,13 @@ type SQLBuilder struct {
 	orderBy      []string
 	limit        int
 	offset       int
+	sql          string
+}
+
+func (sb *SQLBuilder) SQL(sql string) *SQLBuilder {
+	sb.sql = sql
+	return sb
+
 }
 
 func (sb *SQLBuilder) TableName() string {
@@ -35,6 +42,7 @@ func (sb *SQLBuilder) TableName() string {
 
 func (sb *SQLBuilder) Clear() {
 
+	sb.sql = ""
 	sb.selectFields = nil
 	sb.tableName = ""
 	sb.whereClauses = nil
@@ -60,6 +68,7 @@ func (sb *SQLBuilder) Copy() *SQLBuilder {
 	copy(newSb.orderBy, sb.orderBy)
 	newSb.limit = sb.limit
 	newSb.offset = sb.offset
+	newSb.sql = sb.sql
 	return newSb
 }
 
