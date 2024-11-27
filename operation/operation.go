@@ -223,6 +223,51 @@ func Map[S ~[]T, T, U any](fun func(x ...T) U, arr ...S) []U {
 	return res
 }
 
+func Reduce[S ~[]T, T, U any](fun func(x U, y ...T) U, init U, arr ...S) U {
+
+	result := init
+
+	if len(arr) == 0 {
+		return result
+	}
+
+	la := array.Map(func(x S) int { return len(x) }, arr)
+	lm := array.Max(la)
+
+	parm := make([]T, len(arr))
+
+	for i := 0; i < lm; i++ {
+		for j := 0; j < len(arr); j++ {
+			parm[j] = arr[j][i%la[j]]
+		}
+		result = fun(result, parm...)
+	}
+	return result
+}
+
+func ReduceR[S ~[]T, T, U any](fun func(x U, y ...T) U, init U, arr ...S) U {
+
+	result := init
+
+	if len(arr) == 0 {
+		return result
+	}
+
+	la := array.Map(func(x S) int { return len(x) }, arr)
+	lm := array.Max(la)
+
+	parm := make([]T, len(arr))
+
+	for i := lm - 1; i >= 0; i-- {
+		for j := 0; j < len(arr); j++ {
+			parm[j] = arr[j][i%la[j]]
+		}
+		result = fun(result, parm...)
+	}
+
+	return result
+}
+
 // FindLast 查找类型为 S（元素类型为 T）的切片数组中最后一个使条件函数 `fun` 返回 true 的元素组合所在的索引位置。
 //
 // 参数:
