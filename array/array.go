@@ -426,18 +426,6 @@ func Mean[S ~[]T, T gotools.Number](arr S) T {
 	return Sum(arr) / T(la)
 }
 
-// Len 计算类型为 S（元素类型为 T）的多个切片中元素的总数。
-// 参数:
-//   - arr: 类型为 S 的切片
-//
-// 返回值:
-//   - 切片中元素的总数。
-func Len[S ~[]T, T any](arr S) int {
-
-	return len(arr)
-
-}
-
 // Sum 计算类型为 S（元素类型为 T）的切片中所有元素的总和。
 //
 // 参数:
@@ -1009,37 +997,6 @@ func FlatMap[S ~[]T, T any, U any](fun func(x T) []U, arr S) []U {
 	return result
 }
 
-// Zip 将多个同长度的切片 S（类型为 T 的切片）按索引位置组合成新的切片 S 序列。
-// 每个新切片包含的是原始切片在该索引位置上的元素。
-//
-// 参数:
-//   - arr: 变长参数，每个元素都是类型为 S 的切片，所有输入切片的长度必须相等。
-//
-// 返回值:
-//   - 一个新切片，其中每个元素是由原始切片在相同索引处的元素组成的 S 类型切片。
-//     如果输入为空或首个切片为空，则返回空切片。
-//
-// 注意:
-//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
-func Zip[S ~[]T, T any](arr ...S) [][]T {
-	if len(arr) == 0 || len(arr[0]) == 0 {
-		return [][]T{}
-	}
-	l := len(arr[0])
-	f := len(arr)
-	param := make([]T, f)
-	result := make([][]T, l)
-
-	for i := 0; i < l; i++ {
-		for j := 0; j < f; j++ {
-			param[j] = arr[j][i]
-		}
-		result[i] = param
-		param = make([]T, f)
-	}
-	return result
-}
-
 // Compact 移除给定切片 S 中连续重复的元素，其中 S 是泛型类型 T 的切片，且 T 必须实现了 gotools.Ordered 接口。
 //
 // 参数:
@@ -1583,29 +1540,6 @@ func HasAll[S ~[]T, T gotools.Comparable](arr S, elems ...T) bool {
 	res := InterS(arr, elems)
 
 	return len(res) == len(ToMap(elems))
-}
-
-// Concat 合并任意数量的同类型切片为一个新的切片。
-//
-// 参数:
-//   - arr: 可变数量的参数，每个参数为一个类型为 T 的切片，所有切片将被连接。
-//
-// 返回值:
-//   - 返回一个新的 []T 类型切片，包含输入的所有切片中的元素，保持原有的顺序。
-func Union[S ~[]T, T any](arr ...S) []T {
-
-	if len(arr) == 0 {
-		return []T{}
-	}
-
-	num := Map(func(x S) int { return len(x) }, arr)
-
-	res := make([]T, 0, Sum(num))
-
-	for i := 0; i < len(num); i++ {
-		res = append(res, arr[i]...)
-	}
-	return res
 }
 
 /*

@@ -6,6 +6,7 @@ import (
 
 	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/array"
+	"github.com/frankill/gotools/op"
 )
 
 // Sum 对数据进行滑动窗口求和。
@@ -205,7 +206,7 @@ func Pslide[S ~[]T, U, T any](f func(x ...T) U, before int, after int, defaultVa
 		res[i] = <-ch_[i]
 	}
 
-	return array.Zip(res...)
+	return op.Zip(res...)
 
 }
 
@@ -289,6 +290,6 @@ func PslideIndex[S ~[]T, U, T any](f func(x []T) U, before int, after int, index
 		res[i] = <-ch_[i]
 	}
 
-	return array.Zip(res...)
+	return op.Zip(res...)
 
 }

@@ -8,7 +8,36 @@ import (
 	"github.com/frankill/gotools/op"
 )
 
-func TestOperatorMap(t *testing.T) {
+func TestOpZip(t *testing.T) {
+	// 测试用例：常规zip操作
+	regularInput := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
+	expectedRegularResult := [][]int{{1, 4, 7}, {2, 5, 8}, {3, 6, 9}}
+	if result := op.Zip(regularInput...); !reflect.DeepEqual(result, expectedRegularResult) {
+		t.Errorf("ArrayZip failed for regular input: expected %v, got %v", expectedRegularResult, result)
+	}
+
+	// 边界条件测试用例：空数组
+	emptyInput := [][]int{}
+	expectedEmptyResult := [][]int{}
+	if result := op.Zip(emptyInput...); !reflect.DeepEqual(result, expectedEmptyResult) {
+		t.Errorf("ArrayZip did not handle empty input correctly, expected %v, got %v", expectedEmptyResult, result)
+	}
+
+	// 边界条件测试用例：数组中只有一个元素
+	singleElementInput := [][]int{{42}}
+	expectedSingleElementResult := [][]int{{42}}
+	if result := op.Zip(singleElementInput...); !reflect.DeepEqual(result, expectedSingleElementResult) {
+		t.Errorf("ArrayZip did not handle single element input correctly, expected %v, got %v", expectedSingleElementResult, result)
+	}
+
+	// 边界条件测试用例：数组中元素数量不一致
+	unevenLengthsInput := [][]int{{1, 2}, {3, 4}, {5, 6}}
+	if result := op.Zip(op.Zip(unevenLengthsInput...)...); !reflect.DeepEqual(result, unevenLengthsInput) {
+		t.Errorf("ArrayZip did not handle uneven lengths correctly, expected %v, got %v", unevenLengthsInput, result)
+	}
+}
+
+func TestOpMap(t *testing.T) {
 	// 定义测试用例
 	testCases := []struct {
 		name     string

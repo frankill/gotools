@@ -680,35 +680,6 @@ func TestArrayMap(t *testing.T) {
 	}
 }
 
-func TestArrayZip(t *testing.T) {
-	// 测试用例：常规zip操作
-	regularInput := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
-	expectedRegularResult := [][]int{{1, 4, 7}, {2, 5, 8}, {3, 6, 9}}
-	if result := array.Zip(regularInput...); !reflect.DeepEqual(result, expectedRegularResult) {
-		t.Errorf("ArrayZip failed for regular input: expected %v, got %v", expectedRegularResult, result)
-	}
-
-	// 边界条件测试用例：空数组
-	emptyInput := [][]int{}
-	expectedEmptyResult := [][]int{}
-	if result := array.Zip(emptyInput...); !reflect.DeepEqual(result, expectedEmptyResult) {
-		t.Errorf("ArrayZip did not handle empty input correctly, expected %v, got %v", expectedEmptyResult, result)
-	}
-
-	// 边界条件测试用例：数组中只有一个元素
-	singleElementInput := [][]int{{42}}
-	expectedSingleElementResult := [][]int{{42}}
-	if result := array.Zip(singleElementInput...); !reflect.DeepEqual(result, expectedSingleElementResult) {
-		t.Errorf("ArrayZip did not handle single element input correctly, expected %v, got %v", expectedSingleElementResult, result)
-	}
-
-	// 边界条件测试用例：数组中元素数量不一致
-	unevenLengthsInput := [][]int{{1, 2}, {3, 4}, {5, 6}}
-	if result := array.Zip(array.Zip(unevenLengthsInput...)...); !reflect.DeepEqual(result, unevenLengthsInput) {
-		t.Errorf("ArrayZip did not handle uneven lengths correctly, expected %v, got %v", unevenLengthsInput, result)
-	}
-}
-
 func TestArrayCompact(t *testing.T) {
 	// 测试用例：常规去重
 	regularInput := []int{1, 2, 2, 3, 3, 3, 4}
@@ -959,39 +930,6 @@ func TestArrayHasAny(t *testing.T) {
 				t.Errorf("ArrayHasAny() = %v, want %v", result, tt.expected)
 			}
 		})
-	}
-}
-
-func TestArrayConcat(t *testing.T) {
-	// 测试空切片输入
-	emptyResult := array.Union[[]int, int]()
-	if len(emptyResult) != 0 {
-		t.Errorf("Expected empty slice for empty input, got %v", emptyResult)
-	}
-
-	// 测试单个切片
-	singleSlice := []int{1, 2, 3}
-	singleResult := array.Union(singleSlice)
-	expectedSingle := []int{1, 2, 3}
-	if !equalSlices(singleResult, expectedSingle) {
-		t.Errorf("Expected %v for single slice input, got %v", expectedSingle, singleResult)
-	}
-
-	// 测试多个切片
-	multipleSlices := [][]int{{1, 2}, {3, 4}, {5}}
-	multipleResult := array.Union(multipleSlices...)
-	expectedMultiple := []int{1, 2, 3, 4, 5}
-	if !equalSlices(multipleResult, expectedMultiple) {
-		t.Errorf("Expected %v for multiple slices input, got %v", expectedMultiple, multipleResult)
-	}
-
-	// 测试不同类型元素的切片（这里仅演示概念，Go泛型要求所有元素类型一致）
-	// 请注意，在实际应用中，T 的类型在调用时就必须确定，因此以下代码仅作为示意
-	stringSlices := [][]string{{"a", "b"}, {"c"}}
-	stringResult := array.Union(stringSlices...)
-	expectedStrings := []string{"a", "b", "c"}
-	if !equalSlices(stringResult, expectedStrings) {
-		t.Errorf("Expected %v for string slices input, got %v", expectedStrings, stringResult)
 	}
 }
 

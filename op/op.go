@@ -246,13 +246,13 @@ func Scan[S ~[]T, T, U any](fun func(x U, y ...T) U, init U, arr ...S) []U {
 	res := make([]U, lm)
 	parm := make([]T, len(arr))
 
-	tmp := init
+	total := init
 	for i := 0; i < lm; i++ {
 		for j := 0; j < len(arr); j++ {
 			parm[j] = arr[j][i%la[j]]
 		}
-		tmp = fun(tmp, parm...)
-		res[i] = tmp
+		total = fun(total, parm...)
+		res[i] = total
 	}
 
 	return res
@@ -271,13 +271,13 @@ func ScanR[S ~[]T, T, U any](fun func(x U, y ...T) U, init U, arr ...S) []U {
 	res := make([]U, lm)
 	parm := make([]T, len(arr))
 
-	tmp := init
+	total := init
 	for i, m := lm-1, 0; i >= 0; i-- {
 		for j := 0; j < len(arr); j++ {
 			parm[j] = arr[j][i%la[j]]
 		}
-		tmp = fun(tmp, parm...)
-		res[m] = tmp
+		total = fun(total, parm...)
+		res[m] = total
 		m++
 	}
 
@@ -856,6 +856,37 @@ func Fold[S ~[]T, T, U any](fun func(x ...T) U, acc func(x, y U) U, arr ...S) []
 	return result
 }
 
+// Zip 将多个同长度的切片 S（类型为 T 的切片）按索引位置组合成新的切片 S 序列。
+// 每个新切片包含的是原始切片在该索引位置上的元素。
+//
+// 参数:
+//   - arr: 变长参数，每个元素都是类型为 S 的切片，所有输入切片的长度必须相等。
+//
+// 返回值:
+//   - 一个新切片，其中每个元素是由原始切片在相同索引处的元素组成的 S 类型切片。
+//     如果输入为空或首个切片为空，则返回空切片。
+//
+// 注意:
+//   - 所有输入切片的长度必须相等，否则函数的行为未定义。
+func Zip[S ~[]T, T any](arr ...S) [][]T {
+	if len(arr) == 0 || len(arr[0]) == 0 {
+		return [][]T{}
+	}
+	l := len(arr[0])
+	f := len(arr)
+	param := make([]T, f)
+	result := make([][]T, l)
+
+	for i := 0; i < l; i++ {
+		for j := 0; j < f; j++ {
+			param[j] = arr[j][i]
+		}
+		result[i] = param
+		param = make([]T, f)
+	}
+	return result
+}
+
 // Intersect 计算多个切片（类型为 []T，元素类型 T 可比较）的交集。
 // 参数:
 //   - fun: 一个函数，接受 T 类型的变长参数并返回 U 类型的结果，用于比较元素。
@@ -876,31 +907,26 @@ func Intersect[S ~[]T, T any, U gotools.Comparable](f func(x T) U, arr ...S) []T
 	}
 
 	// 使用第一个切片作为基数来收集交集元素
-	intersectionMap := make(map[U]*counts, len(arr[0]))
-	for index, item := range arr[0] {
-
+	intersectionMap := make(map[U]count, len(arr[0]))
+	for k, item := range arr[0] {
 		t := f(item)
-
-		if v, ok := intersectionMap[t]; !ok {
-			intersectionMap[t] = &counts{
-				Key:   1,
-				Count: 1,
-				index: index,
+		if _, ok := intersectionMap[t]; !ok {
+			intersectionMap[t] = count{
+				count: 1,
+				index: k,
 			}
-		} else {
-			v.Count++
-			v.Key++
-
 		}
 	}
 
 	for k := range arr[1:] {
 
 		for _, item := range arr[1:][k] {
-
 			t := f(item)
-			if v, ok := intersectionMap[t]; ok {
-				v.Count++
+			if v, ok := intersectionMap[t]; ok && v.count <= k+1 {
+				intersectionMap[t] = count{
+					count: v.count + 1,
+					index: v.index,
+				}
 			}
 		}
 
@@ -910,14 +936,17 @@ func Intersect[S ~[]T, T any, U gotools.Comparable](f func(x T) U, arr ...S) []T
 
 	for _, v := range intersectionMap {
 
-		if v.Count > v.Key {
-			for i := 0; i < v.Key; i++ {
-				res = append(res, arr[0][v.index])
-			}
+		if v.count == len(arr) {
+			res = append(res, arr[0][v.index])
 		}
 	}
 
 	return res
+}
+
+type count struct {
+	count int
+	index int
 }
 
 // Subtract 计算多个切片（类型为 []T，元素类型 T 可比较）的差集。
@@ -939,21 +968,14 @@ func Subtract[S ~[]T, T any, U gotools.Comparable](f func(x T) U, arr ...S) []T 
 	}
 
 	// 使用第一个切片作为基数来收集交集元素
-	intersectionMap := make(map[U]*counts, len(arr[0]))
-	for index, item := range arr[0] {
-
+	intersectionMap := make(map[U]count, len(arr[0]))
+	for k, item := range arr[0] {
 		t := f(item)
-
-		if v, ok := intersectionMap[t]; !ok {
-			intersectionMap[t] = &counts{
-				Key:   1,
-				Count: 1,
-				index: index,
+		if _, ok := intersectionMap[t]; !ok {
+			intersectionMap[t] = count{
+				count: 1,
+				index: k,
 			}
-		} else {
-			v.Count++
-			v.Key++
-
 		}
 	}
 
@@ -962,8 +984,11 @@ func Subtract[S ~[]T, T any, U gotools.Comparable](f func(x T) U, arr ...S) []T 
 		for _, item := range arr[1:][k] {
 
 			t := f(item)
-			if v, ok := intersectionMap[t]; ok {
-				v.Count++
+			if v, ok := intersectionMap[t]; ok && v.count <= k+1 {
+				intersectionMap[t] = count{
+					count: v.count + 1,
+					index: v.index,
+				}
 			}
 		}
 
@@ -973,14 +998,13 @@ func Subtract[S ~[]T, T any, U gotools.Comparable](f func(x T) U, arr ...S) []T 
 
 	for _, v := range intersectionMap {
 
-		if v.Count == v.Key {
-			for i := 0; i < v.Key; i++ {
-				res = append(res, arr[0][v.index])
-			}
+		if v.count == 1 {
+			res = append(res, arr[0][v.index])
 		}
 	}
 
 	return res
+
 }
 
 // InterS 计算多个切片（类型为 []T，元素类型 T 可比较）的交集。
@@ -1005,25 +1029,18 @@ func InterS[S ~[]T, T gotools.Comparable](arr ...S) []T {
 	}
 
 	// 使用第一个切片作为基数来收集交集元素
-	intersectionMap := make(map[T]*count, len(arr[0]))
+	intersectionMap := make(map[T]int, len(arr[0]))
 	for _, item := range arr[0] {
-		if v, ok := intersectionMap[item]; !ok {
-			intersectionMap[item] = &count{
-				Key:   1,
-				Count: 1,
-			}
-		} else {
-			v.Count++
-			v.Key++
-
+		if _, ok := intersectionMap[item]; !ok {
+			intersectionMap[item] = 1
 		}
 	}
 
 	for k := range arr[1:] {
 
 		for _, item := range arr[1:][k] {
-			if v, ok := intersectionMap[item]; ok {
-				v.Count++
+			if v, ok := intersectionMap[item]; ok && v <= k+1 {
+				intersectionMap[item]++
 			}
 		}
 
@@ -1033,10 +1050,8 @@ func InterS[S ~[]T, T gotools.Comparable](arr ...S) []T {
 
 	for k, v := range intersectionMap {
 
-		if v.Count > v.Key {
-			for i := 0; i < v.Key; i++ {
-				res = append(res, k)
-			}
+		if v == len(arr) {
+			res = append(res, k)
 		}
 	}
 
@@ -1064,25 +1079,18 @@ func SubS[S ~[]T, T gotools.Comparable](arr ...S) []T {
 	}
 
 	// 使用第一个切片作为基数来收集交集元素
-	intersectionMap := make(map[T]*count, len(arr[0]))
+	intersectionMap := make(map[T]int, len(arr[0]))
 	for _, item := range arr[0] {
-		if v, ok := intersectionMap[item]; !ok {
-			intersectionMap[item] = &count{
-				Key:   1,
-				Count: 1,
-			}
-		} else {
-			v.Count++
-			v.Key++
-
+		if _, ok := intersectionMap[item]; !ok {
+			intersectionMap[item] = 1
 		}
 	}
 
 	for k := range arr[1:] {
 
 		for _, item := range arr[1:][k] {
-			if v, ok := intersectionMap[item]; ok {
-				v.Count++
+			if v, ok := intersectionMap[item]; ok && v <= k+1 {
+				intersectionMap[item]++
 			}
 		}
 
@@ -1092,23 +1100,106 @@ func SubS[S ~[]T, T gotools.Comparable](arr ...S) []T {
 
 	for k, v := range intersectionMap {
 
-		if v.Count == v.Key {
-			for i := 0; i < v.Key; i++ {
-				res = append(res, k)
-			}
+		if v == 1 {
+			res = append(res, k)
 		}
 	}
 
 	return res
 }
 
-type count struct {
-	Key   int
-	Count int
+// Union 计算多个切片（类型为 []T，元素类型 T）的并集。
+//
+// 参数:
+//   - arr: 变长参数，每个参数为一个待求并集的切片。
+//
+// 返回值:
+//   - 一个新的 []T 类型的切片，包含所有输入切片中的所有元素
+func UnionS[S ~[]T, T gotools.Comparable](arr ...S) []T {
+
+	if len(arr) == 0 {
+		return make([]T, 0)
+	}
+
+	lm := len(arr) / 5
+
+	seen := make(map[T]struct{}, lm)
+	var result []T
+
+	for _, v := range arr {
+
+		for _, x := range v {
+			if _, ok := seen[x]; !ok {
+				result = append(result, x)
+				seen[x] = struct{}{}
+			}
+		}
+
+	}
+
+	return result
 }
 
-type counts struct {
-	Key   int
-	Count int
-	index int
+// Union 计算多个切片（类型为 []T，元素类型 T）的并集。
+//
+// 参数:
+//   - f: 一个函数，用于将切片中的元素转换为其他类型 U。
+//   - arr: 变长参数，每个参数为一个待求并集的切片。
+//
+// 返回值:
+//   - 一个新的 []T 类型的切片，包含所有输入切片中的所有元素
+func Union[S ~[]T, T any, U gotools.Comparable](f func(x T) U, arr ...S) []T {
+
+	if len(arr) == 0 {
+		return make([]T, 0)
+	}
+
+	lm := len(arr) / 5
+
+	seen := make(map[U]struct{}, lm)
+	var result []T
+
+	for _, v := range arr {
+
+		for _, x := range v {
+			t := f(x)
+			if _, ok := seen[t]; !ok {
+				result = append(result, x)
+				seen[t] = struct{}{}
+			}
+		}
+
+	}
+
+	return result
+}
+
+// Concat 将多个切片（类型为 []T，元素类型 T）连接在一起。
+//
+// 参数:
+//   - arr: 变长参数，每个参数为一个待连接的切片。
+//
+// 返回值:
+//   - 一个新的 []T 类型的切片，包含所有输入切片中的所有元素
+func Concat[S ~[]T, T any](arr ...S) []T {
+
+	if len(arr) == 0 {
+		return make([]T, 0)
+	}
+
+	la := array.Map(func(x S) int { return len(x) }, arr)
+	lm := array.Sum(la)
+
+	result := make([]T, lm)
+
+	index := 0
+	for a := range arr {
+
+		for i := range arr[a] {
+			result[index] = arr[a][i]
+			index++
+		}
+	}
+
+	return result
 }

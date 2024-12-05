@@ -55,12 +55,12 @@ func More[T, U, R any](f func(x T, y U) R) func(ch1 chan T, ch2 chan U) chan R {
 //   - 一个通道，用于接收排序后的数据。
 func Subtract[T any](f func(x, y T) int) func(ch1 chan T, ch2 chan T) chan T {
 	return func(ch1 chan T, ch2 chan T) chan T {
-		ch_ := make(chan T, bufferSize)
+		ch_ := make(chan T, 11)
 
 		go func() {
 			defer close(ch_)
 
-			var v1, v2 T
+			var v1, v2, tmp T
 			var ok1, ok2 bool
 
 			// Get first value from both channels
@@ -74,7 +74,10 @@ func Subtract[T any](f func(x, y T) int) func(ch1 chan T, ch2 chan T) chan T {
 					ch_ <- v1
 					v1, ok1 = <-ch1
 				case f(v1, v2) < 0: // v1 < v2
-					ch_ <- v1
+					if f(v1, tmp) > 0 {
+						ch_ <- v1
+						tmp = v1
+					}
 					v1, ok1 = <-ch1
 				case f(v1, v2) > 0: // v1 > v2
 					v2, ok2 = <-ch2
@@ -98,12 +101,12 @@ func Subtract[T any](f func(x, y T) int) func(ch1 chan T, ch2 chan T) chan T {
 //   - 一个通道，用于接收排序后的数据。
 func Intersect[T any](f func(x, y T) int) func(ch1, ch2 chan T) chan T {
 	return func(ch1, ch2 chan T) chan T {
-		ch_ := make(chan T, bufferSize)
+		ch_ := make(chan T, 11)
 
 		go func() {
 			defer close(ch_)
 
-			var v1, v2 T
+			var v1, v2, tmp T
 			var ok1, ok2 bool
 
 			// Get first value from both channels
@@ -120,7 +123,12 @@ func Intersect[T any](f func(x, y T) int) func(ch1, ch2 chan T) chan T {
 				case f(v1, v2) > 0: // v1 > v2
 					v2, ok2 = <-ch2
 				default: // v1 == v2
-					ch_ <- v1
+
+					if f(v1, tmp) > 0 {
+						ch_ <- v1
+						tmp = v1
+					}
+
 					v1, ok1 = <-ch1
 				}
 			}
@@ -144,7 +152,7 @@ func Intersect[T any](f func(x, y T) int) func(ch1, ch2 chan T) chan T {
 func InterS[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
 
 	ch_ := make(chan T, bufferSize)
-	m := array.ToMap(Collect(ch2))
+	m := array.ToZero(Collect(ch2))
 
 	var wg sync.WaitGroup
 	wg.Add(parallerNum)
@@ -162,8 +170,9 @@ func InterS[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
 
 			for v := range ch1 {
 
-				if _, ok := m[v]; ok {
+				if v1, ok := m[v]; ok && v1 == 0 {
 					ch_ <- v
+					m[v] = 1
 				}
 
 			}
@@ -220,6 +229,7 @@ func SubS[T gotools.Comparable](ch1 chan T, ch2 chan T) chan T {
 
 				if _, ok := m[v]; !ok {
 					ch_ <- v
+					m[v] = struct{}{}
 				}
 
 			}

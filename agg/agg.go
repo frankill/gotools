@@ -153,21 +153,6 @@ func Max[S ~[]T, T gotools.Ordered](slice ...S) T {
 	return array.Max(array.Map(func(x S) T { return array.Max(x) }, slice))
 }
 
-// AConcat 函数用于拼接多个切片。
-// 参数:
-//   - slice: 变长参数，每一项都是一个类型为 T 的切片，可以接受不同切片并将其合并。
-//
-// 返回值:
-//   - 一个新切片，包含了输入的所有切片中的元素。新切片的类型与输入切片元素类型相同。
-//
-// 功能说明:
-//   - 此函数通过泛型 T 支持任意数据类型的切片拼接，它内部调用 ArrayConcat 函数来完成实际的拼接操作。
-func Concat[S ~[]T, T any](slice ...S) []T {
-
-	return array.Union(slice...)
-
-}
-
 // Maxif 根据提供的条件函数从多个切片中找出满足条件的最大元素。
 //
 // 参数:

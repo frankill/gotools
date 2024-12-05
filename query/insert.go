@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/frankill/gotools/array"
+	"github.com/frankill/gotools/op"
 )
 
 type SqlInsert interface {
@@ -137,7 +138,7 @@ func (m *MysqlInsert) Build() (string, []any) {
 		builder.WriteString(strings.Join(updateStrings, ", "))
 	}
 
-	return builder.String(), array.Union(m.InsertValues...)
+	return builder.String(), op.Concat(m.InsertValues...)
 }
 
 func (m *MysqlInsert) Clear() {
