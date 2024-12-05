@@ -1,4 +1,4 @@
-package operation
+package op
 
 import (
 	"github.com/frankill/gotools"

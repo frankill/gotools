@@ -1163,6 +1163,70 @@ func Reduce[S ~[]T, T, U any](fun func(x U, y T) U, init U, arr S) U {
 	return result
 }
 
+// Scan 对切片中的元素从左到右应用一个扫描函数，并返回该函数处理后的结果。
+// 此函数泛型，适用于任何类型的切片和扫描函数，只要扫描函数的输入输出类型与切片元素类型兼容。
+//
+// 参数:
+//
+//   - arr    需要被扫描处理的切片。类型为 S，其中 S 是 T 类型元素的切片。
+//
+//   - fun     扫描函数，接收两个参数：扫描结果（类型为 U）和切片中的当前元素（类型为 T）,
+//
+//   - init    初始扫描值，类型为 U。
+//
+//     并返回一个新的扫描结果（同样为 U 类型）
+//
+// 返回值:
+//
+//   - 应用扫描函数后得到的最终结果。类型为 U，扫描过程的起始值为 U 的零值。
+//
+//     如果切片为空，则直接返回 U 的零值。
+//
+// 注意事项:
+//   - 扫描函数 `fun` 应确保对于所有可能的输入都是正确的，并且应当处理好任何潜在的边界条件或错误情况。
+//   - 若 `result` 是引用类型（如切片、map），其初始零值可能影响结果的预期。确保理解并适当处理此类情况。
+func Scan[S ~[]T, T, U any](fun func(x U, y T) U, init U, arr S) []U {
+
+	if len(arr) == 0 {
+		return []U{}
+	}
+
+	l := len(arr)
+
+	result := make([]U, l)
+
+	tmp := init
+
+	for i := 0; i < l; i++ {
+		tmp = fun(tmp, arr[i])
+		result[i] = tmp
+	}
+
+	return result
+}
+
+// ScanR 对切片中的元素从右到左应用一个扫描函数，并返回该函数处理后的结果。
+func ScanR[S ~[]T, T, U any](fun func(x U, y T) U, init U, arr S) []U {
+
+	if len(arr) == 0 {
+		return []U{}
+	}
+
+	l := len(arr)
+
+	result := make([]U, l)
+
+	tmp := init
+
+	for i, m := l-1, 0; i >= 0; i-- {
+		tmp = fun(tmp, arr[i])
+		result[m] = tmp
+		m++
+	}
+
+	return result
+}
+
 // ReduceR 对切片中的元素从右到左应用一个累积函数，并返回该函数处理后的结果。
 // 此函数泛型，适用于任何类型的切片和累积函数，只要累积函数的输入输出类型与切片元素类型兼容。
 func ReduceR[S ~[]T, T, U any](fun func(x U, y T) U, init U, arr S) U {

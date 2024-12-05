@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/frankill/gotools/array"
-	"github.com/frankill/gotools/operation"
+	"github.com/frankill/gotools/op"
 )
 
 func TestArrayFromAny(t *testing.T) {
@@ -1130,7 +1130,7 @@ func TestCartesian(t *testing.T) {
 		}
 	}
 
-	operation.ForEach(func(x ...int) {
+	op.ForEach(func(x ...int) {
 		fmt.Println(x)
 	}, array.Seq(1, 3, 1), array.Seq(2, 10, 1))
 

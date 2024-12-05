@@ -3,7 +3,7 @@ package maps
 import (
 	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/array"
-	"github.com/frankill/gotools/operation"
+	"github.com/frankill/gotools/op"
 	"github.com/frankill/gotools/pair"
 )
 
@@ -650,7 +650,7 @@ func Intersect[V []U, K, U gotools.Comparable](data ...map[K]V) pair.Pair[[][]K,
 			tmp = append(tmp, data[k][v])
 		}
 
-		if dd := operation.InterS(tmp...); len(dd) > 0 {
+		if dd := op.InterS(tmp...); len(dd) > 0 {
 			res.First = append(res.First, rf[i])
 			res.Second = append(res.Second, dd)
 		}

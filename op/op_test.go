@@ -1,11 +1,11 @@
-package operation_test
+package op_test
 
 import (
 	"reflect"
 	"strconv"
 	"testing"
 
-	"github.com/frankill/gotools/operation"
+	"github.com/frankill/gotools/op"
 )
 
 func TestOperatorMap(t *testing.T) {
@@ -39,7 +39,7 @@ func TestOperatorMap(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 调用待测试函数
-			result := operation.Map(tc.fun, tc.arr...)
+			result := op.Map(tc.fun, tc.arr...)
 
 			// 检查结果是否与预期相同
 			if !reflect.DeepEqual(result, tc.expected) {

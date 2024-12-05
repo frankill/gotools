@@ -1,4 +1,4 @@
-package operation
+package op
 
 import (
 	"github.com/frankill/gotools"
@@ -223,6 +223,80 @@ func Map[S ~[]T, T, U any](fun func(x ...T) U, arr ...S) []U {
 	return res
 }
 
+// Scan 对一组切片应用指定的函数，每个切片元素按位置组合后作为函数的参数。
+//
+// 参数:
+//
+//   - fun: 一个函数，定义了如何将一个累积值和当前元素结合起来产生新的累积值。
+//   - init: 累积的初始值。
+//   - arr: 变长参数列表，每个参数都是类型 S 的切片，S 必须是切片类型。
+//
+// 返回:
+//
+//   - 类型为 []U 的切片，包含应用给定函数 `fun` 到所有切片元素组合上的结果。
+func Scan[S ~[]T, T, U any](fun func(x U, y ...T) U, init U, arr ...S) []U {
+
+	if len(arr) == 0 {
+		return make([]U, 0)
+	}
+
+	la := array.Map(func(x S) int { return len(x) }, arr)
+	lm := array.Max(la)
+
+	res := make([]U, lm)
+	parm := make([]T, len(arr))
+
+	tmp := init
+	for i := 0; i < lm; i++ {
+		for j := 0; j < len(arr); j++ {
+			parm[j] = arr[j][i%la[j]]
+		}
+		tmp = fun(tmp, parm...)
+		res[i] = tmp
+	}
+
+	return res
+}
+
+// ScanR 对一组切片应用指定的函数，每个切片元素按位置组合后作为函数的参数。
+func ScanR[S ~[]T, T, U any](fun func(x U, y ...T) U, init U, arr ...S) []U {
+
+	if len(arr) == 0 {
+		return make([]U, 0)
+	}
+
+	la := array.Map(func(x S) int { return len(x) }, arr)
+	lm := array.Max(la)
+
+	res := make([]U, lm)
+	parm := make([]T, len(arr))
+
+	tmp := init
+	for i, m := lm-1, 0; i >= 0; i-- {
+		for j := 0; j < len(arr); j++ {
+			parm[j] = arr[j][i%la[j]]
+		}
+		tmp = fun(tmp, parm...)
+		res[m] = tmp
+		m++
+	}
+
+	return res
+}
+
+// Reduce 对一组切片应用指定的函数，每个切片元素按位置组合后作为函数的参数。
+// 此泛型函数接受一个函数 `fun`，该函数接受变长参数列表 x...T 并返回类型 U 的结果，和一个初始值 `init`。
+// 函数返回一个类型为 U 的结果，表示对所有切片元素组合后应用给定函数 `fun` 的结果。
+//
+// 参数:
+//
+//   - fun: 一个函数，接受变长参数列表 x...T 并返回类型 U 的结果。
+//   - init: 初始值，类型为 U。
+//   - arr: 变长参数列表，每个参数都是类型 S 的切片，S 必须是切片类型。
+//
+// 返回:
+//
+//   - 类型为 U 的结果，表示对所有切片元素组合后应用给定函数 `fun` 的结果。
 func Reduce[S ~[]T, T, U any](fun func(x U, y ...T) U, init U, arr ...S) U {
 
 	result := init
@@ -245,6 +319,7 @@ func Reduce[S ~[]T, T, U any](fun func(x U, y ...T) U, init U, arr ...S) U {
 	return result
 }
 
+// ReduceR 逆序执行 Reduce
 func ReduceR[S ~[]T, T, U any](fun func(x U, y ...T) U, init U, arr ...S) U {
 
 	result := init

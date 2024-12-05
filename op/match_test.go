@@ -1,10 +1,10 @@
-package operation_test
+package op_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/frankill/gotools/operation"
+	"github.com/frankill/gotools/op"
 )
 
 func TestMatchOne(t *testing.T) {
@@ -31,7 +31,7 @@ func TestMatchOne(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := operation.MatchOne(test.lookup_value, test.lookup_array)
+		result := op.MatchOne(test.lookup_value, test.lookup_array)
 		if !reflect.DeepEqual(result, test.expected) {
 			t.Errorf("MatchOne(%v, %v) = %v, expected %v", test.lookup_value, test.lookup_array, result, test.expected)
 		}
@@ -48,7 +48,7 @@ func TestXlookup(t *testing.T) {
 	lookup_result := []int{1, 2, 3}
 
 	expected := []int{1}
-	result := operation.Xlookup(lookup_value, lookup_array, lookup_result)
+	result := op.Xlookup(lookup_value, lookup_array, lookup_result)
 
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Expected %v, but got %v", expected, result)
