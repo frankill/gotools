@@ -1308,6 +1308,74 @@ func InterS[S ~[]T, T gotools.Comparable](a, b S) []T {
 
 }
 
+// Union 计算两个切片（类型为 []T，元素类型 T 任意类型）的并集。
+//
+// 参数:
+//   - f: 一个函数，用于将元素转换为可比较的类型。
+//   - a: 一个切片。
+//   - b: 一个切片。
+//
+// 返回值:
+//   - 一个新的 []T 类型的切片，包含所有输入切片中的元素，且元素顺序与它们在第一个切片中出现的顺序一致。
+//     如果没有交集或输入为空，则返回一个空切片。
+func Union[S ~[]T, T any, U gotools.Comparable](f func(x T) U, a, b S) []T {
+
+	r := make(map[U]struct{}, len(a)/5)
+
+	res := []T{}
+	for _, x := range a {
+		if _, ok := r[f(x)]; !ok {
+			res = append(res, x)
+			r[f(x)] = struct{}{}
+		}
+	}
+
+	for _, x := range b {
+		if _, ok := r[f(x)]; !ok {
+			res = append(res, x)
+			r[f(x)] = struct{}{}
+		}
+	}
+
+	return res
+
+}
+
+// UnionS 计算两个切片（类型为 []T，元素类型 T 可比较）的并集。
+//
+// 参数:
+//   - a: 一个切片。
+//   - b: 一个切片。
+//
+// 返回值:
+//   - 一个新的 []T 类型的切片，包含所有输入切片中的元素，且元素顺序与它们在第一个切片中出现的顺序一致。
+func UnionS[S ~[]T, T gotools.Comparable](a, b S) []T {
+
+	r := make(map[T]struct{}, len(a)/5)
+
+	res := []T{}
+	for _, x := range a {
+		if _, ok := r[x]; !ok {
+			res = append(res, x)
+			r[x] = struct{}{}
+		}
+	}
+
+	for _, x := range b {
+		if _, ok := r[x]; !ok {
+			res = append(res, x)
+			r[x] = struct{}{}
+		}
+	}
+
+	return res
+
+}
+
+func Concat[S ~[]T, T any](a, b S) []T {
+	return append(a, b...)
+}
+
 // EnumerateDense 为输入的数组中每个元素生成一个索引列表，其中的值对应该元素在数组中首次出现的位置。
 // 参数:
 //

@@ -285,7 +285,7 @@ func IndexAsc[B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered](by B, ord
 	res := make(map[T][]int, len(group))
 
 	for k, v := range group {
-		array.SortByL(gotools.ASCGeneric, v.First, v.Second)
+		array.SortByL(gotools.Lt, v.First, v.Second)
 		res[k] = v.First
 	}
 
@@ -313,7 +313,7 @@ func IndexDesc[B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered](by B, or
 	res := make(map[T][]int, len(group))
 
 	for k, v := range group {
-		array.SortByL(gotools.DESCGeneric, v.First, v.Second)
+		array.SortByL(gotools.Gt, v.First, v.Second)
 		res[k] = v.First
 	}
 
@@ -363,7 +363,7 @@ func Order[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, U an
 	res := make(map[T][]U, len(group))
 
 	for k, v := range group {
-		array.SortByL(gotools.ASCGeneric, v.First, v.Second)
+		array.SortByL(gotools.Lt, v.First, v.Second)
 		res[k] = v.First
 	}
 
@@ -382,7 +382,7 @@ func OrderDesc[D ~[]U, B ~[]T, O ~[]S, T gotools.Comparable, S gotools.Ordered, 
 	res := make(map[T][]U, len(group))
 
 	for k, v := range group {
-		array.SortByL(gotools.DESCGeneric, v.First, v.Second)
+		array.SortByL(gotools.Gt, v.First, v.Second)
 		res[k] = v.First
 	}
 
