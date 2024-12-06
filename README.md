@@ -27,7 +27,7 @@ import (
 
 	"github.com/frankill/gotools"
 	"github.com/frankill/gotools/iter"
-	"github.com/frankill/gotools/operation"
+	"github.com/frankill/gotools/op"
 	"github.com/frankill/gotools/query"
 )
 
@@ -45,7 +45,7 @@ func main() {
 
 	d2, _ := iter.FromMysql[user](MysqlTest)(q2)
 
-	res := operation.Eq(iter.Collect(d1), iter.Collect(d2))
+	res := op.Eq(iter.Collect(d1), iter.Collect(d2))
 
 	fmt.Println(res)
 }
