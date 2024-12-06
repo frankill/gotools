@@ -42,17 +42,9 @@ func Identity[T any](x T) T {
 }
 
 var (
-	ASCInt  = ASCGeneric[int]
-	DESCInt = DESCGeneric[int]
+	ASCInt  = Lt[int]
+	DESCInt = Gt[int]
 )
-
-func ASCGeneric[T Ordered](x, y T) bool {
-	return x < y
-}
-
-func DESCGeneric[T Ordered](x, y T) bool {
-	return x > y
-}
 
 func SysStop() context.Context {
 	// 创建一个可取消的上下文
