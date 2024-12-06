@@ -15,7 +15,7 @@ func Gt[T Ordered](x, y T) bool {
 	return x > y
 }
 
-func Eq[T Ordered](x, y T) bool {
+func Eq[T Comparable](x, y T) bool {
 	return x == y
 }
 
@@ -31,7 +31,7 @@ func Gte[T Ordered](x, y T) bool {
 	return x >= y
 }
 
-func NotEq[T Ordered](x, y T) bool {
+func NotEq[T Comparable](x, y T) bool {
 	return x != y
 }
 
