@@ -799,7 +799,7 @@ func TestArraySort(t *testing.T) {
 			sortFunc := func(x, y int) bool {
 				return x < y
 			}
-			if result := array.Sort(sortFunc, tt.arr); !reflect.DeepEqual(result, tt.expected) {
+			if result := array.SortFun(sortFunc, tt.arr); !reflect.DeepEqual(result, tt.expected) {
 				t.Errorf("ArraySort() = %v, want %v", result, tt.expected)
 			}
 		})

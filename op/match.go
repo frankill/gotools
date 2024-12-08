@@ -41,9 +41,7 @@ func MatchOne[A ~[]T, T gotools.Ordered](lookup_value A, lookup_array A) []int {
 	id := array.Seq(0, la, 1)
 	res := array.Repeat(-1, ll)
 
-	id, lookup_array = array.SortBy(func(x, y T) bool {
-		return x < y
-	}, id, lookup_array)
+	id, lookup_array = array.Order(id, lookup_array, false)
 
 	for i := 0; i < ll; i++ {
 
@@ -81,9 +79,7 @@ func MatchMinusOne[A ~[]T, T gotools.Ordered](lookup_value A, lookup_array A) []
 	id := array.Seq(0, la, 1)
 	res := array.Repeat(-1, ll)
 
-	id, lookup_array = array.SortBy(func(x, y T) bool {
-		return x > y
-	}, id, lookup_array)
+	id, lookup_array = array.Order(id, lookup_array, false)
 
 	for i := 0; i < ll; i++ {
 

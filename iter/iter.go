@@ -532,7 +532,7 @@ func SortS[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 			// TODO: 优化
 			data := Collect(ch)
-			array.SortL(f, data)
+			array.SortFunLocal(f, data)
 
 			for _, v := range data {
 				ch_ <- v
@@ -640,7 +640,7 @@ func Sort[T any](f func(x, y T) bool) func(ch chan T) chan T {
 
 		for v := range ch_ {
 
-			array.SortL(f, v)
+			array.SortFunLocal(f, v)
 
 			fn := filepath.Join(p, strconv.Itoa(num)+".gob")
 			file = append(file, fn)

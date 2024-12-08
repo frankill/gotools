@@ -1,65 +1,35 @@
 package array
 
-// Sort 对类型为 S（元素类型为 T）的切片进行自定义排序。
+import "github.com/frankill/gotools"
+
+// SortFun 通过比较函数对切片进行排序
 //
 // 参数:
-//   - fun: 一个比较函数，接受两个 T 类型的参数并返回一个布尔值，指示是否需要交换这两个参数的位置。
-//     当 `fun(x, y)` 返回 `true` 时，在排序过程中 `x` 应该排在 `y` 之前。
-//   - arr: 要排序的切片 S。
+//   - f: 一个函数，接受两个 T 类型的变长参数并返回布尔值，决定是否交换两个元素的位置。true 表示交换，false 表示不交换。
+//   - arr: 一个切片，表示要进行排序的切片。
 //
-// 返回值:
-//   - 返回一个新的 S 类型切片，其中的元素根据提供的比较函数 `fun` 进行排序。
-func Sort[S ~[]T, T any](fun func(x, y T) bool, arr S) []T {
+// 返回:
+//   - 一个新的切片，表示排序后的结果。
+func SortFun[S ~[]T, T any](f func(x T, y T) bool, arr S) []T {
 
-	la := len(arr)
-	if la == 0 {
-		return []T{}
-	}
-	if la == 1 {
-		return []T{arr[0]}
-	}
+	res := make([]T, len(arr))
 
-	res := make([]T, la)
 	copy(res, arr)
 
-	for i := 1; i < la; {
-		if i == 0 {
-			i = 2
-		}
-		if i >= la {
-			break
-		}
-		if fun(res[i], res[i-1]) {
-			res[i], res[i-1] = res[i-1], res[i]
-			i--
-			continue
-		}
-		i++
-
-	}
+	SortFunLocal(f, res)
 
 	return res
 
 }
 
-// SortQuick 使用快速排序的思路（尽管实现并不完全正确）尝试对类型为 S（元素类型为 T）的切片进行原地排序。
-// 注意：当前实现并非标准快速排序算法，更像是简化冒泡排序变种。
+// SortFunLocal 通过比较函数对切片进行排序，修改原切片
 //
 // 参数:
-//    - arr: 要排序的切片 S，其中元素类型 T 必须是可比较的（实现 gotools.Ordered 接口）。
-// func SortQuick[S ~[]T, T gotools.Ordered](arr S) []T {
-
-// 	return ArraySort(func(x, y T) bool { return x < y }, arr)
-
-// }
-
-// SortL 对类型为 S（元素类型为 T）的切片进行原地排序，依据提供的比较函数 `fun`。
+//   - f: 一个函数，接受两个 T 类型的变长参数并返回布尔值，决定是否交换两个元素的位置。true 表示交换，false 表示不交换。
+//   - arr: 一个切片，表示要进行排序的切片。
 //
-// 参数:
-//   - fun: 自定义比较函数，接受两个 T 类型的参数并返回一个布尔值。
-//     当 `fun(x, y)` 返回 `true`，则在排序时 `x` 应位于 `y` 之前。
-//   - arr: 要排序的本地切片 S，函数会直接修改传入的切片。
-func SortL[S ~[]T, T any](fun func(x, y T) bool, arr S) {
+// 无返回值
+func SortFunLocal[S ~[]T, T any](f func(x T, y T) bool, arr S) {
 	la := len(arr)
 	if la == 0 {
 		return
@@ -75,7 +45,7 @@ func SortL[S ~[]T, T any](fun func(x, y T) bool, arr S) {
 		if i >= la {
 			break
 		}
-		if fun(arr[i], arr[i-1]) {
+		if f(arr[i], arr[i-1]) {
 			arr[i], arr[i-1] = arr[i-1], arr[i]
 			i--
 			continue
@@ -86,36 +56,45 @@ func SortL[S ~[]T, T any](fun func(x, y T) bool, arr S) {
 
 }
 
-// func SortByQ[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D) (S, D) {
-
-// 	return ArraySortBy(func(x, y U) bool { return x < y }, arr, order)
-
-// }
-
-// SortTwo 通过自定义比较函数和排序顺序对数组进行排序。
+// OrderFun 通过比较函数对切片进行排序
+//
 // 参数:
+//   - f: 一个函数，接受两个 T 类型的变长参数并返回布尔值，决定是否交换两个元素的位置。true 表示交换，false 表示不交换。
+//   - arr: 一个切片，表示要进行排序的切片。
+//   - order: 一个切片，表示排序后的顺序。
 //
-//   - fun: 自定义比较函数，接受两个 T 类型的参数并返回一个布尔值。
-//   - arr: 需要排序的数组，类型为 S。
-//   - order: 与 arr 相关的数组，类型为 D，其元素类型与 fun 的参数类型相同。
-//
-// 返回值:
-//
-//   - 返回值是排序后的数组。
-func SortBy[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D) (S, D) {
+// 返回:
+//   - 一个新的切片，表示排序后的结果。
+func OrderFun[D ~[]U, S ~[]T, T any, U any](f func(x, y U) bool, arr S, order D) (S, D) {
 
+	res := make([]T, len(arr))
+	copy(res, arr)
+
+	resOrder := make([]U, len(order))
+	copy(resOrder, order)
+
+	OrderFunLocal(f, res, resOrder)
+
+	return res, resOrder
+
+}
+
+// OrderFunLocal 通过比较函数对切片进行排序，修改原切片
+//
+// 参数:
+//   - f: 一个函数，接受两个 T 类型的变长参数并返回布尔值，决定是否交换两个元素的位置。true 表示交换，false 表示不交换。
+//   - arr: 一个切片，表示要进行排序的切片。
+//   - order: 一个切片，表示排序后的顺序。
+//
+// 无返回值
+func OrderFunLocal[D ~[]U, S ~[]T, T any, U any](f func(x, y U) bool, arr S, order D) {
 	la := len(arr)
 	if la == 0 {
-		return S{}, D{}
+		return
 	}
 	if la == 1 {
-		return arr, order
+		return
 	}
-
-	res := make(S, la)
-	tmp := make(D, la)
-	copy(res, arr)
-	copy(tmp, order)
 
 	for i := 1; i < la; {
 		if i == 0 {
@@ -124,9 +103,9 @@ func SortBy[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D) (S,
 		if i >= la {
 			break
 		}
-		if fun(tmp[i], tmp[i-1]) {
-			tmp[i], tmp[i-1] = tmp[i-1], tmp[i]
-			res[i], res[i-1] = res[i-1], res[i]
+		if f(order[i], order[i-1]) {
+			order[i], order[i-1] = order[i-1], order[i]
+			arr[i], arr[i-1] = arr[i-1], arr[i]
 			i--
 			continue
 		}
@@ -134,27 +113,39 @@ func SortBy[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D) (S,
 
 	}
 
-	return res, tmp
 }
 
-// func SortByLQ[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D) {
-// 	ArraySortByL(func(current, before U) bool { return current < before }, arr, order)
-// }
-
-// SortTwoLocal 是一个泛型排序函数，用于对两个关联数组进行排序。
-// 它接受一个比较函数、一个需要排序的数组和一个与之相关的数组，
-// 根据比较函数的规则对相关数组进行排序。
-// 比较函数接收两个元素并返回一个布尔值，表示第一个元素是否应排在第二个元素之前。
-// 注意：这个函数会直接修改输入的数组。
+// Sort 对切片进行排序, 切片类型必须实现 Ordered 接口
 //
 // 参数:
-//   - fun: 比较函数，用于确定元素的排序顺序。
-//   - arr: 需要排序的数组，类型为 S。
-//   - order: 与 arr 相关的数组，类型为 D，其元素类型与 fun 的参数类型相同。
+//   - arr: 一个切片，表示要进行排序的切片。
+//   - descending: 一个布尔值，表示是否降序排序。
 //
 // 返回:
-//   - 无返回值，直接修改输入的 arr 和 order 数组。
-func SortByL[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D) {
+//   - 一个新的切片，表示排序后的结果。
+func Sort[S ~[]T, T gotools.Ordered](arr S, descending bool) []T {
+
+	res := make([]T, len(arr))
+
+	copy(res, arr)
+
+	if descending {
+		SortR(res)
+	} else {
+		SortL(res)
+	}
+
+	return res
+
+}
+
+// SortL 对切片进行升序排序, 切片类型必须实现 Ordered 接口
+//
+// 参数:
+//   - arr: 一个切片，表示要进行排序的切片。
+//
+// 无返回值
+func SortL[S ~[]T, T gotools.Ordered](arr S) {
 	la := len(arr)
 	if la == 0 {
 		return
@@ -170,7 +161,137 @@ func SortByL[D ~[]U, S ~[]T, T, U any](fun func(x, y U) bool, arr S, order D) {
 		if i >= la {
 			break
 		}
-		if fun(order[i], order[i-1]) {
+		if arr[i] < arr[i-1] {
+			arr[i], arr[i-1] = arr[i-1], arr[i]
+			i--
+			continue
+		}
+		i++
+
+	}
+
+}
+
+// SortR 对切片进行降序排序, 切片类型必须实现 Ordered 接口
+//
+// 参数:
+//   - arr: 一个切片，表示要进行排序的切片。
+//
+// 无返回值
+func SortR[S ~[]T, T gotools.Ordered](arr S) {
+	la := len(arr)
+	if la == 0 {
+		return
+	}
+	if la == 1 {
+		return
+	}
+
+	for i := 1; i < la; {
+		if i == 0 {
+			i = 2
+		}
+		if i >= la {
+			break
+		}
+		if arr[i] > arr[i-1] {
+			arr[i], arr[i-1] = arr[i-1], arr[i]
+			i--
+			continue
+		}
+		i++
+
+	}
+
+}
+
+// Order 对切片进行排序，order切片类型必须实现 Ordered 接口
+//
+// 参数:
+//   - arr: 一个切片，表示要进行排序的切片。
+//   - order: 一个切片，表示排序后的顺序。
+//   - descending: 一个布尔值，表示是否降序排序。
+//
+// 返回:
+//   - 一个新的切片，表示排序后的结果。
+//   - 一个新的切片，表示排序后的顺序。
+func Order[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D, descending bool) (S, D) {
+
+	res := make([]T, len(arr))
+	copy(res, arr)
+
+	resOrder := make([]U, len(order))
+	copy(resOrder, order)
+
+	if descending {
+		OrderR(res, resOrder)
+	} else {
+		OrderL(res, resOrder)
+	}
+
+	return res, resOrder
+
+}
+
+// OrderL 对切片进行升序排序，order切片类型必须实现 Ordered 接口
+//
+// 参数:
+//   - arr: 一个切片，表示要进行排序的切片。
+//   - order: 一个切片，表示排序后的顺序。
+//
+// 无返回值
+func OrderL[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D) {
+	la := len(arr)
+	if la == 0 {
+		return
+	}
+	if la == 1 {
+		return
+	}
+
+	for i := 1; i < la; {
+		if i == 0 {
+			i = 2
+		}
+		if i >= la {
+			break
+		}
+		if order[i] < order[i-1] {
+			order[i], order[i-1] = order[i-1], order[i]
+			arr[i], arr[i-1] = arr[i-1], arr[i]
+			i--
+			continue
+		}
+		i++
+
+	}
+
+}
+
+// OrderR 对切片进行降序排序，order切片类型必须实现 Ordered 接口
+//
+// 参数:
+//   - arr: 一个切片，表示要进行排序的切片。
+//   - order: 一个切片，表示排序后的顺序。
+//
+// 无返回值
+func OrderR[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D) {
+	la := len(arr)
+	if la == 0 {
+		return
+	}
+	if la == 1 {
+		return
+	}
+
+	for i := 1; i < la; {
+		if i == 0 {
+			i = 2
+		}
+		if i >= la {
+			break
+		}
+		if order[i] < order[i-1] {
 			order[i], order[i-1] = order[i-1], order[i]
 			arr[i], arr[i-1] = arr[i-1], arr[i]
 			i--
