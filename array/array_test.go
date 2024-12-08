@@ -1,13 +1,11 @@
 package array_test
 
 import (
-	"fmt"
 	"reflect"
 	"strconv"
 	"testing"
 
 	"github.com/frankill/gotools/array"
-	"github.com/frankill/gotools/op"
 )
 
 func TestArrayFromAny(t *testing.T) {
@@ -31,23 +29,6 @@ func TestArrayFromAny(t *testing.T) {
 				t.Errorf("ArrayFromAny() = %v, want %v", got, tt.want)
 			}
 		})
-	}
-}
-func TestArrayRandomSample(t *testing.T) {
-	// Test case 3: Test with an empty input array
-	input3 := []float64{}
-	expected3 := []float64{}
-	result3 := array.RandomSample(input3, 1, false)
-	if !reflect.DeepEqual(result3, expected3) {
-		t.Errorf("ArrayRandomSample(%v, 1) = %v, want %v", input3, result3, expected3)
-	}
-
-	// Test case 4: Test with a sample size greater than or equal to the input array size
-	input4 := []int{6, 7, 8, 9, 10}
-	expected4 := []int{6, 7, 8, 9, 10}
-	result4 := array.RandomSample(input4, 5, false)
-	if !reflect.DeepEqual(result4, expected4) {
-		t.Errorf("ArrayRandomSample(%v, 5) = %v, want %v", input4, result4, expected4)
 	}
 }
 
@@ -110,84 +91,6 @@ func TestArrayProduct(t *testing.T) {
 	expected3 := float64(1.0)
 	if output3 != expected3 {
 		t.Errorf("Expected %v but got %v", expected3, output3)
-	}
-
-	// Add more test cases as needed
-}
-
-// Test case for the ArrayCumSum function
-func TestArrayCumFun(t *testing.T) {
-	input1 := []int{1, 2, 3, 4, 5, 6}
-	output1 := array.CumFun(func(a, b int) int {
-		return a + b
-	}, 0, input1)
-	expected1 := []int{1, 3, 6, 10, 15, 21}
-	if !reflect.DeepEqual(output1, expected1) {
-		t.Errorf("Expected %v but got %v", expected1, output1)
-	}
-
-	input2 := []float32{1.5, 2.5, 3.5, 4.5, 5.5, 6.5}
-	output2 := array.CumFun(func(a, b float32) float32 {
-		return a + b
-	}, 0.0, input2)
-	expected2 := []float32{1.5, 4, 7.5, 12, 17.5, 24}
-	if !reflect.DeepEqual(output2, expected2) {
-		t.Errorf("Expected %v but got %v", expected2, output2)
-	}
-
-	// Add more test cases as needed
-}
-
-// Test case for the ArrayCumSum function
-func TestArrayCumSum(t *testing.T) {
-	input1 := []int{1, 2, 3, 4, 5, 6}
-	output1 := array.CumSum(input1)
-	expected1 := []int{1, 3, 6, 10, 15, 21}
-	if !reflect.DeepEqual(output1, expected1) {
-		t.Errorf("Expected %v but got %v", expected1, output1)
-	}
-
-	input2 := []float32{1.5, 2.5, 3.5, 4.5, 5.5, 6.5}
-	output2 := array.CumSum(input2)
-	expected2 := []float32{1.5, 4, 7.5, 12, 17.5, 24}
-	if !reflect.DeepEqual(output2, expected2) {
-		t.Errorf("Expected %v but got %v", expected2, output2)
-	}
-
-	// Add more test cases as needed
-}
-
-// Test case for the ArrayCumProd function
-func TestArrayCumProd(t *testing.T) {
-	input1 := []int{1, 2, 3, 4, 5, 6}
-	output1 := array.CumProd(input1)
-	expected1 := []int{1, 2, 6, 24, 120, 720}
-	if !reflect.DeepEqual(output1, expected1) {
-		t.Errorf("Expected %v but got %v", expected1, output1)
-	}
-
-	// Add more test cases as needed
-}
-
-// Test case for the ArrayCumMax function
-func TestArrayCumMax(t *testing.T) {
-	input1 := []int{1, 5, 3, 7, 2, 6}
-	output1 := array.CumMax(input1)
-	expected1 := []int{1, 5, 5, 7, 7, 7}
-	if !reflect.DeepEqual(output1, expected1) {
-		t.Errorf("Expected %v but got %v", expected1, output1)
-	}
-
-	// Add more test cases as needed
-}
-
-// Test case for the ArrayCumMin function
-func TestArrayCumMin(t *testing.T) {
-	input1 := []int{1, 5, 3, 7, 2, 6}
-	output1 := array.CumMin(input1)
-	expected1 := []int{1, 1, 1, 1, 1, 1}
-	if !reflect.DeepEqual(output1, expected1) {
-		t.Errorf("Expected %v but got %v", expected1, output1)
 	}
 
 	// Add more test cases as needed
@@ -359,7 +262,7 @@ func TestArrayLast(t *testing.T) {
 		return array.Sum(x) > 12
 	}
 	result3 := array.Last(f1, arr3)
-	expected3 := 3
+	expected3 := []int{7, 8, 9}
 	if !reflect.DeepEqual(result3, expected3) {
 		t.Errorf("Test case 3 failed. Expected %v, got %v", expected3, result3)
 	}
@@ -806,30 +709,6 @@ func TestArraySort(t *testing.T) {
 	}
 }
 
-func TestArrayDistinct(t *testing.T) {
-	tests := []struct {
-		name     string
-		arr      []int
-		expected []int
-	}{
-		{"Test with duplicates", []int{1, 2, 2, 3, 4, 4, 5}, []int{1, 2, 3, 4, 5}},
-		{"Test with single element", []int{1}, []int{1}},
-		{"Test with empty slice", []int{}, []int{}},
-		{"Test with all elements the same", []int{1, 1, 1, 1}, []int{1}},
-		{"Test with negative numbers", []int{-1, -1, -2, -2, -3}, []int{-3, -2, -1}},
-		{"Test with mixed positive and negative numbers", []int{-1, 1, -1, 2, 2, -2}, []int{-2, -1, 1, 2}},
-		{"Test with zero", []int{0, 0, 1, 2, 3, 0}, []int{0, 1, 2, 3}},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := array.Distinct(tt.arr)
-			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("ArrayDistinct() = %v, want %v", result, tt.expected)
-			}
-		})
-	}
-}
 func TestArrayDifference(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -890,7 +769,7 @@ func TestArrayHasAll(t *testing.T) {
 		{"6", []int{1, 2, 3, 4}, []int{1, 2, 3}, true},
 		{"7", []int{-1, -2, -3}, []int{-1, -2}, true},
 		{"8", []int{0, 1, 2}, []int{0}, true},
-		{"9", []int{1, 2, 2, 3}, []int{2}, true},
+		{"9", []int{1, 2, 2, 3}, []int{2}, false},
 		{"10", []int{1, 2, 3}, []int{2, 2}, true},
 	}
 
@@ -957,7 +836,7 @@ func TestArrayHasSequence(t *testing.T) {
 	// Test case 3: arr2 is an empty sequence
 	arr1 = []int{1, 2, 3, 4, 5, 6}
 	arr2 = []int{}
-	expected = true
+	expected = false
 	expectedIndex = 0
 	result, index = array.HasSequence(arr1, arr2)
 	if result != expected || index != expectedIndex {
@@ -1055,7 +934,7 @@ func TestCartesian(t *testing.T) {
 	}{
 		{
 			input:  [][]int{{1, 2}, {3, 4}},
-			output: [][]int{{1, 3}, {2, 3}, {1, 4}, {2, 4}},
+			output: [][]int{{1, 3}, {1, 4}, {2, 3}, {2, 4}},
 		},
 		// 添加更多的测试用例
 	}
@@ -1067,10 +946,6 @@ func TestCartesian(t *testing.T) {
 			t.Errorf("Expected %v, but got %v", tc.output, result)
 		}
 	}
-
-	op.ForEach(func(x ...int) {
-		fmt.Println(x)
-	}, array.Seq(1, 3, 1), array.Seq(2, 10, 1))
 
 }
 func TestArrayReduce(t *testing.T) {

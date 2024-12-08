@@ -291,7 +291,7 @@ func OrderR[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D) {
 		if i >= la {
 			break
 		}
-		if order[i] < order[i-1] {
+		if order[i] > order[i-1] {
 			order[i], order[i-1] = order[i-1], order[i]
 			arr[i], arr[i-1] = arr[i-1], arr[i]
 			i--

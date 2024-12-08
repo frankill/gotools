@@ -571,7 +571,7 @@ func TestTakeWhile(t *testing.T) {
 			// 使用 TakeWhile 函数
 			resultCh := iter.TakeWhile(tt.f)(inputCh)
 			result := iter.Collect(resultCh) // 收集结果
-
+			fmt.Println(result)
 			// 比较结果和期望结果
 			if !reflect.DeepEqual(result, tt.expected) {
 				t.Errorf("For  and input %v, expected %v, got %v", tt.input, tt.expected, result)

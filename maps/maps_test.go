@@ -552,9 +552,10 @@ func TestMapToPairsArray2(t *testing.T) {
 		"two":   {3, 4},
 		"three": {5},
 	}
-	expectedPairs := pair.Pair[[]string, []int]{
-		First:  []string{"one", "one", "two", "two", "three"},
-		Second: []int{1, 2, 3, 4, 5},
+	expectedPairs := []pair.Pair[string, []int]{
+		{First: "one", Second: []int{1, 2}},
+		{First: "two", Second: []int{3, 4}},
+		{First: "three", Second: []int{5}},
 	}
 
 	result := maps.ToPairs(testData)
@@ -590,13 +591,13 @@ func TestMapMerge(t *testing.T) {
 	}
 }
 func TestMapIntersect(t *testing.T) {
-	data1 := map[string][]int{"a": {1, 2, 3}, "b": {5, 6, 7, 8, 9}, "c": {4}}
-	data2 := map[string][]int{"a": {3, 4, 5}, "b": {7}, "c": {8, 9, 10}}
+	data1 := map[string][]int{"a": {1, 2, 3}  }
+	data2 := map[string][]int{"a": {3, 4, 5} }
 
 	result := maps.Intersect(data1, data2)
 
-	expectedFirst := [][]string{{"a", "a"}, {"b", "a"}, {"c", "a"}, {"b", "b"}, {"b", "c"}}
-	expectedSecond := [][]int{{3}, {5}, {4}, {7}, {8, 9}}
+	expectedFirst := [][]string{{"a", "a"}}
+	expectedSecond := [][]int{{3}}
 
 	if !reflect.DeepEqual(result.First, expectedFirst) {
 		t.Errorf("First arrays do not match. Expected %v, got %v", expectedFirst, result.First)

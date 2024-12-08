@@ -312,10 +312,12 @@ func TakeWhile[T any](f func(x T) bool) func(ch chan T) chan T {
 
 		go func() {
 			defer close(ch_)
+			num := true
 			for v := range ch {
-				if f(v) {
+				if f(v) && num {
 					ch_ <- v
 				} else {
+					num = false
 					continue
 				}
 			}
