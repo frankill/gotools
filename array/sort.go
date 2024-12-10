@@ -67,6 +67,10 @@ func SortFunLocal[S ~[]T, T any](f func(x T, y T) bool, arr S) {
 //   - 一个新的切片，表示排序后的结果。
 func OrderFun[D ~[]U, S ~[]T, T any, U any](f func(x, y U) bool, arr S, order D) (S, D) {
 
+	if len(arr) != len(order) {
+		panic("length of arr and order must be equal")
+	}
+
 	res := make([]T, len(arr))
 	copy(res, arr)
 
@@ -88,6 +92,11 @@ func OrderFun[D ~[]U, S ~[]T, T any, U any](f func(x, y U) bool, arr S, order D)
 //
 // 无返回值
 func OrderFunLocal[D ~[]U, S ~[]T, T any, U any](f func(x, y U) bool, arr S, order D) {
+
+	if len(arr) != len(order) {
+		panic("length of arr and order must be equal")
+	}
+
 	la := len(arr)
 	if la == 0 {
 		return
@@ -217,6 +226,10 @@ func SortR[S ~[]T, T gotools.Ordered](arr S) {
 //   - 一个新的切片，表示排序后的顺序。
 func Order[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D, descending bool) (S, D) {
 
+	if len(arr) != len(order) {
+		panic("length of arr and order must be equal")
+	}
+
 	res := make([]T, len(arr))
 	copy(res, arr)
 
@@ -241,6 +254,11 @@ func Order[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D, descending 
 //
 // 无返回值
 func OrderL[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D) {
+
+	if len(arr) != len(order) {
+		panic("length of arr and order must be equal")
+	}
+
 	la := len(arr)
 	if la == 0 {
 		return
@@ -276,6 +294,11 @@ func OrderL[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D) {
 //
 // 无返回值
 func OrderR[D ~[]U, S ~[]T, T any, U gotools.Ordered](arr S, order D) {
+
+	if len(arr) != len(order) {
+		panic("length of arr and order must be equal")
+	}
+
 	la := len(arr)
 	if la == 0 {
 		return
