@@ -43,7 +43,9 @@ func ForEach[S ~[]T, T any](fun func(x ...T), arr ...S) {
 //
 //	一个切片
 func Add[S ~[]T, T gotools.Number](a, b S) []T {
+
 	return array.Map2(func(x, y T) T { return x + y }, a, b)
+
 }
 
 // Sub 逐元素相减
@@ -56,7 +58,9 @@ func Add[S ~[]T, T gotools.Number](a, b S) []T {
 //
 //	一个切片
 func Sub[S ~[]T, T gotools.Number](a, b S) []T {
+
 	return array.Map2(func(x, y T) T { return x - y }, a, b)
+
 }
 
 // Mul 逐元素相乘
@@ -1202,4 +1206,202 @@ func Concat[S ~[]T, T any](arr ...S) []T {
 	}
 
 	return result
+}
+
+// Min 寻找多个切片中的最小元素。
+// 该函数接受一个变长参数，其中每个参数是一个T类型的切片。
+// 它通过先将每个切片的最小值找到，然后再从这些最小值中找出最终的最小值。
+// 这样做的目的是为了在多个切片中找到全局最小值，而不是仅仅在一个切片中找到最小值。
+// 参数:
+//
+//   - slice ...[]T: 变长参数，每个参数是一个T类型的切片。
+//
+// 返回值:
+//
+//   - T: 所有切片中的最小元素。
+func Min[S ~[]T, T gotools.Ordered](slice ...S) T {
+
+	var result T
+
+	for _, v := range slice {
+		if len(v) == 0 {
+			continue
+		}
+
+		for _, x := range v {
+			if result > x {
+				result = x
+			}
+		}
+
+	}
+
+	return result
+}
+
+// Max 函数接收多个切片的切片作为输入，返回这些切片中的最大值。
+// 它首先将每个切片中的最大值找到，然后在这些最大值中找出最终的最大值。
+// 这个函数利用了泛型 T，使得它可以适用于任何实现了 gotools.Ordered 接口的类型。
+// 参数:
+//
+//   - slice ...[]T: 一个变长参数，包含了多个 T 类型的切片。
+//
+// 返回值:
+//
+//   - T: 所有输入切片中的最大值。
+func Max[S ~[]T, T gotools.Ordered](slice ...S) T {
+
+	var result T
+
+	for _, v := range slice {
+		if len(v) == 0 {
+			continue
+		}
+
+		for _, x := range v {
+			if result < x {
+				result = x
+			}
+		}
+
+	}
+
+	return result
+}
+
+// Maxif 根据提供的条件函数从多个切片中找出满足条件的最大元素。
+//
+// 参数:
+//   - fun: 一个函数，接受可变数量的T类型参数并返回一个布尔值，用于判断元素是否满足条件。
+//   - slice: 可变数量的切片参数，所有切片的元素类型需为T，且T需要实现Ordered接口。
+//
+// 返回值:
+//   - T: 满足条件的所有输入切片元素中的最大值。
+func Maxif[S ~[]T, T gotools.Ordered](fun func(x T) bool, slice ...S) T {
+
+	var result T
+
+	for _, v := range slice {
+		if len(v) == 0 {
+			continue
+		}
+
+		for _, x := range v {
+			if fun(x) && result > x {
+				result = x
+			}
+		}
+
+	}
+
+	return result
+}
+
+// Minif 是一个泛型函数，用于从一个切片中找到满足特定条件的最小元素。
+// 它接受一个函数 fun 作为条件判断，和一个或多个切片 slice 作为待检查的集合。
+// 函数 fun 用于测试切片中的元素是否满足某种条件，返回一个布尔值。
+// Minif 返回满足条件的最小元素，前提是切片中的元素类型必须实现了 gotools.Ordered 接口。
+//
+// 参数:
+//
+//   - fun: 一个函数，接受一个或多个 T 类型的参数，并返回一个布尔值。
+//     该函数用于判断元素是否满足某种条件。
+//   - slice: 一个或多个切片，它们的元素类型必须是 T，并且 T 必须实现了 gotools.Ordered 接口。
+//
+// 返回值:
+//
+//   - 返回满足条件的最小元素，类型为 T。
+func Minif[S ~[]T, T gotools.Ordered](fun func(x T) bool, slice ...S) T {
+
+	var result T
+
+	for _, v := range slice {
+		if len(v) == 0 {
+			continue
+		}
+
+		for _, x := range v {
+			if fun(x) && result < x {
+				result = x
+			}
+		}
+
+	}
+
+	return result
+
+}
+
+// argMax 函数在给定的值数组（val）中找到对应的键（arg）的最大值。
+// 当值数组（val）为空时，返回键数组（arg）的第一个元素。
+// 当键数组（arg）为空时，返回默认值（res）。
+// 值数组（val）中的元素需要实现gotools.Ordered接口，键和值可以是任意类型。
+//
+// 参数:
+//   - arg: D 类型，键数组，对应值数组（val）中的索引。
+//   - val: S 类型，值数组，根据其元素大小进行比较。
+//
+// 返回:
+//   - U 类型，找到的最大值对应的键
+func AargMax[D ~[]U, S ~[]T, T gotools.Ordered, U any](arg D, val S) U {
+
+	if len(val) == 0 {
+		return arg[0]
+	}
+	var res U
+	if len(arg) == 0 {
+		return res
+	}
+
+	if len(arg) != len(val) {
+		val = val[0:len(arg)]
+	}
+
+	index := array.FindMax(val)
+
+	if index == -1 {
+		return res
+	}
+
+	res = arg[index]
+	return res
+
+}
+
+// argMin 查找与目标序列中最小元素对应的数据源序列中的元素。
+//
+// 参数:
+//   - arg(D): 数据源序列，类型为切片，元素类型为 U。
+//   - val(S): 目标序列，类型为切片，元素类型需满足有序比较（gotools.Ordered），用于寻找最小值。
+//
+// 返回值:
+//   - U: 与目标序列中最小元素对应的数据源序列中的元素。如果目标序列为空，返回数据源序列的第一个元素。
+//     如果数据源序列为空，返回 U 类型的零值。
+//
+// 注意:
+//   - 函数利用泛型支持多种数据类型的操作，D 和 S 分别约束为切片类型，T 需实现 Ordered 接口，
+//     而 U 可以为任何类型。
+func AargMin[D ~[]U, S ~[]T, T gotools.Ordered, U any](arg D, val S) U {
+
+	if len(val) == 0 {
+		return arg[0]
+	}
+	var res U
+	if len(arg) == 0 {
+		return res
+	}
+
+	if len(arg) != len(val) {
+		val = val[0:len(arg)]
+	}
+
+	index := array.FindMin(val)
+
+	if index == -1 {
+		return res
+	}
+
+	res = arg[index]
+	return res
+
 }
