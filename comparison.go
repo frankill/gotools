@@ -1,7 +1,5 @@
 package gotools
 
-import "fmt"
-
 func Cmp[T Ordered](x, y T) int {
 	if x > y {
 		return 1
@@ -35,9 +33,11 @@ func NotEq[T Comparable](x, y T) bool {
 	return x != y
 }
 
-// Println 打印数据
-// 参数:
-//   - x: 数据
-func Println[T any](x T) {
-	fmt.Println(x)
+func Identity[T any](x T) T {
+	return x
 }
+
+var (
+	ASCInt  = Lt[int]
+	DESCInt = Gt[int]
+)

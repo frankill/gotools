@@ -37,15 +37,6 @@ type Ordered interface {
 	cmp.Ordered
 }
 
-func Identity[T any](x T) T {
-	return x
-}
-
-var (
-	ASCInt  = Lt[int]
-	DESCInt = Gt[int]
-)
-
 func SysStop() context.Context {
 	// 创建一个可取消的上下文
 	ctx, cancel := context.WithCancel(context.Background())
