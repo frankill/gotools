@@ -1,5 +1,16 @@
 package gotools
 
+// Cmp 比较函数
+//
+// 参数:
+//
+//   - x: 第一个要比较的值。
+//   - y: 第二个要比较的值。
+//
+// 返回值:
+//
+//   - 如果 x 大于 y，返回 1。
+//   - 如果 x 小于 y，返回 -1。
 func Cmp[T Ordered](x, y T) int {
 	if x > y {
 		return 1
