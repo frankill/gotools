@@ -349,6 +349,10 @@ func NewESMustQuery() *EsQuery {
 	}
 }
 
+func NewESAllQuery() *EsQuery {
+	return &EsQuery{}
+}
+
 // NewMustNotQuery 创建一个新的must_not查询
 func NewESMustNotQuery() *EsQuery {
 	return &EsQuery{
