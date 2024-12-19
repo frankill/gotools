@@ -65,7 +65,7 @@ func FromConvert[T, U any](fun func(T) U, input ...T) []U {
 	return res
 }
 
-// ForEach 逐元素执行函数。
+// Walk 逐元素执行函数。
 //
 // 参数:
 //
@@ -73,7 +73,7 @@ func FromConvert[T, U any](fun func(T) U, input ...T) []U {
 //   - input: 可变长度参数，表示要执行函数的输入值。
 //
 // 返回:
-func ForEach[S ~[]T, T any](fun func(T), input S) {
+func Walk[S ~[]T, T any](fun func(T), input S) {
 	for _, v := range input {
 		fun(v)
 	}
