@@ -70,7 +70,7 @@ func FromConvert[T, U any](fun func(T) U, input ...T) []U {
 // 参数:
 //
 //   - fun: 用于逐元素执行的函数。
-//   - input: 可变长度参数，表示要执行函数的输入值。
+//   - input: 切片
 //
 // 返回:
 func Walk[S ~[]T, T any](fun func(T), input S) {
