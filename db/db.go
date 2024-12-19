@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -184,7 +183,7 @@ func (m *DB) QueryOne(query *query.SQLBuilder) func() ([]string, error) {
 			var tmp sql.NullString
 			err := rows.Scan(&tmp)
 			if err != nil {
-				panic(err)
+				return nil, err
 			}
 			dict[tmp] = struct{}{}
 		}
@@ -284,7 +283,7 @@ func (m *DB) QueryArr(query *query.SQLBuilder) func() ([][]string, error) {
 		for rows.Next() {
 			err := rows.Scan(rowPointers...)
 			if err != nil {
-				log.Fatalln(err)
+				return nil, err
 			}
 
 			tmpRow := array.Map(func(x sql.NullString) string { return x.String }, row)
@@ -450,7 +449,7 @@ func (m *DB) QueryVector(query *query.SQLBuilder) func() ([][]string, error) {
 		for rows.Next() {
 			err := rows.Scan(rowPointers...)
 			if err != nil {
-				log.Fatal(err)
+				return nil, err
 			}
 
 			for i := 0; i < lc; i++ {
