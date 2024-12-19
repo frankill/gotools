@@ -15,12 +15,12 @@ import (
 	"github.com/olivere/elastic/v7"
 )
 
-// ToTOne 将 ElasticBluk 转换为 T
-func ToTOne[T any](data ElasticBluk[T]) T {
+// ToOne 将 ElasticBluk 转换为 T
+func ToOne[T any](data ElasticBluk[T]) T {
 	return data.Source
 }
 
-// ToT 将 ElasticBluk[T] 转换为 []T
+// ToSource 将 ElasticBluk[T] 转换为 []T
 // 参数:
 //
 //   - data: ElasticBluk[T]
@@ -28,7 +28,7 @@ func ToTOne[T any](data ElasticBluk[T]) T {
 // 返回:
 //
 //   - []T
-func ToT[T any](data []ElasticBluk[T]) []T {
+func ToSource[T any](data []ElasticBluk[T]) []T {
 
 	res := make([]T, len(data))
 
