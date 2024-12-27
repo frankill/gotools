@@ -200,7 +200,7 @@ func FromTxt(path string) func(skip int) (chan string, chan error) {
 	}
 }
 
-// FromElasticSearch 从 ElasticSearch 中读取数据。
+// FromES 从 ElasticSearch 中读取数据。
 // 参数:
 //
 //   - client: ElasticSearch 客户端。
@@ -211,12 +211,30 @@ func FromTxt(path string) func(skip int) (chan string, chan error) {
 //
 //   - chan db.ElasticBluk[T]: 数据通道。
 //   - chan error: 错误通道。
-func FromElasticSearch[T any](client *elastic.Client) func(index string, query any) (chan db.ElasticBluk[T], chan error) {
+func FromES[T any](client *elastic.Client) func(index string, query any) (chan db.ElasticBluk[T], chan error) {
 	return func(index string, query any) (chan db.ElasticBluk[T], chan error) {
 
-		con := db.NewElasticSearchClient[T](client)
+		return db.NewElasticSearchClient[T](client).QueryIter(index, query)
 
-		return con.QueryIter(index, query)
+	}
+}
+
+// FromESShard 将数据写入 ElasticSearch。
+// 参数:
+//
+//   - client: ElasticSearch 客户端。
+//   - index: ElasticSearch 索引名称。
+//   - ctype: ElasticSearch 写入类型 index create
+//   - data: 需要写入的数据。
+//
+// 返回:
+//
+//   - chan db.ElasticBluk[T]: 数据通道。
+//   - chan error: 错误通道。
+func FromESShard[T any](client *elastic.Client) func(index string, query any) (chan db.ElasticBluk[T], chan error) {
+	return func(index string, query any) (chan db.ElasticBluk[T], chan error) {
+
+		return db.NewElasticSearchClient[T](client).QueryIterShard(index, query)
 
 	}
 }

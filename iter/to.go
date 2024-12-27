@@ -223,7 +223,7 @@ func ToCK(ck *db.CKinfo, q query.SqlInsert) func(ch chan []any) error {
 
 }
 
-// ToElasticSearch 将数据写入 ElasticSearch。
+// ToES 将数据写入 ElasticSearch。
 // 参数:
 //
 //   - client: ElasticSearch 客户端。
@@ -234,7 +234,7 @@ func ToCK(ck *db.CKinfo, q query.SqlInsert) func(ch chan []any) error {
 // 返回:
 //
 //	error: 错误信息，如果写入失败。
-func ToElasticSearch[T any](client *elastic.Client) func(ch chan db.ElasticBluk[T]) error {
+func ToES[T any](client *elastic.Client) func(ch chan db.ElasticBluk[T]) error {
 	return func(ch chan db.ElasticBluk[T]) error {
 
 		con := db.NewElasticSearchClient[T](client)
