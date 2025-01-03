@@ -108,7 +108,7 @@ func Values[K gotools.Comparable, V any](m map[K]V) []V {
 // Filter 过滤给定映射中的元素，仅保留满足特定条件的键值对。
 // 参数:
 //
-//   - f: 一个函数，它接受每个元素作为输入，返回一个可比较的键。
+//   - f: 一个函数，它接受每个k,v元素作为输入，返回一个可比较的键。
 //   - m: 要过滤的映射。
 //
 // 返回值:
@@ -124,6 +124,15 @@ func Filter[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) map[K]V {
 	return filtered
 }
 
+// FilterKeys 根据给定的函数 f 过滤给定映射中的键，仅保留满足特定条件的键。
+// 参数:
+//
+//   - f: 一个函数，它接受每个k,v元素作为输入，返回一个可比较的键。
+//   - m: 要过滤的映射。
+//
+// 返回值:
+//
+//   - 一个切片，包含在 m 中存在的键。
 func FilterKeys[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) []K {
 
 	filtered := make([]K, 0)
@@ -135,6 +144,15 @@ func FilterKeys[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) []K {
 	return filtered
 }
 
+// FilterValues 根据给定的函数 f 过滤给定映射中的值，仅保留满足特定条件的值。
+// 参数:
+//
+//   - f: 一个函数，它接受每个k,v元素作为输入，返回一个可比较的键。
+//   - m: 要过滤的映射。
+//
+// 返回值:
+//
+//   - 一个切片，包含在 m 中存在的值。
 func FilterValues[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) []V {
 
 	filtered := make([]V, 0)
@@ -168,7 +186,7 @@ func FilterArr[S ~[]K, K gotools.Comparable, V any](m map[K]V, arr S) map[K]V {
 	return filtered
 }
 
-// MapValue 对给定映射中的每个元素应用函数 f，并返回一个新的映射，
+// MapValue 对给定映射中的每个k,v元素应用函数 f，并返回一个新的映射，
 // 其中包含原始键和应用函数后得到的新值。
 // 参数:
 //
@@ -194,7 +212,7 @@ func MapValue[K gotools.Comparable, V, U any](f func(K, V) U, m map[K]V) map[K]U
 
 }
 
-// MapKey 对给定映射中的每个键值对应用函数 f，并返回一个新的映射，
+// MapKey 对给定映射中的每个k,v元素对应用函数 f，并返回一个新的映射，
 // 其中键是应用函数后的结果，值保持不变。
 // 参数:
 //
