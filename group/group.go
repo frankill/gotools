@@ -194,6 +194,21 @@ func By[D ~[]U, B ~[]T, T gotools.Comparable, U any](by B, data D) map[T][]U {
 	return res
 }
 
+func By2[D ~[]U, U any, T gotools.Comparable](f func(U) T, data D) map[T][]U {
+
+	res := map[T][]U{}
+
+	if len(data) == 0 {
+		return res
+	}
+	for i := 0; i < len(data); i++ {
+		key := f(data[i])
+		res[key] = append(res[key], data[i])
+	}
+	return res
+
+}
+
 // ByFn 根据给定的函数进行分组计算。
 //
 // 参数:
