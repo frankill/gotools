@@ -190,7 +190,7 @@ func TestMapApplyValue(t *testing.T) {
 	// Run the tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			actual := maps.ApplyValue(tt.f, tt.m)
+			actual := maps.MapValue(tt.f, tt.m)
 			if len(actual) != len(tt.expected) {
 				t.Errorf("Expected length %d, but got %d", len(tt.expected), len(actual))
 			}
@@ -247,7 +247,7 @@ func TestMapApplyKey(t *testing.T) {
 	// Run the tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			actual := maps.ApplyKey(tt.f, tt.m)
+			actual := maps.MapKey(tt.f, tt.m)
 			if !mapsEqual(actual, tt.expected) {
 				t.Errorf("Expected %v, but got %v", tt.expected, actual)
 			}
@@ -293,7 +293,7 @@ func TestMapApplyBoth(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := maps.ApplyBoth(tt.f, tt.m); !reflect.DeepEqual(got, tt.want) {
+			if got := maps.Map(tt.f, tt.m); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("MapApplyBoth() = %v, want %v", got, tt.want)
 			}
 		})
@@ -591,8 +591,8 @@ func TestMapMerge(t *testing.T) {
 	}
 }
 func TestMapIntersect(t *testing.T) {
-	data1 := map[string][]int{"a": {1, 2, 3}  }
-	data2 := map[string][]int{"a": {3, 4, 5} }
+	data1 := map[string][]int{"a": {1, 2, 3}}
+	data2 := map[string][]int{"a": {3, 4, 5}}
 
 	result := maps.Intersect(data1, data2)
 

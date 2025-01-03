@@ -34,7 +34,7 @@ func SequenceMatch[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Compa
 
 	return func(eventID []U) func([]int) map[T]bool {
 
-		group = maps.ApplyValue(func(k T, v []U) []U {
+		group = maps.MapValue(func(k T, v []U) []U {
 			return array.Filter(func(x U) bool { return array.Has(eventID, x) }, v)
 		}, group)
 
@@ -42,7 +42,7 @@ func SequenceMatch[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Compa
 
 			modeID = array.Map(func(x int) int { return x - 1 }, modeID)
 			eID := array.Map(func(x int) U { return eventID[x] }, modeID)
-			return maps.ApplyValue(func(k T, v []U) bool {
+			return maps.MapValue(func(k T, v []U) bool {
 				ok, _ := array.HasSequence(v, eID)
 				return ok
 			}, group)
@@ -73,7 +73,7 @@ func SequenceCount[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Compa
 
 	return func(eventID []U) func([]int) map[T]int {
 
-		group = maps.ApplyValue(func(k T, v []U) []U {
+		group = maps.MapValue(func(k T, v []U) []U {
 			return array.Filter(func(x U) bool { return array.Has(eventID, x) }, v)
 		}, group)
 
@@ -81,7 +81,7 @@ func SequenceCount[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Compa
 
 			modeID = array.Map(func(x int) int { return x - 1 }, modeID)
 			eID := array.Map(func(x int) U { return eventID[x] }, modeID)
-			return maps.ApplyValue(func(k T, v []U) int {
+			return maps.MapValue(func(k T, v []U) int {
 				return array.ArrSequenceCount(v, eID)
 			}, group)
 
@@ -121,7 +121,7 @@ func WindowFunnel[B ~[]T, D ~[]U, O ~[]S, T gotools.Comparable, U gotools.Compar
 
 		return func(mode string) map[T]int {
 
-			return maps.ApplyValue(func(k T, v []U) int {
+			return maps.MapValue(func(k T, v []U) int {
 
 				var num int
 

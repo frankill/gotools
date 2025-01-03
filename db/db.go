@@ -188,7 +188,7 @@ func (m *DB) QueryOne(query *query.SQLBuilder) func() ([]string, error) {
 			dict[tmp] = struct{}{}
 		}
 
-		return maps.Apply(func(k sql.NullString, v struct{}) string { return k.String }, dict), nil
+		return maps.Map2(func(k sql.NullString, v struct{}) string { return k.String }, dict), nil
 
 	}
 
@@ -232,7 +232,7 @@ func (m *DB) QueryTwo(query *query.SQLBuilder) func() (map[string]string, error)
 			data[one] = two
 		}
 
-		return maps.ApplyBoth(func(k sql.NullString, v sql.NullString) (string, string) { return k.String, v.String }, data), nil
+		return maps.Map(func(k sql.NullString, v sql.NullString) (string, string) { return k.String, v.String }, data), nil
 
 	}
 

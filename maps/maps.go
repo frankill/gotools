@@ -124,6 +124,28 @@ func Filter[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) map[K]V {
 	return filtered
 }
 
+func FilterKeys[K gotools.Comparable, V any](f func(K) bool, m map[K]V) []K {
+
+	filtered := make([]K, 0)
+	for k := range m {
+		if f(k) {
+			filtered = append(filtered, k)
+		}
+	}
+	return filtered
+}
+
+func FilterValues[K gotools.Comparable, V any](f func(V) bool, m map[K]V) []V {
+
+	filtered := make([]V, 0)
+	for _, v := range m {
+		if f(v) {
+			filtered = append(filtered, v)
+		}
+	}
+	return filtered
+}
+
 // FilterArr 根据给定的数组过滤给定映射中的元素，仅保留满足特定条件的键值对。
 // 参数:
 //
@@ -146,7 +168,7 @@ func FilterArr[S ~[]K, K gotools.Comparable, V any](m map[K]V, arr S) map[K]V {
 	return filtered
 }
 
-// ApplyValue 对给定映射中的每个元素应用函数 f，并返回一个新的映射，
+// MapValue 对给定映射中的每个元素应用函数 f，并返回一个新的映射，
 // 其中包含原始键和应用函数后得到的新值。
 // 参数:
 //
@@ -162,7 +184,7 @@ func FilterArr[S ~[]K, K gotools.Comparable, V any](m map[K]V, arr S) map[K]V {
 //
 //   - 当需要对映射中的所有值进行某种转换时，此函数非常有用。
 //   - 它允许在不改变原始映射的情况下，创建一个包含转换后值的新映射。
-func ApplyValue[K gotools.Comparable, V, U any](f func(K, V) U, m map[K]V) map[K]U {
+func MapValue[K gotools.Comparable, V, U any](f func(K, V) U, m map[K]V) map[K]U {
 	applied := make(map[K]U, len(m))
 
 	for k, v := range m {
@@ -172,7 +194,7 @@ func ApplyValue[K gotools.Comparable, V, U any](f func(K, V) U, m map[K]V) map[K
 
 }
 
-// ApplyKey 对给定映射中的每个键值对应用函数 f，并返回一个新的映射，
+// MapKey 对给定映射中的每个键值对应用函数 f，并返回一个新的映射，
 // 其中键是应用函数后的结果，值保持不变。
 // 参数:
 //
@@ -186,7 +208,7 @@ func ApplyValue[K gotools.Comparable, V, U any](f func(K, V) U, m map[K]V) map[K
 // 使用场景:
 //
 //   - 当需要根据原始映射的键和值计算出新的键，并保持值不变时，可以使用这个函数。
-func ApplyKey[K, U gotools.Comparable, V any](f func(K, V) U, m map[K]V) map[U]V {
+func MapKey[K, U gotools.Comparable, V any](f func(K, V) U, m map[K]V) map[U]V {
 	applied := make(map[U]V, len(m))
 
 	for k, v := range m {
@@ -195,7 +217,7 @@ func ApplyKey[K, U gotools.Comparable, V any](f func(K, V) U, m map[K]V) map[U]V
 	return applied
 }
 
-// ApplyBoth 接受一个函数和一个映射，应用函数到映射的每个键值对上，
+// Map 接受一个函数和一个映射，应用函数到映射的每个键值对上，
 // 并返回一个新的映射，其中新映射的键是原映射的键和值通过函数处理后的结果，
 // 值是原映射的值通过函数处理后的结果。
 // 参数:
@@ -206,7 +228,7 @@ func ApplyKey[K, U gotools.Comparable, V any](f func(K, V) U, m map[K]V) map[U]V
 // 返回值:
 //
 //   - 一个新的映射，其中键是原映射的键和值通过函数处理后的结果，值是原映射的值通过函数处理后的结果。
-func ApplyBoth[K, U gotools.Comparable, V, S any](f func(K, V) (U, S), m map[K]V) map[U]S {
+func Map[K, U gotools.Comparable, V, S any](f func(K, V) (U, S), m map[K]V) map[U]S {
 	applied := make(map[U]S, len(m))
 
 	for k, v := range m {
@@ -216,7 +238,7 @@ func ApplyBoth[K, U gotools.Comparable, V, S any](f func(K, V) (U, S), m map[K]V
 	return applied
 }
 
-// Apply 应用给定的函数 f 到 map m 的每个键值对上，返回应用函数后的结果集合。
+// Map2 应用给定的函数 f 到 map m 的每个键值对上，返回应用函数后的结果集合。
 // 参数:
 //
 //   - f: 一个函数，它接受 map 的键和值作为参数，返回一个任意类型的值。
@@ -227,7 +249,7 @@ func ApplyBoth[K, U gotools.Comparable, V, S any](f func(K, V) (U, S), m map[K]V
 //   - 一个切片，包含对 map 中每个键值对应用函数 f 后的结果。
 //
 //   - Apply 的目的是提供一个通用的方式，来对 map 的所有元素执行某种操作，而无需直接修改原 map。
-func Apply[K gotools.Comparable, V, U any](f func(K, V) U, m map[K]V) []U {
+func Map2[K gotools.Comparable, V, U any](f func(K, V) U, m map[K]V) []U {
 
 	applied := make([]U, 0, len(m))
 	for k, v := range m {
