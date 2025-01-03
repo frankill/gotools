@@ -124,22 +124,22 @@ func Filter[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) map[K]V {
 	return filtered
 }
 
-func FilterKeys[K gotools.Comparable, V any](f func(K) bool, m map[K]V) []K {
+func FilterKeys[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) []K {
 
 	filtered := make([]K, 0)
-	for k := range m {
-		if f(k) {
+	for k, v := range m {
+		if f(k, v) {
 			filtered = append(filtered, k)
 		}
 	}
 	return filtered
 }
 
-func FilterValues[K gotools.Comparable, V any](f func(V) bool, m map[K]V) []V {
+func FilterValues[K gotools.Comparable, V any](f func(K, V) bool, m map[K]V) []V {
 
 	filtered := make([]V, 0)
-	for _, v := range m {
-		if f(v) {
+	for k, v := range m {
+		if f(k, v) {
 			filtered = append(filtered, v)
 		}
 	}
