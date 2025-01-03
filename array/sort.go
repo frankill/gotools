@@ -16,20 +16,20 @@ func SortFun[S ~[]T, T any](f func(x T, y T) bool, arr S) []T {
 
 	copy(res, arr)
 
-	SortFunLocal(f, res)
+	SortFun2(f, res)
 
 	return res
 
 }
 
-// SortFunLocal 通过比较函数对切片进行排序，修改原切片
+// SortFun2 通过比较函数对切片进行排序，修改原切片
 //
 // 参数:
 //   - f: 一个函数，接受两个 T 类型的变长参数并返回布尔值，决定是否交换两个元素的位置。true 表示交换，false 表示不交换。
 //   - arr: 一个切片，表示要进行排序的切片。
 //
 // 无返回值
-func SortFunLocal[S ~[]T, T any](f func(x T, y T) bool, arr S) {
+func SortFun2[S ~[]T, T any](f func(x T, y T) bool, arr S) {
 	la := len(arr)
 	if la == 0 {
 		return
@@ -77,7 +77,7 @@ func OrderFun[D ~[]U, S ~[]T, T any, U any](f func(x, y U) bool, arr S, order D)
 	resOrder := make([]U, len(order))
 	copy(resOrder, order)
 
-	OrderFunLocal(f, res, resOrder)
+	OrderFun2(f, res, resOrder)
 
 	return res, resOrder
 
@@ -91,7 +91,7 @@ func OrderFun[D ~[]U, S ~[]T, T any, U any](f func(x, y U) bool, arr S, order D)
 //   - order: 一个切片，表示排序后的顺序。
 //
 // 无返回值
-func OrderFunLocal[D ~[]U, S ~[]T, T any, U any](f func(x, y U) bool, arr S, order D) {
+func OrderFun2[D ~[]U, S ~[]T, T any, U any](f func(x, y U) bool, arr S, order D) {
 
 	if len(arr) != len(order) {
 		panic("length of arr and order must be equal")

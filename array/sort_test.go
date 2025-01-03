@@ -19,7 +19,7 @@ func TestSortFun(t *testing.T) {
 func TestSortFunLocal(t *testing.T) {
 	arr := []int{3, 2, 1, 4, 5}
 	expected := []int{1, 2, 3, 4, 5}
-	array.SortFunLocal(func(x, y int) bool { return x < y }, arr)
+	array.SortFun2(func(x, y int) bool { return x < y }, arr)
 	if !reflect.DeepEqual(arr, expected) {
 		t.Errorf("expected %v, got %v", expected, arr)
 	}
@@ -39,7 +39,7 @@ func TestOrderFunLocal(t *testing.T) {
 	arr := []int{3, 2, 1, 4, 5}
 	order := []int{1, 2, 3, 4, 5}
 	expected := []int{3, 2, 1, 4, 5}
-	array.OrderFunLocal(func(x, y int) bool { return x < y }, arr, order)
+	array.OrderFun2(func(x, y int) bool { return x < y }, arr, order)
 	if !reflect.DeepEqual(arr, expected) {
 		t.Errorf("expected %v, got %v", expected, arr)
 	}

@@ -1840,7 +1840,7 @@ func Cartesian[S ~[]T, T any](arr ...S) [][]T {
 //	InsertAt([]int{1, 2, 3, 4}, 1, 3, 5，7)(0) // => [1 0 2 0 3 0 4]
 func InsertAt[S ~[]T, T any](data S, pos ...int) func(default_x T) []T {
 
-	SortFunLocal(func(x, y int) bool { return x < y }, pos)
+	SortFun2(func(x, y int) bool { return x < y }, pos)
 
 	for i := len(pos) - 1; i >= 0; i-- {
 		if pos[i] < len(data)+len(pos)-1 {
