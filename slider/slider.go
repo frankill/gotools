@@ -121,14 +121,12 @@ func Slider[S ~[]T, U, T any](f func(x ...T) U, before int, after int, defaultVa
 	result := make([]U, 0, l)
 	num := 0
 
-	for i := 0; i < l; i++ {
+	for i := 0; i < before; i++ {
+		windows = append(windows, defaultValue)
+		num++
+	}
 
-	llp:
-		if num < before {
-			windows = append(windows, defaultValue)
-			num++
-			goto llp
-		}
+	for i := 0; i < l; i++ {
 
 		windows = append(windows, data[i])
 		num++
